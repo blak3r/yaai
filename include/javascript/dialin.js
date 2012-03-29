@@ -33,27 +33,27 @@
 // * 
 // */
 
-var consecutiveErrors = 0;
-
 
 // look for new events logged from asterisk
 function checkForNewStates(){
 		//alert(jQuery.fn.jquery);
 		
-		// TODO upgrade to jquery 1.5 so the error method exists then we can have an error count.
-		//$.getJSON('index.php?entryPoint=AsteriskCallListener', function(data){checkData(data);}).error(function() { alert("error");consecutiveErrors++; });	
+		// Note: once the user gets logged out, the ajax requests will get redirected to the login page.
+		// Originally, the setTimeout method was in this method.  But, no way to detect the redirect without server side
+		// changes.  See: http://stackoverflow.com/questions/199099/how-to-manage-a-redirect-request-after-a-jquery-ajax-call
+		// So, now I only schedule a setTimeout upon a successful AJAX call.  The only downside of this is if there is a legit reason
+		// the call does fail it'll never try again... So, I have a hybrid solution where I always schedule a new check every 1 minute.
+		// but increase to only 5s on each successful call.
+		// Would be interesting to see if the .error() addition to .getJSON in jquery 1.5 can detect redirects... doubtful though.
 		$.getJSON('index.php?entryPoint=AsteriskCallListener', function(data){checkData(data);});	
-		
-		
-		// When session die, prevents ongoing ajax requests.
-		if( consecutiveErrors < 3 ) {
-			setTimeout('checkForNewStates()', 5000);
-		}
+		setTimeout('checkForNewStates()', 60000);
 }
 
 function checkData(data){
 	var tmpList = new Array();
-
+	
+	setTimeout('checkForNewStates()', 5000); // Only when the previous request was successful do we try again.
+	
 	//----- ORIGINAL UI BLOCK ------//
 	/*
 	if(data == "."){
@@ -63,11 +63,9 @@ function checkData(data){
 	}
 	*/
 	//-----END OLD UI BLOCK------//
-	
-	if( data == "" ) {
-		consecutiveErrors++; // I don't think this case ever occurs, see comments in checkForNewStates
-	}
-	else if( data == "." ) {
+
+
+	if( data == "." ) {
 		// do nothing
 	}
 	else {

@@ -71,6 +71,9 @@ $calloutPrefix = $sugar_config['asterisk_prefix'];
 $callinPrefix = $sugar_config['asterisk_dialinPrefix'];
 
 
+log_entry("$current_user->asterisk_ext_c is the extension...\n", "c:\callListenerLog.txt"); // FIXME remove this debug
+
+
 // Original query that returns only "Active" Calls -- query below gives me ones that were updated in last hour (so user can still put notes on them).
 //$query = " SELECT * FROM asterisk_log WHERE (callstate = 'Dial' OR callstate = 'Connected') AND (channel LIKE 'SIP/{$current_user->asterisk_ext_c}%')";
 
@@ -223,5 +226,14 @@ if(count($response) == 0){
 }
 
 sugar_cleanup();
+
+
+// just for debugging purposes
+function log_entry( $str, $file = "default" ) {
+	$handle = fopen($file, 'a');
+	fwrite($handle, "[" . date('Y-m-j H:i:s') . "] " . $str );
+	fclose($handle);
+}
+
 
 ?>

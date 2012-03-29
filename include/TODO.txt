@@ -51,7 +51,7 @@ There are a few regex's that must work.
   -- Currently, there isn't a regular expression for this.  There are a series of If/else statements that do this in asteriskLogger.
   -- It first tries to see if SIP/### would work... if it doesn't, it then tries one that would match "Local/###@" so this should take care of it.
   -- IF your calls aren't being associated with the proper contact... this is the likely problem (or you don't have a User with that extension already).
- 
+* TODO: CallListener has a line which is like SIP/$extension in the DB Query... 
 
 
 ==[ Important ]================

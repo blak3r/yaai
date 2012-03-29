@@ -43,6 +43,8 @@ $mysql_log_results = 1;
 // Say hello, setup include path(s)
 //
 define('sugarEntry', TRUE);
+logLine( "******** Asterisk Logger Starting **************\n");
+
 print "**** asteriskLogger ****\n";
 print "# Version \$Id: asteriskLogger.php 180 2009-06-12 10:16:16Z andreas \$\n";
 
@@ -112,6 +114,7 @@ class SugarSoap extends nusoapclient
 require_once($sugarRoot . 'config.php');
 include_once($sugarRoot . 'config_override.php');
 
+logLine( "Logging to: " . $sugar_config['asterisk_log_file'] . "\n");
 $asteriskServer        = $sugar_config['asterisk_host'];
 $asteriskManagerPort   = (int) $sugar_config['asterisk_port'];
 $asteriskUser          = "Username: " . $sugar_config['asterisk_user'] . "\r\n";
@@ -1367,6 +1370,7 @@ function mysql_checked_query($aQuery)
 
 function logLine($str)
 {
+	global $sugar_config;
     print($str); 
 	
 	// if logging is enabled.
@@ -1379,6 +1383,7 @@ function logLine($str)
 	}
 }
 
+// Theoretically safe method, feof will block indefinitely.
 function safe_feof($fp, &$start = NULL) {
  $start = microtime(true);
  return feof($fp);
