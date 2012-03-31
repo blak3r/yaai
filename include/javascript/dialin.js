@@ -46,7 +46,7 @@ function checkForNewStates(){
 		// but increase to only 5s on each successful call.
 		// Would be interesting to see if the .error() addition to .getJSON in jquery 1.5 can detect redirects... doubtful though.
 		$.getJSON('index.php?entryPoint=AsteriskCallListener', function(data){checkData(data);});	
-		setTimeout('checkForNewStates()', 60000);
+		//setTimeout('checkForNewStates()', 60000);  // NEVER MIND HYBRID IS WORSE
 }
 
 function checkData(data){

@@ -566,7 +566,7 @@ while (true) {
                             //
                             // ... on success also update entry in Calls module
                             //
-                            logLine( "# SQL update successfull, now updating record in /Calls/ id=" . $callRecord['sweet']['id'] . "...\n");
+                            logLine( "# (OUTBOUND) Now updating record in /Calls/ id=" . $callRecord['sweet']['id'] . "...\n");
                             
                             print_r($callRecord);
                             logLine("NAME: " . $callRecord['sweet']['name'] . "\n");
@@ -651,7 +651,7 @@ while (true) {
                     
                     
                 } else {
-                    //inbound call handling
+                    //-----------------[ INBOUND HANGUP HANDLING ]----------------------
                     
                     $id         = $e['Uniqueid'];
                     //
@@ -708,7 +708,7 @@ while (true) {
                             }
                             $callStart = strtotime($rawData['timestampCall']);
                             
-                            echo ("# Measured call duration is $callDurationRaw seconds\n");
+                            logLine ("# Measured call duration is $callDurationRaw seconds\n");
                             
                             // Recalculate call direction in minutes
                             $callDuration        = (int) ($callDurationRaw / 60);
@@ -722,7 +722,7 @@ while (true) {
                             $callStatus      = NULL;
                             $callName        = NULL;
                             $callDescription = "";
-                            if ($callDurationRaw > 05) {
+                            if ($callDurationRaw > 15) {
                                 $callStatus = "Held";
                                 //$callName = "Successfull call";
                                 
@@ -760,7 +760,7 @@ while (true) {
                             //
                             // ... on success also update entry in Calls module
                             //
-                            logLine( "# SQL update successfull, now updating record in /Calls/ id=" . $callRecord['sweet']['id'] . "...\n");
+                            logLine( "# (INBOUND) now updating record in /Calls/ id=" . $callRecord['sweet']['id'] . "...\n");
                             
                             print_r($callRecord);
                             logLine("NAME: " . $callRecord['sweet']['name'] . "\n");
