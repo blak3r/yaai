@@ -36,8 +36,8 @@
 //
 // Debug flags
 //
-$mysql_loq_queries = 1;
-$mysql_log_results = 1;
+$mysql_loq_queries = 0;
+$mysql_log_results = 0;
 
 //
 // Say hello, setup include path(s)
@@ -46,7 +46,7 @@ define('sugarEntry', TRUE);
 logLine( "******** Asterisk Logger Starting **************\n");
 
 print "**** asteriskLogger ****\n";
-print "# Version \$Id: asteriskLogger.php 180 2009-06-12 10:16:16Z andreas \$\n";
+print "# Version \$Id: asteriskLogger.php 180 2012-04-01 10:16:16Z blak3r \$\n";
 
 // Determine SugarCRM's root dir (we'll use this to find the config filez
 $scriptRoot = dirname(__FILE__);
@@ -120,6 +120,11 @@ $asteriskManagerPort   = (int) $sugar_config['asterisk_port'];
 $asteriskUser          = "Username: " . $sugar_config['asterisk_user'] . "\r\n";
 $asteriskSecret        = "Secret: " . $sugar_config['asterisk_secret'] . "\r\n";
 $asteriskMatchInternal = $sugar_config['asterisk_expr'];
+
+// Make regex pattern compatible with preg_match
+if( !startsWith($asteriskMatchInternal, '/' ) ) {
+		$asteriskMatchInternal = '/' . $asteriskMatchInternal . '/i';
+}
 
 // Fetch Asterisk dialprefix - must strip this from inbound callerIDs if set
 $calloutPrefix = isset($sugar_config['asterisk_prefix']) ? $sugar_config['asterisk_prefix'] : "";
@@ -309,38 +314,38 @@ while (true) {
                 $tmpCallerID = trim($e['CallerIDNum']); //Asterisk Manager 1.0 $e['CallerID']
                 
                 
-                // echo("* CallerID is: $tmpCallerID\n");
                 if ((strlen($calloutPrefix) > 0) && (strpos($tmpCallerID, $calloutPrefix) === 0)) {
                     echo ("* Stripping callout prefix: $calloutPrefix");
                     $tmpCallerID = substr($tmpCallerID, strlen($calloutPrefix));
                 }
-                logLine("* CallerID is: $tmpCallerID\n");
                 
                 if ((strlen($callinPrefix) > 0) && (strpos($tmpCallerID, $callinPrefix) === 0)) {
                     echo ("* Stripping callin prefix: $calloutPrefix");
                     $tmpCallerID = substr($tmpCallerID, strlen($callinPrefix));
                 }
-                logLine("* CallerID is: $tmpCallerID\n");
-                
+              
+				logLine("* CallerID is: $tmpCallerID\n");
                 
 				// TODO for us, Channel --> SIP/209-00000e36 & Destination --> Local/207@sugarsip-1fcd;
 		        // Check if both ends of the call are internal (then delete created (** Automatic record **) record)
-                if (eregi($asteriskMatchInternal, $e['Channel']) && eregi($asteriskMatchInternal, $e['Destination'])) {
+                if (preg_match($asteriskMatchInternal, $e['Channel']) && preg_match($asteriskMatchInternal, $e['Destination'])) {
                     $query = "DELETE FROM calls WHERE id='$callRecordId'";
                     mysql_checked_query($query);
+					// TODO what about the other tables.. like the custom table?  Why not use soap for this?
+					logLine("INTERNAL call detected, Deleting call");
                 }
                 
                 //Asterisk Manager 1.1 (If the call is internal, this will be skipped)
-                if (eregi($asteriskMatchInternal, $e['Channel']) && !eregi($asteriskMatchInternal, $e['Destination'])) {
-                    $query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s',%s)", $e['DestUniqueID'], $callRecordId, $e['Channel'], 'NeedID', 'O', $tmpCallerID, 'NOW()');
+                if (preg_match($asteriskMatchInternal, $e['Channel']) && !preg_match($asteriskMatchInternal, $e['Destination'])) {
+                    $query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", $e['DestUniqueID'], $callRecordId, $e['Channel'], $e['Destination'], 'NeedID', 'O', $tmpCallerID, 'NOW()');
                     $callDirection = 'Outbound';
                     logLine("OUTBOUND state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $e['Channel'] . ' eDestination=' . $e['Destination'] . "\n");
                     
-                } else if (!eregi($asteriskMatchInternal, $e['Channel'])) {
-                    $query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestampCall, asterisk_dest_id) VALUES('%s','%s','%s','%s','%s','%s',%s,'%s')", $e['UniqueID'], $callRecordId, $e['Destination'], 'Dial', 'I', $tmpCallerID, 'NOW()', $e['DestUniqueID']);
+                } else if (!preg_match($asteriskMatchInternal, $e['Channel'])) {
+                    $query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall, asterisk_dest_id) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s')", $e['UniqueID'], $callRecordId, $e['Destination'], $e['Channel'], 'Dial', 'I', $tmpCallerID, 'NOW()', $e['DestUniqueID']);
                     $callDirection = 'Inbound';
                     
-                    logLine("Inbound state detected... $astMatchInternal is astMatchInternal eChannel= " . $e['Channel'] . ' eDestination=' . $e['Destination'] . "\n");
+                    logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $e['Channel'] . ' eDestination=' . $e['Destination'] . "\n");
                     
                 }
                 mysql_checked_query($query);
@@ -397,8 +402,8 @@ while (true) {
                 
                 echo "Direction is $callDirection \n";
                 // TODO: Error checking!
-                
             }
+			
             //
             // NewCallerID for Outgoing Call
             //
@@ -470,34 +475,9 @@ while (true) {
                             'Hangup', 'NOW()', $e['Cause'], $e['Cause-txt'], $id);
                         $updateResult = mysql_checked_query($query);
                         if ($updateResult) {
-						    //
-                            // Attempt to find assigned user by asterisk ext
+							$assignedUser = findUserIdFromChannel( $rawData['channel'] );
+					
                             //
-                            $assignedUser = $userGUID; // Use logged in user as fallback
-                            $channel      = $rawData['channel'];
-                            var_dump($channel);
-                            $channelSplit = array();
-                            echo "# Channel was $channel\n";
-                            {
-								// KEEP THIS BLOCK OF CODE IN SYNC WITH OUTBOUND 
-								// BR: This cases matches things like Local/LC-52@from-internal-4bbbb
-								$pattern = '/Local\/.*(\d\d\d?\d?\d?)@/i';
-								if( preg_match($pattern, $channel, $regs)) {
-									logLine("Matched User REGEX.  Regex: " . $regs[1] . "\n");
-									$asteriskExt = $regs[1];
-								}							
-                                else if (eregi('^([[:alpha:]]+)/([[:alnum:]]+)-', $channel, $channelSplit) > 0){
-                                    $asteriskExt = $channelSplit[2];
-									logLine("Channel Matched SIP/### style regex.  Ext is:" . $asteriskExt . "\n");
-                                }
-								$maybeAssignedUser = findUserByAsteriskExtension($asteriskExt);
-                                if ($maybeAssignedUser) {
-                                    $assignedUser = $maybeAssignedUser;
-                                    logLine("! Assigned user id set to $assignedUser\n");
-                                }
-                            }
-						
-                           //
                             // ... on success also update entry in Calls module
                             //
                             
@@ -648,9 +628,8 @@ while (true) {
                     } else {
                         logLine("FAILED TO FIND THE CALL for asterisk id: $id (note: there are two hangups per call, so this might not be an error)\n");
                     }
-                    
-                    
-                } else {
+                } 
+				else {
                     //-----------------[ INBOUND HANGUP HANDLING ]----------------------
                     
                     $id         = $e['Uniqueid'];
@@ -667,32 +646,9 @@ while (true) {
                             'Hangup', 'NOW()', $e['Cause'], $e['Cause-txt'], $id);
                         $updateResult = mysql_checked_query($query);
                         if ($updateResult) {
-                        //
-                            // Attempt to find assigned user by asterisk ext
-                            //
-                            $assignedUser = $userGUID; // Use logged in user as fallback
-                            $channel      = $rawData['channel'];
-                            var_dump($channel);
-                            $channelSplit = array();
-                            echo "# Channel was $channel\n";
-                            {
-								// KEEP THIS BLOCK OF CODE IN SYNC WITH OUTBOUND 
-								// BR: This cases matches things like Local/LC-52@from-internal-4bbbb
-								$pattern = '/Local\/.*(\d\d\d?\d?\d?)@/i';
-								if( preg_match($pattern, $channel, $regs)) {
-									logLine("Matched User REGEX.  Regex: " . $regs[1] . "\n");
-									$asteriskExt = $regs[1];
-								}							
-                                else if (eregi('^([[:alpha:]]+)/([[:alnum:]]+)-', $channel, $channelSplit) > 0){
-                                    $asteriskExt = $channelSplit[2];
-									logLine("Channel Matched SIP/### style regex.  Ext is:" . $asteriskExt . "\n");
-                                }
-								$maybeAssignedUser = findUserByAsteriskExtension($asteriskExt);
-                                if ($maybeAssignedUser) {
-                                    $assignedUser = $maybeAssignedUser;
-                                    logLine("! Assigned user id set to $assignedUser\n");
-                                }
-                            }
+							$assignedUser = findUserIdFromChannel( $rawData['channel'] );
+							
+							
                             //
                             // ... on success also update entry in Calls module
                             //
@@ -835,36 +791,41 @@ while (true) {
                                     );
                                     var_dump($soapArgs);
                                     $soapResult = $soapClient->call('set_relationship', $soapArgs);
-                                    echo "\n\nPrinting Soap REsult\n\n";
-                                    var_dump($soapResult);
-                                    echo "\n\n";
+                                    
+									//echo "\n\nPrinting Soap REsult\n\n";
+                                    //var_dump($soapResult);
+                                    //echo "\n\n";
                                 }
                             }
                         }
+						
+						$mysql_log_queries = 1; //TODO disable this when done debugging.
+						
+						// In case of multiple extensions when a call is not answered, every extensions produces a failed call record, this will keep the first of those records but delete the rest.
+						$query     = "SELECT asterisk_id FROM asterisk_log WHERE asterisk_dest_id='$id'";
+						$result    = mysql_checked_query($query);
+						$result_id = mysql_fetch_array($result);
+						logLine("Cleaning up Failed Calls part1, asterisk_id = ".$result_id['asterisk_id']."\n");
+						
+						$query     = "SELECT call_record_id FROM asterisk_log WHERE asterisk_id='" . $result_id['asterisk_id'] . "' ORDER BY id ASC LIMIT 1, 999999999999";
+						$result    = mysql_checked_query($query);
+						logLine("Cleaning up Failed Calls part2, call_record_id = ".$result['call_record_id']."\n");
+						
+						while ($call_record_id = mysql_fetch_array($result)) {
+							//For testing purposes
+							//$query = "SELECT id FROM calls WHERE id='" . $call_record_id['call_record_id'] . "' AND name LIKE 'Failed call%'";
+							$query = "DELETE FROM calls WHERE id='" . $call_record_id['call_record_id'] . "' AND name LIKE 'Failed call%'";
+							$rq    = mysql_checked_query($query);
+							$total_result = mysql_fetch_array($rq);
+							var_dump($total_result);
+						}
+						
+						$mysql_log_queries = 0;
                     }
-                    // In case of multiple extensions when a call is not answered, every extensions produces a failed call record, this will keep the first of those records but delete the rest.
-                    $query     = "SELECT asterisk_id FROM asterisk_log WHERE asterisk_dest_id='$id'";
-                    $result    = mysql_checked_query($query);
-                    $result_id = mysql_fetch_array($result);
-					logLine("Cleaning up Failed Calls part1, asterisk_id = ".$result_id['asterisk_id']."\n");
-					
-                    $query     = "SELECT call_record_id FROM asterisk_log WHERE asterisk_id='" . $result_id['asterisk_id'] . "' ORDER BY id ASC LIMIT 1, 999999999999";
-                    $result    = mysql_checked_query($query);
-					logLine("Cleaning up Failed Calls part2, call_record_id = ".$result['call_record_id']."\n");
-					
-					
-                    while ($call_record_id = mysql_fetch_array($result)) {
-                        //For testing purposes
-                        //$query = "SELECT id FROM calls WHERE id='" . $call_record_id['call_record_id'] . "' AND name LIKE 'Failed call%'";
-                        $query = "DELETE FROM calls WHERE id='" . $call_record_id['call_record_id'] . "' AND name LIKE 'Failed call%'";
-                        $rq    = mysql_checked_query($query);
-                        //$total_result = mysql_fetch_array($rq);
-                        //var_dump($total_result);
-                    }
-                }
-                
-            }
-            ;
+
+                } // End if INBOUND hangup event
+            }// End of HangupEvent.
+            
             
              
             // success
@@ -1271,9 +1232,65 @@ function findAccountForContact($aContactId)
     }
 }
 
+
+///
+/// Given the channel ($rawData['channel']) from the AMI Event, this returns the user ID the call should be assigned to.
+/// If a suitable user extension cannot be found, Admin is returned
+///
+function findUserIdFromChannel( $channel ) 
+{
+	global $userGUID;
+	$assignedUser = $userGUID; // Use logged in user as fallback
+
+	$asteriskExt = extractExtensionNumberFromChannel($channel);
+	
+	$maybeAssignedUser = findUserByAsteriskExtension($asteriskExt);
+	if ($maybeAssignedUser) {
+		$assignedUser = $maybeAssignedUser;
+		logLine("! Assigned user id set to $assignedUser\n");
+	}
+	else {
+		$assignedUser = $userGUID;
+		logLine(" ! Assigned user will be set to Administrator.");
+	}
+	
+	return $assignedUser;
+}
+
+//    
+// Attempt to find assigned user by asterisk ext
+// PRIVATE METHOD: See findUserIdFromChannel
+//
+function extractExtensionNumberFromChannel( $channel )
+{
+	$asteriskExt = FALSE;
+	$channelSplit = array();
+	logLine("Looking for user extension number in: $channel\n");
+	
+	// KEEP THIS BLOCK OF CODE IN SYNC WITH OUTBOUND 
+	// BR: This cases matches things like Local/LC-52@from-internal-4bbbb
+	// FIXME: replace this pattern with sugar_config.
+	$pattern = '/Local\/(.*?)(\d\d\d?\d?\d?)@/i';
+	if( preg_match($pattern, $channel, $regs)) {
+		logLine("Matched User REGEX.  Regex: " . $regs[2] . "\n");
+		$asteriskExt = $regs[2];
+	}
+	// This matches the standard cases such as SIP/### or IAX/### 
+	else if (eregi('^([[:alpha:]]+)/([[:alnum:]]+)-', $channel, $channelSplit) > 0){
+		$asteriskExt = $channelSplit[2];
+		logLine("Channel Matched SIP/### style regex.  Ext is:" . $asteriskExt . "\n");
+	}
+	else {
+		$asteriskExt = FALSE;
+	}
+	
+	return $asteriskExt;
+}
+
 //
 // Locate user by asterisk extension
 // NOTE: THIS RETURNS JUST AN ID
+// PRIVATE METHOD: See findUserIdFromChannel
 //
 function findUserByAsteriskExtension($aExtension)
 {
@@ -1287,8 +1304,6 @@ function findUserByAsteriskExtension($aExtension)
 	}
 	
 	return FALSE;
-	
-
 
 	///// OLD WAY OF DOING IT IS WITH SOAP... DIDN"T WORK FOR ME... so reverted to db query.
 /*
@@ -1338,10 +1353,14 @@ function mysql_checked_query($aQuery)
     global $mysql_loq_queries;
     global $mysql_log_results;
     
-    logLine("# +++ mysql_checked_query()\n");
+	if( $mysql_loq_queries || $mysql_log_results ) 
+	{
+		logLine("# +++ mysql_checked_query()\n");
+	}
+	
     $query = trim($aQuery);
     if ($mysql_loq_queries) {
-        print "! SQL: $query\n";
+		logLine("  ! SQL: $query\n");
     }
     
     // Is this is a SELECT ?
@@ -1352,19 +1371,18 @@ function mysql_checked_query($aQuery)
     if ($mysql_log_results) {
         if (!$sqlResult) {
             // Error occured
-            print("! SQL error " . mysql_errno() . " (" . mysql_error() . ")\n");
+            logLine("! SQL error " . mysql_errno() . " (" . mysql_error() . ")\n");
         } else {
             // SQL succeeded
             if ($isSelect) {
-                logLine("# Rows in result set: " . mysql_num_rows($sqlResult) . "\n");
+                logLine("  --> Rows in result set: " . mysql_num_rows($sqlResult) . "\n");
             } else {
-                logLine("# Rows affected: " . mysql_affected_rows() . "\n");
+                logLine("  --> Rows affected: " . mysql_affected_rows() . "\n");
             }
         }
     }
     
-    // Pass original result to caller
-    logLine("# --- mysql_checked_query()\n");
+
     return $sqlResult;
 }
 
@@ -1387,6 +1405,19 @@ function logLine($str)
 function safe_feof($fp, &$start = NULL) {
  $start = microtime(true);
  return feof($fp);
+}
+
+function startsWith($haystack, $needle)
+{
+    $length = strlen($needle);
+    return (substr($haystack, 0, $length) === $needle);
+}
+
+function endsWith($haystack, $needle)
+{
+    $length = strlen($needle);
+    $start  = $length * -1; //negative
+    return (substr($haystack, $start) === $needle);
 }
 
 

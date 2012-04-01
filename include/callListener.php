@@ -78,7 +78,7 @@ log_entry("$current_user->asterisk_ext_c is the extension...\n", "c:\callListene
 //$query = " SELECT * FROM asterisk_log WHERE (callstate = 'Dial' OR callstate = 'Connected') AND (channel LIKE 'SIP/{$current_user->asterisk_ext_c}%')";
 
 $lastHour = date('Y-m-d H:i:s',time() - 1*60*60);
-$query = " SELECT * FROM asterisk_log WHERE \"$lastHour\" < timestampCall AND (uistate IS NULL OR uistate != \"Closed\") AND (channel LIKE 'SIP/{$current_user->asterisk_ext_c}%')";
+$query = " SELECT * FROM asterisk_log WHERE \"$lastHour\" < timestampCall AND (uistate IS NULL OR uistate != \"Closed\") AND (channel LIKE 'SIP/{$current_user->asterisk_ext_c}%' OR channel LIKE 'Local%{$current_user->asterisk_ext_c}%')";
 
 $resultSet = $current_user->db->query($query, false);
 if($current_user->db->checkError()){

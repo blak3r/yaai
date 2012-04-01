@@ -51,7 +51,13 @@ There are a few regex's that must work.
   -- Currently, there isn't a regular expression for this.  There are a series of If/else statements that do this in asteriskLogger.
   -- It first tries to see if SIP/### would work... if it doesn't, it then tries one that would match "Local/###@" so this should take care of it.
   -- IF your calls aren't being associated with the proper contact... this is the likely problem (or you don't have a User with that extension already).
-* TODO: CallListener has a line which is like SIP/$extension in the DB Query... 
+* To determine what call window popups should appear CallListener's db query (CTRL+F for $query) has a line which 
+  checks to see if the channel matches either SIP/has a line which is like SIP/$extension in the DB Query... There isn't currently a config properly for this.
+  So, if call windows aren't popping up this might be a good place to look.
+
+Versions Developed with:
+* Asterisk 1.6.2.22 built by root on a i686 running Linux on 2011-12-29 01:26:29 UTC (we compiled asterisk b/c DTMF wasn't working).
+* 
 
 
 ==[ Important ]================
@@ -63,6 +69,9 @@ There are a few regex's that must work.
 
 * Need to do custom code for Contacts Subpanels.. (doesn't show magic call icon there).
 
+==[ Minor Bugs ]================
+* If there is no user extension that matches, the call gets assigned to NULL
+
 
 ==[ Potential Enhancements]=========================
 
@@ -70,6 +79,7 @@ There are a few regex's that must work.
 * Would be cool if it could give you voicemail also.
 * Ability to record the call?
 * Have Button to create a new contact when number isn't recognized.
+
 
 
 ==[ Configuration Changes Needed]===
@@ -100,6 +110,9 @@ asterisk_subject_max_len
 * (Performance) -- Reduce querying in callListener... Perhaps set Contact only in asteriskLogger? -- You'd loose it getting updated if person adds afterwards.
 * (Performance) -- Index the timestampCall column?
 * (Performance) -- Perhaps create a asterisk_log_archive table and copy entries to it after 1 week to cut down on records that have to be scanned.
+* (Performance) -- Ajax calls to callLister continue even after user's session ends (like when you login from a diff browser).  Need to somehow stop that.
+
+* Process the AMI response in CallCreate / controller and display errors when they fail in javascript.
 
 ==[INSTALLER]=========
 * (DONE) The previous versions added some custom code around every phone number. 
@@ -114,8 +127,12 @@ asterisk_subject_max_len
 
 ==============================[ CHANGELOG ]================================
 
-3/28/2012
-* DONE - (Performance) -- Ajax calls to callLister continue even after user's session ends (like when you login from a diff browser).  Need to somehow stop that.
+3/31/2012
+* Extracted code to find the assigned user based on extension to methods.
+* Fixed couple regex bugs.
+* Fixed Internal call detection when using custom dial plans ( Local/ )
+* Updated the callListener query to show the correct call
+* Now, only 1 call shows up for each inbound call.
 
 3/26/2012
 * (DONE) Z-index issue with chatbox and buttons on pagination.
