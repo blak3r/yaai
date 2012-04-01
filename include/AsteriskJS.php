@@ -42,9 +42,13 @@
 //prevents directly accessing this file from a web browser
 if(!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point');	
 
+global $sugar_config;
+
 class AsteriskJS{
-	
+
   function echoJavaScript($event,$arguments){
+	global $sugar_config;
+
 	// asterisk hack: include ajax callbacks in every sugar page except ajax requests:
 	if( $_REQUEST['action']!='modulelistmenu' && empty($_REQUEST['to_pdf']) && ( !empty($_REQUEST['module']) && $_REQUEST['module']!='ModuleBuilder') && empty($_REQUEST['to_csv'])){
 		if(isset($GLOBALS['current_user']->asterisk_ext_c) && ($GLOBALS['current_user']->asterisk_ext_c != '') && 
@@ -72,7 +76,7 @@ QUERY8;
 			    echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/dialin.js"></script>';
 			if($GLOBALS['current_user']->asterisk_outbound_c == '1') {
 			 			 // TODO add other server side variables here to control behavior of javascript.
-			   echo '<script> AST_UserExtention = ' . $GLOBALS['current_user']->asterisk_ext_c . ";</script>";
+			   echo '<script> AST_UserExtention = ' . $GLOBALS['current_user']->asterisk_ext_c . "; AST_PollRate = {$sugar_config['asterisk_listener_poll_rate']}</script>";
 			   echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/dialout.js"></script>';
 			 }
 

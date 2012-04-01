@@ -1,42 +1,3 @@
-[behavior]
-  Pro - very easy and fast to save call notes, Con - easy to accidently hit enter when doing bullets etc.
-* What is the ideal save call notes behavior.  As it stands, when you click the "enter" key it saves the note.  Should this also close out the chat box? 
- 
-[tasks]
-
-* For some reason on 6.4
-# +++ findSugarObjectByPhoneNumber(52)  <--- this should be 4102152497
-# +++ findAccountForContact()
-# No associated account found
-
-(Inbound call is like this)
-# +++ findUserByAsteriskExtension(52)
-# Measured call duration is 38 seconds
-# +++ findSugarObjectByPhoneNumber(4102152497)
-# +++ findAccountForContact()
-# No associated account found
-
-
-	$current_language = $_SESSION['authenticated_user_language'];
-	if(empty($current_language)) {
-		$current_language = $sugar_config['default_language'];
-	}
-	require("custom/modules/Asterisk/language/" . $current_language . ".lang.php");
-
-! --- Event -----------------------------------------------------------
-!                Event --> Dial
-!            Privilege --> call,all
-!             SubEvent --> Begin
-!              Channel --> SIP/209-00000e36
-!          Destination --> Local/207@sugarsip-1fcd;1
-!          CallerIDNum --> 209
-!         CallerIDName --> BR 209 test
-!             UniqueID --> 1332710950.4735
-!         DestUniqueID --> 1332710951.4736
-!           Dialstring --> 207@sugarsip/n
-! ---------------------------------------------------------------------
-! Dial Event src=SIP/209-00000e36 dest=Local/207@sugarsip-1fcd;1
-
 Documentation:
 If you have a custom dial plan.  You must do the following.
 * Modify asterisk_expr to have an OR condition.
@@ -61,6 +22,8 @@ Versions Developed with:
 
 
 ==[ Important ]================
+
+* Investigate the dial out prefix... I don't think i use this in click to dial... make sure usermanual is accurate.
 
 * ***On Inbound calls (such as Ray Lewis 9:56am on 10/16/2012) we have lots of failed calls.  Presumably 1 for my cell phone etc...
 
@@ -133,6 +96,7 @@ asterisk_subject_max_len
 * Fixed Internal call detection when using custom dial plans ( Local/ )
 * Updated the callListener query to show the correct call
 * Now, only 1 call shows up for each inbound call.
+* Rudimentary Transfer functionality implemented.
 
 3/26/2012
 * (DONE) Z-index issue with chatbox and buttons on pagination.

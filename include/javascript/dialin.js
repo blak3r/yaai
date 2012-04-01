@@ -52,7 +52,7 @@ function checkForNewStates(){
 function checkData(data){
 	var tmpList = new Array();
 	
-	setTimeout('checkForNewStates()', 5000); // Only when the previous request was successful do we try again.
+	setTimeout('checkForNewStates()', AST_PollRate); // Only when the previous request was successful do we try again.
 	
 	//----- ORIGINAL UI BLOCK ------//
 	/*

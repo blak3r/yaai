@@ -76,6 +76,7 @@ if( $_REQUEST['action'] == "memoSave") {
 	$focus->name = $subject;		
 	$focus->save(); 
 	
+	/*
 	$query = "Select remote_channel from asterisk_log where call_record_id='{$_POST["call_record"]}'";
 	
 	$resultSet = $current_user->db->query($query, false);
@@ -88,7 +89,7 @@ if( $_REQUEST['action'] == "memoSave") {
 		$cmd ="ACTION: Redirect\r\nChannel: {$row['remote_channel']}\r\nContext: from-internal\r\nExten: 208\r\nPriority: 1\r\n\r\n";
 		SendAMICommand($cmd);
 	}
-	
+	*/
 	
 	// Inbound call trying, THIS WORKED!!!
 	// 174-37-247-84*CLI> core show channels concise
@@ -157,6 +158,7 @@ else {
 	echo "Undefined Action";
 }
 
+
 function SendAMICommand( $amiCmd ) {
 	global $sugar_config;
 	$server = $sugar_config['asterisk_host'];
@@ -178,32 +180,28 @@ function SendAMICommand( $amiCmd ) {
 		fputs($socket, "\r\n");	
 		//$result = fgets($socket,128);
 		
-		/*
-		while (($buffer = fgets($handle, 128)) !== false) {
-			echo $buffer;
-		}*/
 		
-		fputs($socket,$amiCmd);
-		//$resultCmd = fgets($socket,128);
-		
-		/*while (($buffer = fgets($handle, 128)) !== false) {
-			echo $buffer;
-		}*/
-		
-
-		fputs($socket, "Action: Logoff\r\n\r\n");
-		fputs($socket, "\r\n");	
-		
-		//$result = fgets($socket,128);
-		
-		sleep(10);
-	
+		echo "Login Response: \n";
 		while (($buffer = fgets($socket, 128)) !== false) {
 			echo $buffer;
 		}
 		
+		fputs($socket,$amiCmd);
+		//$resultCmd = fgets($socket,128);
 		
+		echo "\nAMI Comand Response: \n";
+		while (($buffer = fgets($socket, 128)) !== false) {
+			echo $buffer;
+		}
 		
+		fputs($socket, "Action: Logoff\r\n\r\n");
+		fputs($socket, "\r\n");	
+		
+		echo "\nLogout Response: \n";
+		while (($buffer = fgets($socket, 128)) !== false) {
+			echo $buffer;
+		}
+			
 		//echo $result;
 		//var_dump($result);
 		//var_dump($resultCmd);
