@@ -1,0 +1,2 @@
+User Manual is maintained on:
+https://github.com/blak3r/yaai/wiki/User-Manual
