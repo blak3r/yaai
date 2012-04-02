@@ -1,0 +1,29 @@
+
+<!-- Start Extensions for Asterisk-Sugar-Integration -->
+<!-- Paste this block after 'email_info'             -->
+<p>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabForm">
+	<tr>
+		<th align="left" class="dataLabel" colspan="2">
+			<h4 class="dataLabel">{MOD.LBL_ASTERISK_OPTIONS_TITLE}</h4>
+		</th>
+	</tr>
+	<tr>
+        <td class="dataLabel" valign="top"><slot>{MOD.LBL_ASTERISK_EXT}</slot></td>
+            <td class="dataField"><slot><input type="text" tabindex='3' name="asterisk_ext_c" value="{ASTERISK_EXT_C}" size="3"></slot></td>
+                  <td class="dataField"><slot>{MOD.LBL_ASTERISK_EXT_DESC}</slot></td>
+    </tr>
+ <tr>
+        <td class="dataLabel" valign="top"><slot>{MOD.LBL_ASTERISK_INBOUND}</slot></td>
+		    <td class="dataField"><slot><input type="text" tabindex='3' name="asterisk_inbound_c" value="{ASTERISK_INBOUND_C}" size="3"></slot></td>
+                <td class="dataField"><slot>{MOD.LBL_ASTERISK_INBOUND_DESC}</slot></td>
+    </tr>
+    <tr>
+        <td class="dataLabel" valign="top"><slot>{MOD.LBL_ASTERISK_OUTBOUND}</slot></td>
+		    <td class="dataField"><slot><input type="text" tabindex='3' name="asterisk_outbound_c" value="{ASTERISK_OUTBOUND_C}" size="3"></slot></td>
+			    <td class="dataField"><slot>{MOD.LBL_ASTERISK_OUTBOUND_DESC}</slot></td>
+    </tr>  
+</table>
+</p>
+<!-- Fin Extensions for Asterisk-Sugar-Integration -->
+

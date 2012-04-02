@@ -1,0 +1,1 @@
+As of yaai v2, just the language entries are used.  Metadata and views left for reference.

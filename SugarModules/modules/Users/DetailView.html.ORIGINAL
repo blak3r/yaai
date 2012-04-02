@@ -1,0 +1,403 @@
+<!--
+/*********************************************************************************
+ * SugarCRM is a customer relationship management program developed by
+ * SugarCRM, Inc. Copyright (C) 2004 - 2009 SugarCRM Inc.
+ * 
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License version 3 as published by the
+ * Free Software Foundation with the addition of the following permission added
+ * to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK
+ * IN WHICH THE COPYRIGHT IS OWNED BY SUGARCRM, SUGARCRM DISCLAIMS THE WARRANTY
+ * OF NON INFRINGEMENT OF THIRD PARTY RIGHTS.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, see http://www.gnu.org/licenses or write to the Free
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ * 
+ * You can contact SugarCRM, Inc. headquarters at 10050 North Wolfe Road,
+ * SW2-130, Cupertino, CA 95014, USA. or at email address contact@sugarcrm.com.
+ * 
+ * The interactive user interfaces in modified source and object code versions
+ * of this program must display Appropriate Legal Notices, as required under
+ * Section 5 of the GNU General Public License version 3.
+ * 
+ * In accordance with Section 7(b) of the GNU General Public License version 3,
+ * these Appropriate Legal Notices must retain the display of the "Powered by
+ * SugarCRM" logo. If the display of the logo is not reasonably feasible for
+ * technical reasons, the Appropriate Legal Notices must display the words
+ * "Powered by SugarCRM".
+ ********************************************************************************/
+/*********************************************************************************
+
+ ********************************************************************************/
+-->
+<!-- BEGIN: main -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<form action="index.php" method="post" name="DetailView" id="form">
+    <input type="hidden" name="module" value="Users">
+    <input type="hidden" name="record" value="{ID}">
+    <input type="hidden" name="isDuplicate" value=false>
+    <input type="hidden" name="action">
+    <input type="hidden" name="user_name" value="{USER_NAME}">
+    <input type="hidden" name="password_change">
+    <input type="hidden" name="old_password">
+    <input type="hidden" name="new_password">
+    <input type="hidden" name="return_module">
+    <input type="hidden" name="return_action">
+    <input type="hidden" name="return_id">
+
+    <tr><td nowrap style="padding-bottom: 2px;">{BUTTONS}</td></tr>
+</form>
+</table>
+
+
+
+<p>	<table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabDetailView">
+{PAGINATION}
+	<tr>
+	<td width="15%" valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_NAME}:</slot></td>
+	<td width="35%" valign="top" class="tabDetailViewDF"><slot>{FULL_NAME}&nbsp;</slot></td>
+	<td width="15%" valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_USER_NAME}:</slot></td>
+	<td width="35%" valign="top" class="tabDetailViewDF"><slot>{USER_NAME}&nbsp;</slot></td>
+	</tr>
+	<tr>
+	<td valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_STATUS}:</slot></td>
+	<td valign="top" class="tabDetailViewDF"><slot>{STATUS}&nbsp;</slot></td>
+	<td valign="top" class="tabDetailViewDL"><slot>&nbsp;</slot></td>
+	<td valign="top"  class="tabDetailViewDF"><slot>&nbsp;</slot></td>
+</tr></table></p>
+
+<!-- END: main -->
+
+<!-- BEGIN: user_settings -->
+
+
+<p>	<table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabDetailView">
+	<tr>
+	<th colspan='4' align="left" class="tabDetailViewDL" width="100%" valign="top"><h4 class="tabDetailViewDL"><slot>{MOD.LBL_USER_SETTINGS}</slot></h4></th>
+	</tr>
+	<tr>
+	<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_ADMIN}:</slot></td>
+	<td class="tabDetailViewDF"><slot><input class="checkbox" type="checkbox" disabled {IS_ADMIN}></slot></td>
+	<td class="tabDetailViewDF"><slot>{MOD.LBL_ADMIN_TEXT}&nbsp;</slot></td>
+	</tr>
+	<tr>
+	<td class="tabDetailViewDL"><slot>{MOD.LBL_GROUP}:</slot></td>
+	<td width="15%" class="tabDetailViewDF"><slot><input name='is_group' class="checkbox" type="checkbox" value='1' tabindex='3' disabled {IS_GROUP}></slot></td>
+	<td width="65%" class="tabDetailViewDF"><slot>{MOD.LBL_GROUP_DESC}&nbsp;</slot></td>
+	</tr>
+
+
+
+
+
+
+
+
+
+
+
+	<tr>
+	<td class="tabDetailViewDL"><slot>{MOD.LBL_RECEIVE_NOTIFICATIONS}:</slot></td>
+	<td class="tabDetailViewDF"><slot><input class="checkbox" type="checkbox" disabled {RECEIVE_NOTIFICATIONS}></slot></td>
+	<td class="tabDetailViewDF"><slot>{MOD.LBL_RECEIVE_NOTIFICATIONS_TEXT}&nbsp;</slot></td>
+	</tr>
+	<tr>
+	<td class="tabDetailViewDL"><slot>{MOD.LBL_GRIDLINE}:</slot></td>
+	<td class="tabDetailViewDF"><slot><input class="checkbox" type="checkbox" disabled {GRIDLINE_CHECK}></slot></td>
+	<td class="tabDetailViewDF"><slot>{MOD.LBL_GRIDLINE_TEXT}&nbsp;</slot></td>
+	</tr>
+
+
+
+
+
+
+
+
+
+	<!-- BEGIN: open_source -->
+	<!-- END: open_source -->
+	<tr>
+	<td  valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_REMINDER}:</td>
+	<td valign="top" nowrap class="tabDetailViewDF"><slot><input name='should_remind' tabindex='1' size='2' maxlength='2'  disabled type="checkbox" class="checkbox" value='1' {REMINDER_CHECKED}>&nbsp;{REMINDER_TIME}</slot></td>
+	<td  class="tabDetailViewDF"><slot>{MOD.LBL_REMINDER_TEXT}&nbsp;</slot></td>
+
+	</tr>
+	<tr>
+	<td valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_MAILMERGE}:</slot></td>
+	<td valign="top" nowrap class="tabDetailViewDF"><slot><input tabindex='3' name='mailmerge_on' disabled class="checkbox" type="checkbox" {MAILMERGE_ON}></slot></td>
+	<td class="tabDetailViewDF"><slot>{MOD.LBL_MAILMERGE_TEXT}&nbsp;</slot></td>
+	</tr>
+
+
+
+
+
+
+
+
+
+
+
+	<tr>
+	<td valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_SETTINGS_URL}:</slot></td>
+	<td valign="top" class="tabDetailViewDF"><slot>{SETTINGS_URL}</slot></td>
+	<td class="tabDetailViewDF"><slot>{MOD.LBL_SETTINGS_URL_DESC}&nbsp;</slot></td>
+	</tr>
+    <tr>
+    <td  class="tabDetailViewDL" valign="top"><slot>{MOD.LBL_EXPORT_DELIMITER}:</slot></td>
+    <td class="tabDetailViewDF"><slot>{EXPORT_DELIMITER}</slot></td>
+    <td class="tabDetailViewDF"><slot>{MOD.LBL_EXPORT_DELIMITER_DESC}</slot></td>
+    </tr>
+    <tr>
+    <td  class="tabDetailViewDL" valign="top"><slot>{MOD.LBL_EXPORT_CHARSET}:</slot></td>
+    <td class="tabDetailViewDF"><slot>{EXPORT_CHARSET}</slot></td>
+    <td class="tabDetailViewDF"><slot>{MOD.LBL_EXPORT_CHARSET_DESC}</slot></td>
+    </tr>
+    <tr>
+    <td  class="tabDetailViewDL" valign="top"><slot>{MOD.LBL_USE_REAL_NAMES}:</slot></td>
+    <td class="tabDetailViewDF"><slot>{USE_REAL_NAMES}</slot></td>
+    <td class="tabDetailViewDF"><slot>{MOD.LBL_USE_REAL_NAMES_DESC}</slot></td>
+    </tr>
+
+
+
+
+
+
+
+
+
+
+
+	</table></p>
+
+<!-- END: user_settings -->
+
+<!-- BEGIN: user_locale -->
+<p>
+	<table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabDetailView">
+		<tr>
+			<th colspan='4' align="left" class="tabDetailViewDL" width="100%" valign="top">
+				<h4 class="tabDetailViewDL"><slot>{MOD.LBL_USER_LOCALE}:</slot></h4></th>
+		</tr>
+		<tr>
+			<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_DATE_FORMAT}:</slot></td>
+			<td class="tabDetailViewDF"><slot>{DATEFORMAT}&nbsp;</slot></td>
+			<td class="tabDetailViewDF"><slot>{MOD.LBL_DATE_FORMAT_TEXT}&nbsp;</slot></td>
+		</tr>
+		<tr>
+			<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_TIME_FORMAT}:</slot></td>
+			<td class="tabDetailViewDF"><slot>{TIMEFORMAT}&nbsp;</slot></td>
+			<td class="tabDetailViewDF"><slot>{MOD.LBL_TIME_FORMAT_TEXT}&nbsp;</slot></td>
+		</tr>
+		<tr>
+			<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_TIMEZONE}:</slot></td>
+			<td class="tabDetailViewDF" nowrap><slot>{TIMEZONE}&nbsp;</slot></td>
+			<td class="tabDetailViewDF"><slot>{MOD.LBL_ZONE_TEXT}&nbsp;</slot></td>
+		</tr>
+
+		<!-- BEGIN: currency -->
+		<tr>
+			<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_CURRENCY}:</slot></td>
+			<td class="tabDetailViewDF"><slot>{CURRENCY}&nbsp;</slot></td>
+			<td class="tabDetailViewDF"><slot>{MOD.LBL_CURRENCY_TEXT}&nbsp;</slot></td>
+		</tr>
+		<tr>
+			<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_CURRENCY_SIG_DIGITS}:</slot></td>
+			<td class="tabDetailViewDF"><slot>{CURRENCY_SIG_DIGITS}&nbsp;</slot></td>
+			<td class="tabDetailViewDF"><slot>{MOD.LBL_CURRENCY_SIG_DIGITS_DESC}&nbsp;</slot></td>
+		</tr>
+		<!-- END: currency -->
+
+		
+		<tr>
+			<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_NUMBER_GROUPING_SEP}:</slot></td>
+			<td class="tabDetailViewDF"><slot>{NUM_GRP_SEP}&nbsp;</slot></td>
+			<td class="tabDetailViewDF"><slot>{MOD.LBL_NUMBER_GROUPING_SEP_TEXT}&nbsp;</slot></td>
+		</tr><tr>
+			<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_DECIMAL_SEP}:</slot></td>
+			<td class="tabDetailViewDF"><slot>{DEC_SEP}&nbsp;</slot></td>
+			<td class="tabDetailViewDF"><slot></slot>{MOD.LBL_DECIMAL_SEP_TEXT}&nbsp;</td>
+		</tr>
+		</tr><tr>
+			<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_LOCALE_DEFAULT_NAME_FORMAT}:</slot></td>
+			<td class="tabDetailViewDF"><slot>{NAME_FORMAT}&nbsp;</slot></td>
+			<td class="tabDetailViewDF"><slot></slot>{MOD.LBL_LOCALE_NAME_FORMAT_DESC}&nbsp;</td>
+		</tr>
+	</table>
+</p>
+<!-- END: user_locale -->
+
+<!-- BEGIN: user_info -->
+<p>
+	<table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabDetailView">
+	<tr>
+	<th colspan='4' align="left" class="tabDetailViewDL" width="100%" valign="top"><h4 class="tabDetailViewDL"><slot>{MOD.LBL_USER_INFORMATION}</slot></h4></th>
+	</tr><tr>
+	<td width="15%" valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_EMPLOYEE_STATUS}:</slot></td>
+	<td width="35%" valign="top" class="tabDetailViewDF"><slot>{EMPLOYEE_STATUS}&nbsp;</slot></td>
+	<td valign="top" class="tabDetailViewDL"><slot>&nbsp;</slot></td>
+	<td valign="top" class="tabDetailViewDF"><slot>&nbsp;</slot></td>
+	</tr><tr>
+	<td width="15%" valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_TITLE}:</slot></td>
+	<td width="35%" valign="top" class="tabDetailViewDF"><slot>{TITLE}&nbsp;</slot></td>
+	<td width="15%" valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_OFFICE_PHONE}:</slot></td>
+	<td width="35%" valign="top" class="tabDetailViewDF"><slot>{PHONE_WORK}&nbsp;</slot></td>
+	</tr><tr>
+	<td valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_DEPARTMENT}:</slot></td>
+	<td valign="top" class="tabDetailViewDF"><slot>{DEPARTMENT}&nbsp;</slot></td>
+	<td valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_MOBILE_PHONE}:</slot></td>
+	<td valign="top" class="tabDetailViewDF"><slot>{PHONE_MOBILE}&nbsp;</slot></td>
+	</tr><tr>
+	<td valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_REPORTS_TO}:</slot></td>
+	<td valign="top" class="tabDetailViewDF"><slot><a href="index.php?module=Users&action=DetailView&record={REPORTS_TO_ID}" class="tabDetailViewDFLink" class="tabDetailViewDFLink">{REPORTS_TO_NAME}</a>&nbsp;</slot></td>
+	<td valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_OTHER}:</slot></td>
+	<td valign="top" class="tabDetailViewDF"><slot>{PHONE_OTHER}&nbsp;</slot></td>
+	</tr><tr>
+	<td valign="top" class="tabDetailViewDL"><slot>&nbsp;</slot></td>
+	<td valign="top" class="tabDetailViewDF"><slot>&nbsp;</slot></td>
+	<td valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_FAX}:</slot></td>
+	<td valign="top" class="tabDetailViewDF"><slot>{PHONE_FAX}&nbsp;</slot></td>
+	</tr><tr>
+
+	<td valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_HOME_PHONE}:</slot></td>
+	<td valign="top" class="tabDetailViewDF"><slot>{PHONE_HOME}&nbsp;</slot></td>
+	<td valign="top" class="tabDetailViewDL"><slot>&nbsp;</slot></td>
+	<td valign="top" class="tabDetailViewDF"><slot>&nbsp;</slot></td>
+	</tr><tr>
+	<td valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_MESSENGER_TYPE}:</slot></td>
+	<td valign="top" class="tabDetailViewDF"><slot>{MESSENGER_TYPE}&nbsp;</slot></td>
+	<td valign="top" class="tabDetailViewDL"><slot>&nbsp;</slot></td>
+	<td valign="top" class="tabDetailViewDF"><slot>&nbsp;</slot></td>
+	</tr><tr>
+	<td valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_MESSENGER_ID}:</slot></td>
+	<td valign="top" class="tabDetailViewDF"><slot>{MESSENGER_ID}&nbsp;</slot></td>
+	<td valign="top" class="tabDetailViewDL"><slot>&nbsp;</slot></td>
+	<td valign="top" class="tabDetailViewDF"><slot>&nbsp;</slot></td>
+	</tr><tr>
+	<td valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_ADDRESS}:</slot></td>
+	<td valign="top"  class="tabDetailViewDF"><slot>{ADDRESS_STREET}<br>
+	{ADDRESS_CITY} {ADDRESS_STATE}&nbsp;&nbsp;{ADDRESS_POSTALCODE}<br>
+	{ADDRESS_COUNTRY}</slot></td>
+	<td class="tabDetailViewDL"><slot>&nbsp;</slot></td>
+	<td class="tabDetailViewDF"><slot>&nbsp;</slot></td>
+	</tr><tr>
+	<td valign="top" valign="top" class="tabDetailViewDL"><slot>{MOD.LBL_NOTES}:</slot></td>
+	<td class="tabDetailViewDF"><slot>{DESCRIPTION}&nbsp;</slot></td>
+	<td width="15%" valign="top" class="tabDetailViewDL"><slot>&nbsp;</slot></td>
+	<td width="35%" valign="top" class="tabDetailViewDF"><slot>&nbsp;</slot></td>
+</tr></table>
+</p>
+
+<!-- BEGIN: email_info -->
+<p>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabForm">
+	<tr>
+		<td>
+	        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+	        	<tr>
+	        		<th align="left" class="dataLabel" colspan="4">
+	        			<h4 class="dataLabel">{MOD.LBL_MAIL_OPTIONS_TITLE}</h4>
+	        		</th>
+	        	</tr>
+	        	<tr>
+			        <td class="dataLabel">
+			        	{MOD.LBL_EMAIL}:
+			        </td>
+					<td class="dataField">
+						{EMAIL_OPTIONS}
+					</td>
+				<tr>
+			        <td class="dataLabel">
+			        	{MOD.LBL_EMAIL_LINK_TYPE}:
+			        </td>
+			        <td class="dataField">
+			        	<select name="email_link_type" tabindex="410" DISABLED>
+			        	{EMAIL_LINK_TYPE}
+			        	</select>
+			        </td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+</p>
+<!-- END: email_info -->
+
+<!-- BEGIN: freebusy -->
+<p>
+	<table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabDetailView">
+	<tr>
+	<th colspan='4' align="left" class="tabDetailViewDL" width="100%" valign="top"><h4 class="tabDetailViewDL"><slot>{MOD.LBL_CALENDAR_OPTIONS}</slot></h4></th>
+	</tr>
+	<tr>
+	<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_PUBLISH_KEY}:</slot></td>
+	<td width="20%" class="tabDetailViewDF"><slot>{CALENDAR_PUBLISH_KEY}</slot></td>
+	<td width="65%" class="tabDetailViewDF"><slot>{MOD.LBL_CHOOSE_A_KEY}&nbsp;</slot></td>
+	</tr>
+	<tr>
+	<td width="15%" class="tabDetailViewDL" ><slot><nobr>{MOD.LBL_YOUR_PUBLISH_URL}:</nobr></slot></td>
+	<td class="tabDetailViewDF" colspan=2><slot>{CALENDAR_PUBLISH_URL}</slot></td>
+	</tr>
+	<tr>
+	<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_SEARCH_URL}:</slot></td>
+	<td class="tabDetailViewDF" colspan=2><slot>{CALENDAR_SEARCH_URL}</slot></td>
+	</tr>
+	</table>
+</p>
+<!-- END: freebusy -->
+
+<!-- BEGIN: layoutopts -->
+<p>
+	<table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabDetailView">
+	<tr>
+	<th colspan='4' align="left" class="tabDetailViewDL" width="100%" valign="top"><h4 class="tabDetailViewDL"><slot>{MOD.LBL_LAYOUT_OPTIONS}</slot></h4></th>
+	</tr>
+	<tr>
+	<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_MAX_TAB}:</slot></td>
+	<td width="15%" class="tabDetailViewDF"><slot>{MAX_TAB}&nbsp;</slot></td>
+	<td class="tabDetailViewDF"><slot>{MOD.LBL_MAX_TAB_DESCRIPTION}&nbsp;</slot></td>
+	</tr>
+	<tr>
+	<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_MAX_SUBTAB}:</slot></td>
+	<td class="tabDetailViewDF"><slot>{MAX_SUBTAB}&nbsp;</slot></td>
+	<td class="tabDetailViewDF"><slot>{MOD.LBL_MAX_SUBTAB_DESCRIPTION}</slot></td>
+	</tr>
+	<tr>
+	<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_SUBPANEL_TABS}:</slot></td>
+	<td class="tabDetailViewDF"><slot><input class="checkbox" type="checkbox" disabled {SUBPANEL_TABS}></slot></td>
+	<td class="tabDetailViewDF"><slot>{MOD.LBL_SUBPANEL_TABS_DESCRIPTION}&nbsp;</slot></td>
+	</tr>
+	<tr>
+	<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_SUBPANEL_LINKS}:</slot></td>
+	<td class="tabDetailViewDF"><slot><input class="checkbox" type="checkbox" disabled {SUBPANEL_LINKS}></slot></td>
+	<td class="tabDetailViewDF"><slot>{MOD.LBL_SUBPANEL_LINKS_DESCRIPTION}&nbsp;</slot></td>
+	</tr>
+	<tr>
+	<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_SWAP_LAST_VIEWED_POSITION}:</slot></td>
+	<td class="tabDetailViewDF"><slot><input class="checkbox" type="checkbox" disabled {SWAP_LAST_VIEWED}></slot></td>
+	<td class="tabDetailViewDF"><slot>{MOD.LBL_SWAP_LAST_VIEWED_DESCRIPTION}&nbsp;</slot> <i>{MOD.LBL_SUPPORTED_THEME_ONLY}</i></td>
+	</tr>
+	<tr>
+	<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_SWAP_SHORTCUT_POSITION}:</slot></td>
+	<td class="tabDetailViewDF"><slot><input class="checkbox" type="checkbox" disabled {SWAP_SHORTCUT}></slot></td>
+	<td class="tabDetailViewDF"><slot>{MOD.LBL_SWAP_SHORTCUT_DESCRIPTION}&nbsp;</slot> <i>{MOD.LBL_SUPPORTED_THEME_ONLY}</i></td>
+	</tr>
+	<tr>
+	<td width="15%" class="tabDetailViewDL"><slot>{MOD.LBL_NAVIGATION_PARADIGM}:</slot></td>
+	<td class="tabDetailViewDF"><slot>{NAVIGATION_PARADIGM}</slot></td>
+	<td class="tabDetailViewDF"><slot>{MOD.LBL_NAVIGATION_PARADIGM_DESCRIPTION}&nbsp;</slot> <i>{MOD.LBL_SUPPORTED_THEME_ONLY}</i></td>
+	</tr>
+	</table>
+</p>
+<!-- END: layoutopts -->
+
+<!-- END: user_info -->

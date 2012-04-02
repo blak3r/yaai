@@ -1,0 +1,29 @@
+
+<!-- Start Extensions for Asterisk-Sugar-Integration -->
+<!-- Paste this block after 'email_info'             -->
+<p>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabDetailView">
+	<tr>
+		<th align="left" class="tabDetailViewDL" colspan="2">
+			<h4 class="tabDetailViewDL">{MOD.LBL_ASTERISK_OPTIONS_TITLE}</h4>
+		</th>
+	</tr>
+	<tr>
+		<td class="tabDetailViewDL" style="width: 30%">
+			{MOD.LBL_ASTERISK_EXT}:
+		</td>
+		<td class="tabDetailViewDF">
+			{ASTERISK_EXT_C}
+		</td>
+		
+	<tr>
+		<td class="tabDetailViewDL">
+			{MOD.LBL_ASTERISK_EXT_DESC}:
+		</td>
+		<td class="tabDetailViewDF">
+			Asterisk Inbound:_ {ASTERISK_INBOUND_C} _: Asterisk Outbound:_ {ASTERISK_OUTBOUND_C} _:
+		</td>
+	</tr>
+</table>
+</p>
+<!-- Fin Extensions for Asterisk-Sugar-Integration -->
