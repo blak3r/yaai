@@ -72,11 +72,12 @@ QUERY8;
 			
 		    //echo '<script type="text/javascript" src="custom/include/javascript/jquery/jquery.pack.js"></script>';
 			echo '<link rel="stylesheet" type="text/css" media="all" href="custom/modules/Asterisk/include/asterisk.css">';
-			if($GLOBALS['current_user']->asterisk_inbound_c == '1') 
+			if($GLOBALS['current_user']->asterisk_inbound_c == '1') {
 			    echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/dialin.js"></script>';
+				echo '<script type="text/javascript">AST_PollRate = ' . $sugar_config['asterisk_listener_poll_rate'] . ';</script>';
+			}
 			if($GLOBALS['current_user']->asterisk_outbound_c == '1') {
-			 			 // TODO add other server side variables here to control behavior of javascript.
-			   echo '<script> AST_UserExtention = ' . $GLOBALS['current_user']->asterisk_ext_c . "; AST_PollRate = {$sugar_config['asterisk_listener_poll_rate']}</script>";
+			   echo '<script> AST_UserExtention = ' . $GLOBALS['current_user']->asterisk_ext_c . ';</script>';
 			   echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/dialout.js"></script>';
 			 }
 

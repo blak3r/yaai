@@ -206,12 +206,6 @@ if( $argc > 1 && $argv[1] == "test" ) {
 	print "findUserByAsteriskExtension(710) returned: " . findUserByAsteriskExtension('710') . "\n";
 	findUserByAsteriskExtension('206');
 
-	//foreach( $extensions as $ext ) {
-		
-//	}
-
-exit;
-
 	foreach( $phones as $currPhone ) {
 		$obj = findSugarObjectByPhoneNumber($currPhone);
 		if( $obj === FALSE ) {
@@ -221,7 +215,6 @@ exit;
 			print "  For $currPhone I found: ". $obj['values']['id'] . ' ' . $obj['values']['first_name'] . ' '. $obj['values']['last_name'] . "\n";
 		}
 	}
-	
 	
 	exit;
 }
@@ -326,12 +319,11 @@ while (true) {
               
 				logLine("* CallerID is: $tmpCallerID\n");
                 
-				// TODO for us, Channel --> SIP/209-00000e36 & Destination --> Local/207@sugarsip-1fcd;
-		        // Check if both ends of the call are internal (then delete created (** Automatic record **) record)
+				// Check if both ends of the call are internal (then delete created (** Automatic record **) record)
                 if (preg_match($asteriskMatchInternal, $e['Channel']) && preg_match($asteriskMatchInternal, $e['Destination'])) {
                     $query = "DELETE FROM calls WHERE id='$callRecordId'";
                     mysql_checked_query($query);
-					// TODO what about the other tables.. like the custom table?  Why not use soap for this?
+					// TODO what about the other tables.. like the calls_cstm?  Why not use soap for this?
 					logLine("INTERNAL call detected, Deleting call");
                 }
                 
@@ -401,7 +393,6 @@ while (true) {
                 $soapResult = $soapClient->call('set_entry', $set_entry_params);
                 
                 echo "Direction is $callDirection \n";
-                // TODO: Error checking!
             }
 			
             //
@@ -548,7 +539,7 @@ while (true) {
                             //
                             logLine( "# (OUTBOUND) Now updating record in /Calls/ id=" . $callRecord['sweet']['id'] . "...\n");
                             
-                            print_r($callRecord);
+                            //print_r($callRecord);
                             logLine("NAME: " . $callRecord['sweet']['name'] . "\n");
                             logLine("DESCRIPTION: " . $callRecord['sweet']['description'] . "\n");
                             
@@ -798,9 +789,7 @@ while (true) {
                                 }
                             }
                         }
-						
-						$mysql_log_queries = 1; //TODO disable this when done debugging.
-						
+							
 						// In case of multiple extensions when a call is not answered, every extensions produces a failed call record, this will keep the first of those records but delete the rest.
 						$query     = "SELECT asterisk_id FROM asterisk_log WHERE asterisk_dest_id='$id'";
 						$result    = mysql_checked_query($query);
@@ -819,9 +808,7 @@ while (true) {
 							$total_result = mysql_fetch_array($rq);
 							var_dump($total_result);
 						}
-						
-						$mysql_log_queries = 0;
-                    }
+				    }
 
                 } // End if INBOUND hangup event
             }// End of HangupEvent.
@@ -1263,16 +1250,19 @@ function findUserIdFromChannel( $channel )
 //
 function extractExtensionNumberFromChannel( $channel )
 {
+	global $sugar_config;
 	$asteriskExt = FALSE;
 	$channelSplit = array();
 	logLine("Looking for user extension number in: $channel\n");
 	
 	// KEEP THIS BLOCK OF CODE IN SYNC WITH OUTBOUND 
 	// BR: This cases matches things like Local/LC-52@from-internal-4bbbb
-	// FIXME: replace this pattern with sugar_config.
-	$pattern = '/Local\/(.*?)(\d\d\d?\d?\d?)@/i';
-	if( preg_match($pattern, $channel, $regs)) {
-		logLine("Matched User REGEX.  Regex: " . $regs[2] . "\n");
+	$pattern = $sugar_config['asterisk_dialin_ext_match'];
+	if( !startsWith($pattern,'/') ) {
+		$pattern = '/' . $pattern . '/i';
+	}
+	if( !empty($sugar_config['asterisk_dialin_ext_match']) && preg_match($pattern, $channel, $regs)) {
+		logLine("Matched User REGEX.  Regex: " . $regs[1] . "\n");
 		$asteriskExt = $regs[2];
 	}
 	// This matches the standard cases such as SIP/### or IAX/### 

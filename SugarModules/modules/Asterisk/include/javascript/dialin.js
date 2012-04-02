@@ -36,17 +36,12 @@
 
 // look for new events logged from asterisk
 function checkForNewStates(){
-		//alert(jQuery.fn.jquery);
-		
 		// Note: once the user gets logged out, the ajax requests will get redirected to the login page.
 		// Originally, the setTimeout method was in this method.  But, no way to detect the redirect without server side
 		// changes.  See: http://stackoverflow.com/questions/199099/how-to-manage-a-redirect-request-after-a-jquery-ajax-call
 		// So, now I only schedule a setTimeout upon a successful AJAX call.  The only downside of this is if there is a legit reason
-		// the call does fail it'll never try again... So, I have a hybrid solution where I always schedule a new check every 1 minute.
-		// but increase to only 5s on each successful call.
-		// Would be interesting to see if the .error() addition to .getJSON in jquery 1.5 can detect redirects... doubtful though.
+		// the call does fail it'll never try again..
 		$.getJSON('index.php?entryPoint=AsteriskCallListener', function(data){checkData(data);});	
-		//setTimeout('checkForNewStates()', 60000);  // NEVER MIND HYBRID IS WORSE
 }
 
 function checkData(data){
@@ -528,8 +523,7 @@ function saveMemo( chatboxid ) {
 		}
 		
 		// If you don't want SAVE button to also close then comment out line below
-		// FIXME reneable line below
-		//closeChatBox(chatboxid);
+		closeChatBox(chatboxid);
 }
 
 
@@ -670,7 +664,7 @@ function chatHeartbeat(){
 	for (x in newMessages) {
 		if (newMessages[x] == true) {
 			if (chatboxFocus[x] == false) {
-				//FIXME: add toggle all or none policy, otherwise it looks funny
+				//FIX add toggle all or none policy, otherwise it looks funny
 				$('#chatbox_'+x+' .chatboxhead').toggleClass('chatboxblink');
 			}
 		}

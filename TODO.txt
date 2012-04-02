@@ -1,9 +1,6 @@
 Documentation:
 If you have a custom dial plan.  You must do the following.
-* Modify asterisk_expr to have an OR condition.
-* 
-
-There are a few regex's that must work.
+*There are a few regex's that must work.
 * asterisk_expr is used for detecting if the channel or the destination (or both) are internal to the PBX.  This is how we determine if it's an inbound call, outbound call or an internal to internal call.
   -- The default should work out of the box assuming you need to match SIP/### Local/###@ or IAX
 * Dial Command, in an originate command you set the Channel to the phone which will be the originator.
@@ -23,7 +20,6 @@ Versions Developed with:
 
 ==[ Important ]================
 
-* Investigate the dial out prefix... I don't think i use this in click to dial... make sure usermanual is accurate.
 
 * ***On Inbound calls (such as Ray Lewis 9:56am on 10/16/2012) we have lots of failed calls.  Presumably 1 for my cell phone etc...
 
@@ -52,15 +48,7 @@ Versions Developed with:
 * Need configurable Channel detection in order to assign cell phones.
 * Parametize the channel --> assigned user id detection, search for Local/LC-52@from-internal-4bbbb in asteriskLogger.
 * (DONE) Add max subject length to controller.php (also variables for IBC, OBC);
-asterisk_log, for specifying the log path (if desired).
-asterisk_dialout_channel_pre /SIP
-asterisk_dialout_channel_suffix 
-asterisk_dialin_ext_match Local/##@sugarsip/n
-asterisk_log
-asterisk_listener_poll_rate 5000
-asterisk_inbound_abbr
-asterisk_outbound_abbr
-asterisk_subject_max_len
+
 
 
 

@@ -80,8 +80,6 @@ $extension = $current_user->asterisk_ext_c;
 // asterisk_dialout_channel == "Local/###@sugarsip/n"   --> $matches[1] == Local/, $matches[2] == "###", $matches[3] is "@sugarsip/n".
 preg_match('/([^#]*)(#+)([^#]*)/',$sugar_config['asterisk_dialout_channel'],$matches);
 $channel = $matches[1] . $extension . $matches[3];
-//$channel 	= 'SIP/###' . $extension;   // FIXME: this is the dial regex.
-//$channel = 'Local/' . $extension . '@sugarsip/n'; // FIXME REMOVE THIS === this works with 207, but not 52
 
 logLine("Creating Call, channel for originate command is: $channel\n");	
 												
