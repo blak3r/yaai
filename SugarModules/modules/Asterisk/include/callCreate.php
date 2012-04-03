@@ -95,7 +95,7 @@ $socket = fsockopen($server, $port, $errno, $errstr, 20);
 	fputs($socket, $Secret);
 	fputs($socket, "\r\n");	
 	$result = fgets($socket,128);
-	echo($result);
+	echo("Login Response: " . $result);
 	logLine("[CreateCall] Login Result: $result\n");
 	
 	//format Phone Number
@@ -104,7 +104,10 @@ $socket = fsockopen($server, $port, $errno, $errstr, 20);
 	$number = str_replace("+", "00", $number);
 	$number = str_replace(array("(", ")", " ", "-", "/", "."), "", $number);
 	$number = $prefix.$number;
-	var_dump($number);
+	
+	echo "Originate Params: Number: $number, Channel: $channel, Context: $context, Exten: $number...\n";
+	
+	
 	
 	// dial number
 	fputs($socket, "Action: originate\r\n");		
@@ -118,11 +121,12 @@ $socket = fsockopen($server, $port, $errno, $errstr, 20);
 	fputs($socket, "\r\n");	
 	
 	$result = fgets($socket,128);
-	logLine("[CreateCall] Originate command result: $result\n");
-	var_dump($result);
-	var_dump($channel);
-	var_dump($context);
-	var_dump($number);
+	echo("Originate/Logout Response: " . $result);
+	
+	//var_dump($result);
+	//var_dump($channel);
+	//var_dump($context);
+	//var_dump($number);
 	sleep(1);
 	
 	// close socket

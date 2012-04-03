@@ -51,10 +51,10 @@ $mod_strings['LBL_ASTERISK_SOAPUSER'] = 'Asterisk Soap-User';
 $mod_strings['LBL_ASTERISK_LOG_FILE'] = 'Log File Path';
 $mod_strings['LBL_ASTERISK_DIALOUT_CHANNEL'] = 'Dialout Channel';
 $mod_strings['LBL_ASTERISK_DIALOUT_CHANNEL_DESC'] = 'Regular expression the ### will be replaced with current users extension';
-$mod_strings['LBL_ASTERISK_DIALIN_EXT_MATCH'] = 'Dialin Ext Match Regex';
+$mod_strings['LBL_ASTERISK_DIALIN_EXT_MATCH'] = 'Custom User Ext Match Regex';
 $mod_strings['LBL_ASTERISK_CALL_SUBJECT_INBOUND_ABBR'] = 'Inbound Call Subject Prefix';
 $mod_strings['LBL_ASTERISK_CALL_SUBJECT_OUTBOUND_ABBR'] = 'Outbound Call Subject Prefix';
 $mod_strings['LBL_ASTERISK_CALL_SUBJECT_MAX_LENGTH'] = 'Max Subject Length';
-$mod_strings['LBL_ASTERISK_LISTENER_POLL_RATE'] = 'Ajax Listener Rate in MS';
+$mod_strings['LBL_ASTERISK_LISTENER_POLL_RATE'] = 'AJAX Req Poll Rate in MS';
 
 ?>

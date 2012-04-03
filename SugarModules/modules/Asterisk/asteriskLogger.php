@@ -43,10 +43,7 @@ $mysql_log_results = 0;
 // Say hello, setup include path(s)
 //
 define('sugarEntry', TRUE);
-logLine( "******** Asterisk Logger Starting **************\n");
-
-print "**** asteriskLogger ****\n";
-print "# Version \$Id: asteriskLogger.php 180 2012-04-01 10:16:16Z blak3r \$\n";
+logLine( "\n\n\n******** Asterisk Logger Starting **************\n");
 
 // Determine SugarCRM's root dir (we'll use this to find the config filez
 $scriptRoot = dirname(__FILE__);
@@ -141,6 +138,7 @@ print "# (Config processed)\n";
 //
 // Connect to mySQL DB
 //
+logLine("Selecting DB Name: {$sugar_config['dbconfig']['db_name']}\n");
 $sql_connection = mysql_connect($sugar_config['dbconfig']['db_host_name'], $sugar_config['dbconfig']['db_user_name'], $sugar_config['dbconfig']['db_password']);
 $sql_db         = mysql_select_db($sugar_config['dbconfig']['db_name']);
 // Prune asterisk_log
@@ -218,10 +216,6 @@ if( $argc > 1 && $argv[1] == "test" ) {
 	
 	exit;
 }
-
-
-
-
 
 
 // BR: Added this while loop to keep loging in to AMI if asterisk goes down.
@@ -320,79 +314,82 @@ while (true) {
 				logLine("* CallerID is: $tmpCallerID\n");
                 
 				// Check if both ends of the call are internal (then delete created (** Automatic record **) record)
-                if (preg_match($asteriskMatchInternal, $e['Channel']) && preg_match($asteriskMatchInternal, $e['Destination'])) {
+                if (preg_match($asteriskMatchInternal, $e['Channel']) && preg_match($asteriskMatchInternal, $e['Destination'])) 
+				{
                     $query = "DELETE FROM calls WHERE id='$callRecordId'";
                     mysql_checked_query($query);
 					// TODO what about the other tables.. like the calls_cstm?  Why not use soap for this?
 					logLine("INTERNAL call detected, Deleting call");
                 }
-                
-                //Asterisk Manager 1.1 (If the call is internal, this will be skipped)
-                if (preg_match($asteriskMatchInternal, $e['Channel']) && !preg_match($asteriskMatchInternal, $e['Destination'])) {
-                    $query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", $e['DestUniqueID'], $callRecordId, $e['Channel'], $e['Destination'], 'NeedID', 'O', $tmpCallerID, 'NOW()');
-                    $callDirection = 'Outbound';
-                    logLine("OUTBOUND state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $e['Channel'] . ' eDestination=' . $e['Destination'] . "\n");
-                    
-                } else if (!preg_match($asteriskMatchInternal, $e['Channel'])) {
-                    $query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall, asterisk_dest_id) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s')", $e['UniqueID'], $callRecordId, $e['Destination'], $e['Channel'], 'Dial', 'I', $tmpCallerID, 'NOW()', $e['DestUniqueID']);
-                    $callDirection = 'Inbound';
-                    
-                    logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $e['Channel'] . ' eDestination=' . $e['Destination'] . "\n");
-                    
-                }
-                mysql_checked_query($query);
+				else 
+				{					
+					//Asterisk Manager 1.1 (If the call is internal, this will be skipped)
+					if (preg_match($asteriskMatchInternal, $e['Channel']) && !preg_match($asteriskMatchInternal, $e['Destination'])) {
+						$query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", $e['DestUniqueID'], $callRecordId, $e['Channel'], $e['Destination'], 'NeedID', 'O', $tmpCallerID, 'NOW()');
+						$callDirection = 'Outbound';
+						logLine("OUTBOUND state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $e['Channel'] . ' eDestination=' . $e['Destination'] . "\n");
+						
+					} else if (!preg_match($asteriskMatchInternal, $e['Channel'])) {
+						$query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall, asterisk_dest_id) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s')", $e['UniqueID'], $callRecordId, $e['Destination'], $e['Channel'], 'Dial', 'I', $tmpCallerID, 'NOW()', $e['DestUniqueID']);
+						$callDirection = 'Inbound';
+						
+						logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $e['Channel'] . ' eDestination=' . $e['Destination'] . "\n");
+						
+					}
+					mysql_checked_query($query);
 				
+												
+					//Asterisk Manager 1.0
+					
+					/*if(eregi($asteriskMatchInternal, $e['Source']))
+					{
+					$query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s',%s)",
+					$e['DestUniqueID'],
+					$callRecordId,
+					$e['Source'],
+					'NeedID',
+					'O',
+					$tmpCallerID,
+					'NOW()'
+					);
+					$callDirection = 'Outbound';
+					}
+					else{
+					$query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s',%s)",
+					$e['SrcUniqueID'],
+					$callRecordId,
+					$e['Destination'],
+					'Dial',
+					'I',
+					$tmpCallerID,
+					'NOW()'
+					);
+					$callDirection = 'Inbound';
+					}
+					mysql_checked_query($query);*/
 				
-                //Asterisk Manager 1.0
-                
-                /*if(eregi($asteriskMatchInternal, $e['Source']))
-                {
-                $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s',%s)",
-                $e['DestUniqueID'],
-                $callRecordId,
-                $e['Source'],
-                'NeedID',
-                'O',
-                $tmpCallerID,
-                'NOW()'
-                );
-                $callDirection = 'Outbound';
-                }
-                else{
-                $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s',%s)",
-                $e['SrcUniqueID'],
-                $callRecordId,
-                $e['Destination'],
-                'Dial',
-                'I',
-                $tmpCallerID,
-                'NOW()'
-                );
-                $callDirection = 'Inbound';
-                }
-                mysql_checked_query($query);*/
-                
-                //
-                // Update CALL record with direction...
-                //
-                $set_entry_params = array(
-                    'session' => $soapSessionId,
-                    'module_name' => 'Calls',
-                    'name_value_list' => array(
-                        array(
-                            'name' => 'id',
-                            'value' => $callRecordId
-                        ),
-                        array(
-                            'name' => 'direction',
-                            'value' => $callDirection
-                        )
-                    )
-                );
-                
-                $soapResult = $soapClient->call('set_entry', $set_entry_params);
-                
-                echo "Direction is $callDirection \n";
+					//
+					// Update CALL record with direction...
+					//
+					$set_entry_params = array(
+						'session' => $soapSessionId,
+						'module_name' => 'Calls',
+						'name_value_list' => array(
+							array(
+								'name' => 'id',
+								'value' => $callRecordId
+							),
+							array(
+								'name' => 'direction',
+								'value' => $callDirection
+							)
+						)
+					);
+					
+					$soapResult = $soapClient->call('set_entry', $set_entry_params);
+					
+					echo "Direction is $callDirection \n";
+				}
             }
 			
             //
@@ -1384,7 +1381,7 @@ function logLine($str)
 	// if logging is enabled.
 	if( !empty($sugar_config['asterisk_log_file']) ) 
 	{
-		$myFile = $sugar_config['asterisk_log_file']; // Might be a performance issue being here... 
+		$myFile = $sugar_config['asterisk_log_file'];  
 		$fh = fopen($myFile, 'a') or die("can't open file");
 		fwrite($fh, $str);
 		fclose($fh);

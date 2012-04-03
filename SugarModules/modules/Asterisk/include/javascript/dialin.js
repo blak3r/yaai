@@ -47,12 +47,13 @@ function checkForNewStates(){
 function checkData(data){
 	var tmpList = new Array();
 	
+	// Note: AST_PollRate is set in AsteriskJS.php
 	setTimeout('checkForNewStates()', AST_PollRate); // Only when the previous request was successful do we try again.
 	
 	//----- ORIGINAL UI BLOCK ------//
 	/*
 	if(data == "."){
-		$("#asterisk_ajaxContent").hide();  // TODO, this is left over from old UI... Not sure what it should do..
+		$("#asterisk_ajaxContent").hide();  // TODO, this is left over from old UI... Might be possible to have a checkbox to switch back so i kept it.
 		$("#asterisk_ajaxContent").empty();
 		return;
 	}

@@ -1,3 +1,7 @@
+TEst extension overlay still works.
+Inbound calls are detected properly.
+Poll Rate variable works.
+
 Documentation:
 If you have a custom dial plan.  You must do the following.
 *There are a few regex's that must work.
@@ -27,6 +31,8 @@ Versions Developed with:
   - Todo this, we need to add a new action to controller.php and add a new column to asteriskLog.  The action=setContactId will pass a contact id which will then get written to the asteriskLog db table.  Then, in asteriskLogger we check if the contactId is already set before trying to make the relation.
 
 * Need to do custom code for Contacts Subpanels.. (doesn't show magic call icon there).
+
+* Update language files for german and whatever the other language is.
 
 ==[ Minor Bugs ]================
 * If there is no user extension that matches, the call gets assigned to NULL
@@ -64,6 +70,10 @@ Versions Developed with:
 * (Performance) -- Ajax calls to callLister continue even after user's session ends (like when you login from a diff browser).  Need to somehow stop that.
 
 * Process the AMI response in CallCreate / controller and display errors when they fail in javascript.
+
+* If the database cannot be accessed, this is the error message you get 
+! FATAL: Cannot find login credentials for user admin
+which is a bit misleading... as it makes you think soap is the problem
 
 ==[INSTALLER]=========
 * (DONE) The previous versions added some custom code around every phone number. 

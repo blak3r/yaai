@@ -45,7 +45,7 @@ $manifest = array (
                           'regex_matches' =>
                           array (
 							1 => '6\.4\.\d',
-							2 => '6\.\d\.\d',
+							2 => '6\.\d\.\d',  /** matches 6.x.x **/
                                  ),
                           ),
                    'acceptable_sugar_flavors' =>
@@ -54,7 +54,7 @@ $manifest = array (
                          ,'PRO'
                           ,'ENT'
                          ),
-                   'readme'=>'README_SUGAR_v6.txt',
+                   'readme'=>'README_INSTALLER.txt',
                    'key'=>'',
                    'author' => 'Blake Robertson / KINAMU Business Solutions AG / abcona active business consulting',
                    'description' => 'Integrates Asterisk telephony features into SugarCRM.',
@@ -63,7 +63,7 @@ $manifest = array (
                    'name' => 'Asterisk SugarCRM Connector',
                    'published_date' => '2012-04-01',
                    'type' => 'module',
-                   'version' => '2.0.7.8 for v6.4 BETA',
+                   'version' => '2.0.1.9 for v6.x',
                    'remove_tables' => 'prompt',
                    );
 
@@ -75,9 +75,9 @@ $installdefs = array (
                                     'from' => '<basepath>/SugarModules/modules/Asterisk',
                                     'to' => 'custom/modules/Asterisk',
                                     ),
-						/*
-						// NOTE ALL THE FILES COMMENTED OUT BELOW WERE REMOVED IN v2.0.
-                             array (
+									
+							/** UNCOMMENT THIS SECTION IF YOU WANT TO OVERWRITE YOUR USER CUSTOMIZATIONS
+					         array (
                                     'from' => '<basepath>/SugarModules/modules/Users/DetailView.tpl',
                                     'to' => 'custom/modules/Users/DetailView.tpl',
                                     ),
@@ -101,6 +101,9 @@ $installdefs = array (
 									'from' => '<basepath>/SugarModules/modules/Users/studio.php',
 									'to' => 'modules/Users/studio.php',
 									),
+							**/
+							
+							/** 
                              array (
                                     'from' => '<basepath>/SugarModules/modules/Accounts/metadata/detailviewdefs.php',
                                     'to' => 'custom/modules/Accounts/metadata/detailviewdefs.php',
@@ -147,14 +150,7 @@ $installdefs = array (
                                     'to' => 'custom/modules/Configurator/asterisk_configurator.tpl',
                                     ),
 							
-							 // REMOVED in 2.0 -- just put listner file into sugarmodules/modules/asterisk
-							 /*
-                             array (
-                                    'from' => '<basepath>/SugarModules/asterisk',
-                                    'to' => 'custom/modules/Asterisk',
-                                    ),
-							*/
-                            
+                           
 							/*
 							array (
                                     'from' => '<basepath>/SugarModules/modules/Calls/metadata/listviewdefs.php',

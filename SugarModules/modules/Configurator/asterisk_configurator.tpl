@@ -209,8 +209,23 @@
 			<input type='text' name='asterisk_listener_poll_rate' size="45" value='{$asterisk_listener_poll_rate}'>
 		</td>
 	</tr>
+
+	<tr>
+		<td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_LOG_FILE}: </td>
+		<td width="25%" class="dataField">
+		{if empty($config.asterisk_log_file )}
+			{assign var='asterisk_log_file' value=$asterisk_config.asterisk_log_file}
+		{else}
+			{assign var='asterisk_log_file' value=$config.asterisk_log_file}
+		{/if}
+			<input type='text' name='asterisk_log_file' size="45" value='{$asterisk_log_file}'>
+		</td>
+		<TD>&nbsp;</TD>
+		<td>&nbsp;</td>
+	</tr>
 	
-	<!--
+<!--
+
 	<tr>
 		<td nowrap width="10%" class="dataLabel">{$MOD.LBL_LEFT_FIELD}: </td>
 		<td width="25%" class="dataField">
@@ -223,9 +238,8 @@
 		</td>
 		<TD>&nbsp;</TD>
 	</tr>
+	
 	-->
-	
-	
 	
 </table>
 </td></tr>

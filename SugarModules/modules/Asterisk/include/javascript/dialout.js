@@ -5,6 +5,7 @@
 // * Parts of this code are (c) 2006. RustyBrick, Inc.  http://www.rustybrick.com/
 // * Parts of this code are (c) 2008 vertico software GmbH  
 // * Parts of this code are (c) 2009 abcona e. K. Angelo Malaguarnera E-Mail admin@abcona.de
+// * Parts of this code are (c) 2012 Blake Robertson http://www.blakerobertson.com
 // * http://www.sugarforge.org/projects/yaai/
 // * 
 // * This program is free software; you can redistribute it and/or modify it under
@@ -34,7 +35,7 @@
 
 $(document).ready(function()
 {	
-	$('.phone').each(function()
+	$('.phone,#phone_work,#phone_other,#phone_mobile').each(function()
 	{
 		var phoneNr = $(this).text().trim();
 		

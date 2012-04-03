@@ -49,8 +49,8 @@ function post_install() {
 
 ?>
 <br /><br />
-<span style="font-size: 2em;"><strong>You are not finished installing!!!  Module was loaded successfully... But, there are several things todo.</strong></span> 
-<br /><span style="font-size: 1.3em;">Please follow directions on Project website here: <a href="https://github.com/blak3r/yaai/wiki/User-Manual">https://github.com/blak3r/yaai/wiki/User-Manual</a></span>
+<span style="font-size: 2em;"><strong>Please review the documentation!  There are several additional steps that must be taken.</strong></span> 
+<br /><span style="font-size: 1.3em;">The User Guide can be found on the Project website here: <a href="https://github.com/blak3r/yaai/wiki/User-Manual">https://github.com/blak3r/yaai/wiki/User-Manual</a></span>
 
 <?php
   }

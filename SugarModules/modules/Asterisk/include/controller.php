@@ -5,7 +5,7 @@
  *
  * Controller class for various AJAX things such as saving the UI state and saving the call details. 
  *
- * TOODO: callListener and createCall should be refactored into this php file and then called by specifying an appropriate action for them.
+ * TODO: callListener and createCall should be refactored into this php file and then called by specifying an appropriate action for them.
  */
 
 
@@ -96,27 +96,47 @@ else if( $_REQUEST['action'] == "updateUIState" ) {
 		trigger_error("Update UIState-Query failed: $query");
 	}
 }
-else if( $_REQUEST['call'] == "call") {
-	/*
-		//format Phone Number
-		$number = $_REQUEST['phoneNr'];
-		$prefix = $sugar_config['asterisk_prefix'];
-		$number = str_replace("+", "00", $number);
-		$number = str_replace(array("(", ")", " ", "-", "/", "."), "", $number);
-		$number = $prefix.$number;
-		var_dump($number);
-		
-				// dial number
-		fputs($socket, "Action: originate\r\n");		
-		fputs($socket, "Channel: ". $channel ."\r\n");	
-		fputs($socket, "Context: ". $context ."\r\n");		
-		fputs($socket, "Exten: " . $number . "\r\n");		
-		fputs($socket, "Priority: 1\r\n");		
-		fputs($socket, "Callerid:" . $_REQUEST['phoneNr'] ."\r\n");	
-		fputs($socket, "Variable: CALLERID(number)=" . $extension . "\r\n");
-		*/
-}
+else if( $_REQUEST['action'] == "call") {
 
+// TODO: For some reason this code isn't working... I think it's getting the extension.
+// For the time being, callCreate is still being used.	
+
+/*
+	$cUser = new User();
+	$cUser->retrieve($_SESSION['authenticated_user_id']);
+	$extension = $cUser->asterisk_ext_c;
+	
+	//$extension = $current_user->asterisk_ext_c;
+	$context = $sugar_config['asterisk_context'];
+
+	// Take the user supplied pattern, we find the part with the #'s (which are the ext)... then we get something like 
+	// asterisk_dialout_channel == "SIP/###"   --> $matches[1] == SIP/, $matches[2] == "###", $matches[3] is "".
+	// asterisk_dialout_channel == "Local/###@sugarsip/n"   --> $matches[1] == Local/, $matches[2] == "###", $matches[3] is "@sugarsip/n".
+	preg_match('/([^#]*)(#+)([^#]*)/',$sugar_config['asterisk_dialout_channel'],$matches);
+	$channel = $matches[1] . $extension . $matches[3];
+	
+	//format Phone Number
+	$number = $_REQUEST['phoneNr'];
+	$prefix = $sugar_config['asterisk_prefix'];
+	$number = str_replace("+", "00", $number);
+	$number = str_replace(array("(", ")", " ", "-", "/", "."), "", $number);
+	$number = $prefix.$number;
+
+
+	// dial number
+	$cmd = "";
+	$cmd .=  "Action: originate\r\n";		
+	$cmd .=  "Channel: ". $channel ."\r\n";	
+	$cmd .=  "Context: ". $context ."\r\n";		
+	$cmd .=  "Exten: " . $number . "\r\n";		
+	$cmd .=  "Priority: 1\r\n";		
+	$cmd .=  "Callerid:" . $_REQUEST['phoneNr'] ."\r\n";	
+	$cmd .=  "Variable: CALLERID(number)=" . $extension . "\r\n\r\n";
+	
+	SendAMICommand($cmd);
+*/
+		
+}
 else if( $_REQUEST['action'] == "transfer" ) {
 
 	$query = "Select remote_channel from asterisk_log where call_record_id='{$_POST["call_record"]}'";
@@ -148,6 +168,8 @@ else {
 }
 
 
+/// Logs in, Sends the AMI Command Payload passed as a parameter, then logs out.
+/// results of the command are "echo"ed and get show up in ajax response for debugging.
 function SendAMICommand( $amiCmd ) {
 	global $sugar_config;
 	$server = $sugar_config['asterisk_host'];

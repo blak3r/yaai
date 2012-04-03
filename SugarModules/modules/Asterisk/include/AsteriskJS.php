@@ -55,7 +55,7 @@ class AsteriskJS{
 		   (($GLOBALS['current_user']->asterisk_inbound_c == '1') || ($GLOBALS['current_user']->asterisk_outbound_c == '1')))
 		{
 		
-$query8=<<<QUERY8
+$conditionalJqueryIncludeScript=<<<QUERY8
 <script type="text/javascript">
  if (typeof jQuery == 'undefined') { 
    var head = document.getElementsByTagName("head")[0];
@@ -68,16 +68,20 @@ $query8=<<<QUERY8
 </script>
 QUERY8;
 	
-			echo $query8;
+			echo $conditionalJqueryIncludeScript;
+			
+			$pollRate = !empty($sugar_config['asterisk_listener_poll_rate']) ? $sugar_config['asterisk_listener_poll_rate'] : "5000";
+			$userExt = !empty($GLOBALS['current_user']->asterisk_ext_c) ? $GLOBALS['current_user']->asterisk_ext_c : "Not Configured!";
+			
 			
 		    //echo '<script type="text/javascript" src="custom/include/javascript/jquery/jquery.pack.js"></script>';
 			echo '<link rel="stylesheet" type="text/css" media="all" href="custom/modules/Asterisk/include/asterisk.css">';
 			if($GLOBALS['current_user']->asterisk_inbound_c == '1') {
 			    echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/dialin.js"></script>';
-				echo '<script type="text/javascript">AST_PollRate = ' . $sugar_config['asterisk_listener_poll_rate'] . ';</script>';
+				echo '<script type="text/javascript">AST_PollRate = ' . $pollRate . ';</script>';
 			}
 			if($GLOBALS['current_user']->asterisk_outbound_c == '1') {
-			   echo '<script> AST_UserExtention = ' . $GLOBALS['current_user']->asterisk_ext_c . ';</script>';
+			   echo '<script> AST_UserExtention = ' . $userExt . ';</script>';
 			   echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/dialout.js"></script>';
 			 }
 

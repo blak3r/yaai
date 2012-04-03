@@ -77,7 +77,7 @@ function pre_install() {
 	$query .= "callerID varchar(45) default NULL,";
 	$query .= "callerName varchar(45) default NULL,";
 	$query .= "channel varchar(30) default NULL,";
-	$query .= "channel_remote varchar(30) default NULL,"; // added in v2.0, it's used for transferring.
+	$query .= "remote_channel varchar(30) default NULL,"; // added in v2.0, it's used for transferring.
 	// $query .= "timestampCall varchar(30) default NULL,";
 	// $query .= "timestampLink varchar(30) default NULL,";
 	// $query .= "timestampHangup varchar(30) default NULL,";
