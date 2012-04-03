@@ -1260,7 +1260,7 @@ function extractExtensionNumberFromChannel( $channel )
 	}
 	if( !empty($sugar_config['asterisk_dialin_ext_match']) && preg_match($pattern, $channel, $regs)) {
 		logLine("Matched User REGEX.  Regex: " . $regs[1] . "\n");
-		$asteriskExt = $regs[2];
+		$asteriskExt = $regs[1];
 	}
 	// This matches the standard cases such as SIP/### or IAX/### 
 	else if (eregi('^([[:alpha:]]+)/([[:alnum:]]+)-', $channel, $channelSplit) > 0){
