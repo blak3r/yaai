@@ -35,7 +35,10 @@ Versions Developed with:
 * Update language files for german and whatever the other language is.
 
 ==[ Minor Bugs ]================
-* If there is no user extension that matches, the call gets assigned to NULL
+
+* $sugar_config['asterisk_dialin_ext_match'] = 'Local\/(?:.*?)(\d\d\d?\d?\d?)@'; -- Make this take 3-11 digits.  If longer then say 5 characters we need to implement a method to look at users's mobile phones.
+* (I think that's been resolved...) If there is no user extension that matches, the call gets assigned to NULL
+
 
 
 ==[ Potential Enhancements]=========================
@@ -49,10 +52,12 @@ Versions Developed with:
 
 ==[ Configuration Changes Needed]===
 
+* Need configurable Channel detection in order to assign calls to users when they answer on cell phones. 
+* Add a configurable option 
+
 * (DONE) Need to add dialin prefix (its in sugarListener)
-* Need to make config option for the dialout.  Currently hardcoded to /SIP (in my case i need to do the Local/##@sugarsip/n... see CreateCall... for some reason I don't need it in callListener (presumably b/c it's already SIP at that point).
-* Need configurable Channel detection in order to assign cell phones.
-* Parametize the channel --> assigned user id detection, search for Local/LC-52@from-internal-4bbbb in asteriskLogger.
+* (DONE) Need to make config option for the dialout.  Currently hardcoded to /SIP (in my case i need to do the Local/##@sugarsip/n... see CreateCall... for some reason I don't need it in callListener (presumably b/c it's already SIP at that point).
+* (DONE) Parametize the channel --> assigned user id detection, search for Local/LC-52@from-internal-4bbbb in asteriskLogger.
 * (DONE) Add max subject length to controller.php (also variables for IBC, OBC);
 
 

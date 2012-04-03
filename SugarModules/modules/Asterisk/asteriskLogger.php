@@ -38,6 +38,7 @@
 //
 $mysql_loq_queries = 0;
 $mysql_log_results = 0;
+$verbose_log = 0;
 
 //
 // Say hello, setup include path(s)
@@ -132,7 +133,7 @@ echo ("# Callin prefix is [$callinPrefix]\n");
 echo ("asteriskMatchInternal = $asteriskMatchInternal\n");
 
 
-print "# (Config processed)\n";
+logLine("# (Config processed)\n");
 
 
 //
@@ -156,7 +157,7 @@ $sugarSoapCredential = ""; {
         $rowData             = mysql_fetch_assoc($sqlResult);
         $sugarSoapCredential = $rowData['user_hash'];
     } else {
-        echo "! FATAL: Cannot find login credentials for user $sugarSoapUser\n";
+        logLine("! FATAL: Cannot find login credentials for user $sugarSoapUser\n");
         die();
     }
 }
@@ -165,7 +166,7 @@ $sugarSoapCredential = ""; {
 //
 // And finally open a SOAP connection to SugarCRM
 //
-echo ("! Trying SOAP login endpoint=[$sugarSoapEndpoint] user=[$sugarSoapUser] password=[$sugarSoapCredential]\n");
+logLine("! Trying SOAP login endpoint=[$sugarSoapEndpoint] user=[$sugarSoapUser] password=[$sugarSoapCredential]\n");
 
 $auth_array = array(
     'user_auth' => array(
@@ -183,7 +184,7 @@ $userGUID      = $soapClient->call('get_user_id', array(
     $soapSessionId
 ));
 //var_dump($userGUID);
-print "! Successful SOAP login id=" . $soapSessionId . " user=" . $auth_array['user_auth']['user_name'] . " GUID=" . $userGUID . "\n";
+logLine( "! Successful SOAP login id=" . $soapSessionId . " user=" . $auth_array['user_auth']['user_name'] . " GUID=" . $userGUID . "\n");
 //die;
 
 
@@ -223,10 +224,11 @@ while (true) {
     // connect to Asterisk server
     $amiSocket = fsockopen($asteriskServer, $asteriskManagerPort, $errno, $errstr, 5);
     if (!$amiSocket) {
-        echo "! Error with socket";
+        logLine( "! Error with socket");
         die("Error connecting $errno $errstr\r\n");
+		// TODO: Should this call die or should we delay some time then do a continue to retry?
     } else {
-        echo "# Successfully opened socket connection to $asteriskServer:$asteriskManagerPort\n";
+        logLine( "# Successfully opened socket connection to $asteriskServer:$asteriskManagerPort\n");
     }
     
     
@@ -235,7 +237,7 @@ while (true) {
     fputs($amiSocket, $asteriskSecret);
     fputs($amiSocket, "Events: call,hud\r\n\r\n"); // to monitor just call data, for Asterisk Manager 1.0 remove hud
     $result = fgets($amiSocket, 4096);
-    echo ("! Login action returned with rc=$result\n");
+    logLine("! AMI Login action returned with rc=$result\n");
     $event = '';
     $stack = 0;
     
@@ -289,8 +291,6 @@ while (true) {
                         )
                     )
                 );
-                
-               
                 $soapResult = $soapClient->call('set_entry', $set_entry_params);
                 
                 $callRecordId = $soapResult['id'];
@@ -301,25 +301,31 @@ while (true) {
                 $tmpCallerID = trim($e['CallerIDNum']); //Asterisk Manager 1.0 $e['CallerID']
                 
                 
-                if ((strlen($calloutPrefix) > 0) && (strpos($tmpCallerID, $calloutPrefix) === 0)) {
-                    echo ("* Stripping callout prefix: $calloutPrefix");
+                if (startsWith($calloutPrefix,$tmpCallerID)) {
+                    logLine ("* Stripping callout prefix: $calloutPrefix\n");
                     $tmpCallerID = substr($tmpCallerID, strlen($calloutPrefix));
                 }
                 
-                if ((strlen($callinPrefix) > 0) && (strpos($tmpCallerID, $callinPrefix) === 0)) {
-                    echo ("* Stripping callin prefix: $calloutPrefix");
+                if (startsWith($callinPrefix,$tmpCallerID)) {
+                    logLine ("* Stripping callin prefix: $calloutPrefix\n");
                     $tmpCallerID = substr($tmpCallerID, strlen($callinPrefix));
                 }
               
 				logLine("* CallerID is: $tmpCallerID\n");
+				
+				$rgDetectRegex = "/^Local\/RG/i"; // TODO make this a configuration option
+				$rgCellRingRegex = "/^Local\/\d{7,10}/i";// TODO make this a configuration option.... This detects in a RG when an outside line is called (usually for a cellphone)... for some reason the cell shows up as the Channel (aka the source)... We detect this by finding a number thats at least 7-10 characters long..
                 
 				// Check if both ends of the call are internal (then delete created (** Automatic record **) record)
-                if (preg_match($asteriskMatchInternal, $e['Channel']) && preg_match($asteriskMatchInternal, $e['Destination'])) 
+				// 2nd condition looks for Local/RG-52-4102152497
+                if ( (preg_match($asteriskMatchInternal, $e['Channel']) && preg_match($asteriskMatchInternal, $e['Destination'])) ||
+				     preg_match($rgDetectRegex, $e['Destination'] ) || 
+					 preg_match($rgCellRingRegex, $e['Channel']) ) 
 				{
-                    $query = "DELETE FROM calls WHERE id='$callRecordId'";
+					$query = "DELETE FROM calls WHERE id='$callRecordId'";
                     mysql_checked_query($query);
 					// TODO what about the other tables.. like the calls_cstm?  Why not use soap for this?
-					logLine("INTERNAL call detected, Deleting call");
+					logLine("INTERNAL call detected, Deleting Call Record $callRecordId affected: " . mysql_affected_rows() . " rows.\n");
                 }
 				else 
 				{					
@@ -387,8 +393,6 @@ while (true) {
 					);
 					
 					$soapResult = $soapClient->call('set_entry', $set_entry_params);
-					
-					echo "Direction is $callDirection \n";
 				}
             }
 			
@@ -399,12 +403,12 @@ while (true) {
             if ($e['Event'] == 'NewCallerid') {
                 $id          = $e['Uniqueid'];
                 $tmpCallerID = trim($e['CallerIDNum']);
-                echo ("* CallerID is: $tmpCallerID\n");
+                //echo ("* CallerID is: $tmpCallerID\n");
                 if ((strlen($calloutPrefix) > 0) && (strpos($tmpCallerID, $calloutPrefix) === 0)) {
                     echo ("* Stripping prefix: $calloutPrefix");
                     $tmpCallerID = substr($tmpCallerID, strlen($calloutPrefix));
                 }
-                echo ("* CallerID is: $tmpCallerID\n");
+                logLine("* {e['UniqueId']} CallerID  Changed to: $tmpCallerID\n");
                 // Fetch associated call record
                 //$callRecord = findCallByAsteriskId($id);
                 $query = "UPDATE asterisk_log SET CallerID='" . $tmpCallerID . "', callstate='Dial' WHERE asterisk_id='" . $id . "'";
@@ -442,7 +446,7 @@ while (true) {
                 $query     = "SELECT direction FROM asterisk_log WHERE asterisk_dest_id = '$id' OR asterisk_id = '$id'";
                 $result    = mysql_checked_query($query);
                 $direction = mysql_fetch_array($result);
-                var_dump($direction);
+                //var_dump($direction);
                 if ($direction['direction'] == "I") {
                     $callDirection = "Inbound";
                 } else {
@@ -454,7 +458,7 @@ while (true) {
                     //
                     $callRecord = findCallByAsteriskId($id);
                     if ($callRecord) {
-					    logLine("FOUND outbound CALL for asterisk id $id\n");
+					    logLine("# [$id] FOUND outbound CALL\n");
                         //
                         // update entry in asterisk_log...
                         //
@@ -480,7 +484,7 @@ while (true) {
                             }
                             $callStart = strtotime($rawData['timestampCall']);
                             
-                            echo ("# Measured call duration is $callDurationRaw seconds\n");
+                            logLine("# [$id] Measured call duration is $callDurationRaw seconds\n");
                             
                             // Recalculate call direction in minutes
                             $callDuration        = (int) ($callDurationRaw / 60);
@@ -534,7 +538,7 @@ while (true) {
                             //
                             // ... on success also update entry in Calls module
                             //
-                            logLine( "# (OUTBOUND) Now updating record in /Calls/ id=" . $callRecord['sweet']['id'] . "...\n");
+                            logLine( "# [$id] (OUTBOUND) Now updating record in /Calls/ id=" . $callRecord['sweet']['id'] . "...\n");
                             
                             //print_r($callRecord);
                             logLine("NAME: " . $callRecord['sweet']['name'] . "\n");
@@ -597,7 +601,6 @@ while (true) {
                             //
                             if ($assoSugarObject) {
                                 if ($assoSugarObject['type'] == 'Contacts') {
-                                    echo "# Establishing relation to contact...\n";
                                     $soapArgs   = array(
                                         'session' => $soapSessionId,
                                         'set_relationship_value' => array(
@@ -607,14 +610,16 @@ while (true) {
                                             'module2_id' => $assoSugarObject['values']['id'],
                                         )
                                     );
-                                    // var_dump($soapArgs);
+									logLine("# Establishing relation to contact... Call ID: {$callRecord['sweet']['id']} to Contact ID: {$assoSugarObject['values']['id']}\n");
+									if( $verbose_logging ) {
+										var_dump($soapArgs);
+									}
                                     $soapResult = $soapClient->call('set_relationship', $soapArgs);
-                                    // var_dump($soapResult);
                                 }
                             }
                         }
                     } else {
-                        logLine("FAILED TO FIND THE CALL for asterisk id: $id (note: there are two hangups per call, so this might not be an error)\n");
+                        logLine("[$id] FAILED TO FIND A CALL (note: there are two hangups per call, so this might not be an error)\n");
                     }
                 } 
 				else {
@@ -777,7 +782,10 @@ while (true) {
                                             'module2_id' => $assoSugarObject['values']['id']
                                         )
                                     );
-                                    var_dump($soapArgs);
+									logLine("# Establishing relation to contact... Call ID: {$callRecord['sweet']['id']} to Contact ID: {$assoSugarObject['values']['id']}\n");
+									if( $verbose_logging ) {
+										var_dump($soapArgs);
+									}
                                     $soapResult = $soapClient->call('set_relationship', $soapArgs);
                                     
 									//echo "\n\nPrinting Soap REsult\n\n";
@@ -795,15 +803,18 @@ while (true) {
 						
 						$query     = "SELECT call_record_id FROM asterisk_log WHERE asterisk_id='" . $result_id['asterisk_id'] . "' ORDER BY id ASC LIMIT 1, 999999999999";
 						$result    = mysql_checked_query($query);
-						logLine("Cleaning up Failed Calls part2, call_record_id = ".$result['call_record_id']."\n");
 						
 						while ($call_record_id = mysql_fetch_array($result)) {
 							//For testing purposes
 							//$query = "SELECT id FROM calls WHERE id='" . $call_record_id['call_record_id'] . "' AND name LIKE 'Failed call%'";
 							$query = "DELETE FROM calls WHERE id='" . $call_record_id['call_record_id'] . "' AND name LIKE 'Failed call%'";
 							$rq    = mysql_checked_query($query);
+							
+							if( mysql_affected_rows() > 0 ) {
+								logLine("Cleaning up Failed Calls part2, DELETED call_record_id = {$call_record_id['call_record_id']}\n");
+							}
 							$total_result = mysql_fetch_array($rq);
-							var_dump($total_result);
+							//var_dump($total_result);
 						}
 				    }
 
@@ -1003,7 +1014,7 @@ function findCallByAsteriskId($asteriskId)
 // AsteriskManager 1.1 for inbound calling
 function findCallByAsteriskDestId($asteriskDestId)
 {
-    global $soapClient, $soapSessionId;
+    global $soapClient, $soapSessionId, $verbose_logging;
     logLine("# +++ findCallByAsteriskDestId($asteriskDestId)\n");
     
     //
@@ -1018,7 +1029,7 @@ function findCallByAsteriskDestId($asteriskDestId)
     
     while ($row = mysql_fetch_assoc($queryResult)) {
         $callRecId = $row['call_record_id'];
-        echo "! Found entry in asterisk_log recordId=$callRecId\n";
+        logLine("! FindCallByAsteriskDestId - Found entry in asterisk_log recordId=$callRecId\n");
         
         //
         // ... then locate Object in Calls module:
@@ -1029,9 +1040,12 @@ function findCallByAsteriskDestId($asteriskDestId)
             'id' => $callRecId
         ));
         $resultDecoded = decode_name_value_list($soapResult['entry_list'][0]['name_value_list']);
-        // echo ("# ** Soap call successfull, dumping result ******************************\n");
+        
+		// echo ("# ** Soap call successfull, dumping result ******************************\n");
         // var_dump($soapResult);
-        var_dump($resultDecoded);
+        if( $verbose_logging ) {
+			var_dump($resultDecoded);
+		}
         // var_dump($row);
         // echo ("# ***********************************************************************\n");
         
@@ -1043,7 +1057,7 @@ function findCallByAsteriskDestId($asteriskDestId)
             'sweet' => $resultDecoded
         );
     }
-    echo "! Warning, results set was empty!\n";
+    logLine( "! Warning, FindCallByAsteriskDestId results set was empty!\n");
     return FALSE;
 }
 
@@ -1116,7 +1130,7 @@ function findSugarObjectByPhoneNumber($aPhoneNumber)
 	$regje = preg_replace( '/(\d)/', '$1\[^\\d\]*',$aPhoneNumber);
 	$regje = '(' . $regje . ')$';    
     
-    logLine("  Contact query components- Phone: $aPhoneNumber   RegEx: $regje\n");
+    logLine("  findSugarObjectByPhoneNumber: Contact query components- Phone: $aPhoneNumber   RegEx: $regje\n");
     //*******/
     
     $soapArgs = array(
@@ -1194,7 +1208,7 @@ function findAccountForContact($aContactId)
     $soapResult = $soapClient->call('get_relationships', $soapArgs);
     
     if ($soapResult['error']['number'] != '0') {
-        logLine("! WARNING Soap called returned with error " . $soapResult['error']['number'] . " " . $soapResult['error']['name'] . " // " . $soapResult['error']['description'] . "\n");
+        logLine("! WARNING Soap call returned with error " . $soapResult['error']['number'] . " " . $soapResult['error']['name'] . " // " . $soapResult['error']['description'] . "\n");
         return FALSE;
     } else {
         // var_dump($soapResult);
@@ -1235,7 +1249,7 @@ function findUserIdFromChannel( $channel )
 	}
 	else {
 		$assignedUser = $userGUID;
-		logLine(" ! Assigned user will be set to Administrator.");
+		logLine(" ! Assigned user will be set to Administrator.\n");
 	}
 	
 	return $assignedUser;
