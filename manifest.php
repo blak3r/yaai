@@ -34,7 +34,6 @@
    * Section 5 of the GNU General Public License version 3.
    *
    **/
-
 $manifest = array (
                    'acceptable_sugar_versions' =>
                    array (
@@ -54,16 +53,16 @@ $manifest = array (
                          ,'PRO'
                           ,'ENT'
                          ),
-                   'readme'=>'README_INSTALLER.txt',
+                   'readme'=>'README_INSTALLER',
                    'key'=>'',
                    'author' => 'Blake Robertson / KINAMU Business Solutions AG / abcona active business consulting',
                    'description' => 'Integrates Asterisk telephony features into SugarCRM.',
                    'icon' => '',
                    'is_uninstallable' => true,
                    'name' => 'Asterisk SugarCRM Connector',
-                   'published_date' => '2012-04-01',
+                   'published_date' => '2012-04-02',
                    'type' => 'module',
-                   'version' => '2.0.1.9 for v6.x',
+                   'version' => '2.0.1.0 for v6.x',
                    'remove_tables' => 'prompt',
                    );
 

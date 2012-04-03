@@ -68,7 +68,18 @@ $conditionalJqueryIncludeScript=<<<QUERY8
 </script>
 QUERY8;
 	
-			echo $conditionalJqueryIncludeScript;
+			//echo $conditionalJqueryIncludeScript;
+			
+			// Conditionally including JQuery didn't work when I tested with 6.4.0.  I got a $ not defined error.
+			// I'm not really sure why since I have them in $(document).ready()... 
+			// If you're getting JQuery errors experiment with commenting out the line below / enabling the google version of jquery.
+			// If you already have jquery being loaded then you might want to comment out both.
+			// The Asterisk connector isn't picky as to what version of JQuery is used.  Anything 1.3.2 or greater should work fine.
+			echo '<script type="text/javascript" src="custom/include/javascript/jquery/jquery.pack.js"></script>';
+		//	echo '<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>';
+		
+		
+			
 			
 			$pollRate = !empty($sugar_config['asterisk_listener_poll_rate']) ? $sugar_config['asterisk_listener_poll_rate'] : "5000";
 			$userExt = !empty($GLOBALS['current_user']->asterisk_ext_c) ? $GLOBALS['current_user']->asterisk_ext_c : "Not Configured!";

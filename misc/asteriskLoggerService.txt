@@ -1,0 +1,60 @@
+!/bin/sh
+
+###
+# quick and dirty start stop script
+# Parts of this code are (c) 2009 abcona e. K. Angelo Malaguarnera E-Mail admin@abcona.de
+#  http://www.sugarforge.org/projects/yaai/
+# gnu public licence
+# 
+###
+###
+# small ideas :-)
+# chmod 755 $path/asterisklogger.php
+# ln -s $path/asterisklogger.php /usr/local/sbin/rcasterisklogger
+
+###
+# Please edit this for your environment
+
+path=/var/www/html/crm/Asterisk
+
+### finish to edit :-)
+
+start() {
+        KIND="asterisklogger"
+        echo -n "Starting $KIND services: "
+        cd $path
+        php asteriskLogger.php >> /var/log/asterisklogger&
+        echo -n " done "
+        echo
+
+}
+stop() {
+        KIND="asterisklogger"
+        echo -n $"Shutting down $KIND services: "
+        killall php
+        echo -n " done "
+        echo
+
+}
+restart() {
+        stop
+        start
+
+}
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart)
+        restart
+        ;;
+ *)
+        echo $"Usage: $0 {start|stop|restart}"
+        exit 2
+esac
+
+exit $?
+
