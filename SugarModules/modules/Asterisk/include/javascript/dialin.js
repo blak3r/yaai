@@ -247,7 +247,7 @@ function restructureChatBoxes() {
 	
 	//  -----[ VERTICAL CHAT STACKING ]------------- //
 	var HEIGHT_MINIMIZED = 32;
-	var HEIGHT_NORMAL = 285;
+	var HEIGHT_NORMAL = 293;
 	var currHeight = 0;
 	for(var i=0; i<chatBoxes.length; i++ ) {
 		chatboxid = chatBoxes[i];
