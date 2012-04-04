@@ -181,10 +181,6 @@ $(document).ready(function(){
 
 Copyright (c) 2009 Anant Garg (anantgarg.com | inscripts.com)
 
-This script may be used for non-commercial purposes only. For any
-commercial purposes, please contact the author at 
-anant.garg@inscripts.com
-
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND

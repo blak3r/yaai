@@ -68,13 +68,13 @@ $conditionalJqueryIncludeScript=<<<QUERY8
 </script>
 QUERY8;
 	
-			//echo $conditionalJqueryIncludeScript;
 			
 			// Conditionally including JQuery didn't work when I tested with 6.4.0.  I got a $ not defined error.
 			// I'm not really sure why since I have them in $(document).ready()... 
 			// If you're getting JQuery errors experiment with commenting out the line below / enabling the google version of jquery.
 			// If you already have jquery being loaded then you might want to comment out both.
 			// The Asterisk connector isn't picky as to what version of JQuery is used.  Anything 1.3.2 or greater should work fine.
+			//echo $conditionalJqueryIncludeScript;
 			echo '<script type="text/javascript" src="custom/include/javascript/jquery/jquery.pack.js"></script>';
 			//	echo '<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>';
 			
@@ -82,8 +82,7 @@ QUERY8;
 			$userExt = !empty($GLOBALS['current_user']->asterisk_ext_c) ? $GLOBALS['current_user']->asterisk_ext_c : "Not Configured!";
 			
 			
-		    //echo '<script type="text/javascript" src="custom/include/javascript/jquery/jquery.pack.js"></script>';
-			echo '<link rel="stylesheet" type="text/css" media="all" href="custom/modules/Asterisk/include/asterisk.css">';
+		    echo '<link rel="stylesheet" type="text/css" media="all" href="custom/modules/Asterisk/include/asterisk.css">';
 			if($GLOBALS['current_user']->asterisk_inbound_c == '1') {
 			    echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/dialin.js"></script>';
 				echo '<script type="text/javascript">AST_PollRate = ' . $pollRate . ';</script>';
