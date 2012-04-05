@@ -191,7 +191,6 @@ Documentation Notes:
 
 
 
-
 ----[ call logger crash notes ]===================
 
 [2011-05-23 13:39:13] # Event loop terminated, attempting to login again

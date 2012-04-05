@@ -45,6 +45,8 @@ $mod_strings = array (
 	'ASTERISKLBL_PHONE' 			=>	'Phone',
 	'ASTERISKLBL_NAME' 			=>	'Name',
 	'ASTERISKLBL_COMPANY' 		=>	'Account',
+	
+	// TODO add duration, Transfer text, save, etc.
 
 
 	'REQUESTED' 			=>	'Proceeding',
@@ -54,6 +56,8 @@ $mod_strings = array (
 	'RINGING' 				=>	'Ringing',
 	'CONNECTED' 			=>	'Connected',
 	'DIAL'					=>  'Ringing',
+	'HANGUP'                =>  'Finished',
+	
 
    );
 

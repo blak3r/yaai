@@ -91,9 +91,11 @@ function checkData(data){
 				
 				if( entry['state'] == "'Hangup'" ) {
 					$("#chatbox_"+astId+" .chatboxhead").css("background-color", "#f99d39");
+					$("#transferImg_"+astId).hide(); // hide transfer icon once call is over.
 				}
 				else {
 					$("#chatbox_"+astId+" .chatboxhead").css("background-color", "#0D5995"); // a blue color
+					$("#transferImg_"+astId).show();	
 				}
 				
 				title = "" + entry['full_name'];
@@ -277,10 +279,21 @@ function createChatBox(chatboxid, checkMinimizeCookie, chatboxtitle, chatboxcall
 		$("#chatbox_"+chatboxid+" .chatboxtextarea").focus();
 		return;
 	}
+	
+		
+	var theHtml = 	'<div class="chatboxhead" onclick="javascript:toggleChatBoxGrowth(\''+chatboxid+'\')" ><div class="chatboxtitle" >'	+
+	chatboxtitle+'</div><div class="chatboxoptions"><a href="javascript:void(0)" onclick="javascript:toggleChatBoxGrowth(\'' +
+	chatboxid+'\')">-</a> <a href="javascript:void(0)" style="font-size:110%;" onclick="javascript:closeChatBox(\''+
+	chatboxid+'\')">X</a></div><br clear="all"/></div><div class="chatboxcontent"></div><div class="chatboxinput"><textarea id="chatboxtextarea_'+
+	chatboxid+'" class="chatboxtextarea" onkeydown="javascript:return checkChatBoxInputKey(event,this,\''+chatboxid+'\');"></textarea>' +
+	'<div class="chatboxbuttons"><table width="100%"><tr><td valign="bottom"><span style="width=150px;" class="asterisk_save_status">&nbsp;</span>'+
+	'<img id="transferImg_'+
+	chatboxid + '" src="custom/modules/Asterisk/include/TransferIcon-BR-blue4.png" height=19 title="Transfer Call" onclick="javascript:showTransferMenu(\'' + chatboxid + '\');"><TD align="right">'+
+	'<input style="" type="button" name="saveMemo" value="Save" onclick="javascript:saveMemo(\''+chatboxid+'\');"></table></div></div>';
 
 	$(" <div />" ).attr("id","chatbox_"+chatboxid)
 	.addClass("chatbox")
-	.html('<div class="chatboxhead" onclick="javascript:toggleChatBoxGrowth(\''+chatboxid+'\')" ><div class="chatboxtitle" >'+chatboxtitle+'</div><div class="chatboxoptions"><a href="javascript:void(0)" onclick="javascript:toggleChatBoxGrowth(\''+chatboxid+'\')">-</a> <a href="javascript:void(0)" style="font-size:110%;" onclick="javascript:closeChatBox(\''+chatboxid+'\')">X</a></div><br clear="all"/></div><div class="chatboxcontent"></div><div class="chatboxinput"><textarea id="chatboxtextarea_"+'+chatboxid+'" class="chatboxtextarea" onkeydown="javascript:return checkChatBoxInputKey(event,this,\''+chatboxid+'\');"></textarea><div class="chatboxbuttons"><table width="100%"><tr><td><span style="width=150px;" class="asterisk_save_status">&nbsp;</span><TD align="right"><input style="" type="button" name="saveMemo" value="Save" onclick="javascript:saveMemo(\''+chatboxid+'\');"></table></div></div>')
+	.html(theHtml)
 	.appendTo($( "body" ));
 			   
 	
@@ -521,6 +534,20 @@ function saveMemo( chatboxid ) {
 		
 		// If you don't want SAVE button to also close then comment out line below
 		closeChatBox(chatboxid);
+}
+
+function showTransferMenu( chatboxid, exten ) {
+	if( chatboxid != '' ) {
+		exten = prompt("Please enter the extension number you'd like to transfer to:\n(Leave Blank to cancel)","");
+		
+		if( exten != '') {
+	alert(exten);	
+		callRecordId = getChatCallRecordId( chatboxid );
+			$.post("index.php?entryPoint=AsteriskController&action=transfer", {id: chatboxid, call_record: callRecordId, extension: exten } , function(data){
+				alert(data);
+			});
+		}
+	}
 }
 
 

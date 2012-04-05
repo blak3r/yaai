@@ -2,4 +2,5 @@
 *.zip
 *.pnproj
 *.pnps
-copyFromLiveSystem.bat
+copyFromLiveSystem.*
+*unused_icons*

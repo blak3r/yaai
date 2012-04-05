@@ -1,3 +1,5 @@
+<!-- This file is not used as of yaii 2.0 -->
+
 <div class="asterisk_info" id="<?php print $item['asterisk_id']; ?>">
 	<h4><?php print $mod_strings[$item['call_type']]; ?></h4>
 	<div class="tabForm">

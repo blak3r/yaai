@@ -54,7 +54,7 @@ $mod_strings = array (
 	'INCOMING' 				=>	'Klingelt',
 	'RINGING' 				=>	'Klingelt',
 	'CONNECTED' 			=>	'Verbunden',
-	'DAIL' 					=>	'Klingelt',
+	'DIAL' 					=>	'Klingelt',
 
    );
 

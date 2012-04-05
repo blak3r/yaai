@@ -45,7 +45,7 @@ if( $_REQUEST['action'] == "memoSave") {
 
 	$focus = new Call(); //create your module object wich extends SugarBean 
 	$focus->retrieve( $_POST["call_record"] ); // retrieve a row by its id
-	
+		
 	if( array_key_exists("name",$_POST) ) 
 		$focus->name=$_POST["name"]; 
 	
@@ -138,8 +138,15 @@ else if( $_REQUEST['action'] == "call") {
 		
 }
 else if( $_REQUEST['action'] == "transfer" ) {
-
-	$query = "Select remote_channel from asterisk_log where call_record_id='{$_POST["call_record"]}'";
+	
+	$exten = preg_replace( '/\D/', '', $_POST["extension"]); // removes anything that isn't a digit.
+	if( empty($exten) ) {
+		echo "ERROR: Invalid extension";
+	}
+	
+	//TODO security!!!
+	$callRecord = $_POST["call_record"];
+	$query = "Select remote_channel from asterisk_log where call_record_id='$callRecord'";
 	
 	$resultSet = $current_user->db->query($query, false);
 	if($current_user->db->checkError()){
@@ -148,7 +155,7 @@ else if( $_REQUEST['action'] == "transfer" ) {
 
 	while($row = $current_user->db->fetchByAssoc($resultSet)){
 		// FIXME destination extension is hardcodeded.
-		$cmd ="ACTION: Redirect\r\nChannel: {$row['remote_channel']}\r\nContext: from-internal\r\nExten: 208\r\nPriority: 1\r\n\r\n";
+		$cmd ="ACTION: Redirect\r\nChannel: {$row['remote_channel']}\r\nContext: from-internal\r\nExten: $exten\r\nPriority: 1\r\n\r\n";
 		SendAMICommand($cmd);
 	}
 	
@@ -170,7 +177,7 @@ else {
 
 /// Logs in, Sends the AMI Command Payload passed as a parameter, then logs out.
 /// results of the command are "echo"ed and get show up in ajax response for debugging.
-function SendAMICommand( $amiCmd ) {
+function SendAMICommand( $amiCmd, &$status=true) {
 	global $sugar_config;
 	$server = $sugar_config['asterisk_host'];
 	$port = (int)$sugar_config['asterisk_port'];
@@ -189,41 +196,46 @@ function SendAMICommand( $amiCmd ) {
 		fputs($socket, $Username); 
 		fputs($socket, $Secret);
 		fputs($socket, "\r\n");	
-		//$result = fgets($socket,128);
-		
-		
+
+		$response = ReadResponse($socket);
 		echo "Login Response: \n";
-		while (($buffer = fgets($socket, 128)) !== false) {
-			echo $buffer;
-		}
+		echo $response;
+		$status = $status && WasAmiCmdSuccessful( $response );
 		
-		fputs($socket,$amiCmd);
-		//$resultCmd = fgets($socket,128);
+		if( $status ) {
+			fputs($socket,$amiCmd);
+			$response = ReadResponse($socket);			
+			echo "\nAMI Comand Response: \n";
+			echo $response;
+			$status = $status && WasAmiCmdSuccessful( $response );			
 		
-		echo "\nAMI Comand Response: \n";
-		while (($buffer = fgets($socket, 128)) !== false) {
-			echo $buffer;
-		}
-		
-		fputs($socket, "Action: Logoff\r\n\r\n");
-		fputs($socket, "\r\n");	
-		
-		echo "\nLogout Response: \n";
-		while (($buffer = fgets($socket, 128)) !== false) {
-			echo $buffer;
-		}
+			fputs($socket, "Action: Logoff\r\n\r\n");
+			fputs($socket, "\r\n");
 			
-		//echo $result;
-		//var_dump($result);
-		//var_dump($resultCmd);
-		//var_dump($channel);
-		//var_dump($context);
-		//var_dump($number);
+			$response = ReadResponse($socket);			
+			echo "\nLogout Response: \n";
+			echo $response;
+			// Don't really care if logoff was successful;
+			//$status = $status && WasAmiCmdSuccessful( $response );			
+		}
 		sleep(1);
-		
-		// close socket
 		fclose($socket);
 	}
+}
+
+function WasAmiCmdSuccessful($response) {
+	return preg_match('/.*Success.*/s',$response);
+}
+
+function ReadResponse($socket) {
+	$retVal = '';
+	
+	// Sets timeout to 1/2 a second
+	stream_set_timeout($socket,0,500000);
+	while (($buffer = fgets($socket, 20)) !== false) {
+		$retVal .= $buffer;
+	}
+	return $retVal;
 }
 
 

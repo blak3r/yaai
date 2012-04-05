@@ -71,7 +71,7 @@ $calloutPrefix = $sugar_config['asterisk_prefix'];
 $callinPrefix = $sugar_config['asterisk_dialinPrefix'];
 
 
-log_entry("$current_user->asterisk_ext_c is the extension...\n", "c:\callListenerLog.txt"); // FIXME remove this debug
+//log_entry("$current_user->asterisk_ext_c is the extension...\n", "c:\callListenerLog.txt"); // FIXME remove this debug
 
 
 // Original query that returns only "Active" Calls -- query below gives me ones that were updated in last hour (so user can still put notes on them).
@@ -90,8 +90,9 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 
 	$item = array();
 	$item['asterisk_id'] = $row['asterisk_id'];
-
-	$item['state'] = isset($mod_strings[$row['callstate']]) ? $mod_strings[$row['callstate']] : $row['callstate'];
+	
+	// All modstrings are in uppercase, so thats what toupper was added for... asterisk 1.6 returns camelcase states perhaps earlier versions didn't.
+	$item['state'] = isset($mod_strings[$row['callstate']]) ? $mod_strings[toupper($row['callstate'])] : $row['callstate'];
 	$item['state'] = "'" . $item['state'] . "'";
 
 	$item['id'] = $row['id'];
@@ -150,6 +151,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 	// delete leading zeros
 	$phoneToFind = ltrim($phoneToFind, '0');
 
+	$gravEmailAddress = ""; //clear address
 	$found = array();
 	if(strlen($phoneToFind) > 5){
 		$sqlReplace = "
@@ -191,9 +193,18 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 			$found['$contactFullName'] = $contactRow['first_name'] . " " . $contactRow['last_name'];
 			$found['$company'] = $contactRow['account_name'];
 			$found['$contactId'] = $contactRow['contact_id'];
+			$cid =  $contactRow['contact_id'];
 			$found['$companyId'] = $contactRow['account_id'];
 		}
+		
+		// TODO optimize this... can I grab this some other way? This is just to get the primary email address... might be a faster way to do this?
+		$bean = new Contact();
+		$bean->retrieve( $cid );
+		$gravEmailAddress = $bean->emailAddress->getPrimaryAddress($bean);		
+		
+		//log_entry(printrs($bean), "c:\callListenerLog.txt");
 	}
+	
 	$item['full_name'] = isset($found['$contactFullName']) ? $found['$contactFullName'] : "";
 
 	$item['company'] = isset($found['$company']) ? $found['$company'] : "";
@@ -218,7 +229,14 @@ if(count($response) == 0){
 		$item['html'] = str_replace("\t", "", $item['html']);
 		$item['html'] = str_replace("\r", "", $item['html']);
 		ob_clean();
-
+		
+		
+		// TODO wrap in an if gravatar...
+		if( !empty($gravEmailAddress) ) {
+			$gravHash = md5( strtolower( trim( $gravEmailAddress ) ) );
+			$item['html'] .= '<img src="http://www.gravatar.com/avatar/'. $gravHash . '?s=160">';
+		}
+		
 		$responseArray[] = $item;
 	}
 	print json_encode($responseArray);
@@ -235,5 +253,14 @@ function log_entry( $str, $file = "default" ) {
 	fclose($handle);
 }
 
+/// printr to string
+function printrs($data) {
+  if ($data) {
+    $str = '<pre>\n';
+    $str .= print_r($data, TRUE);
+    $str .= '</pre>\n';
+  }
+  return $str;
+}
 
 ?>
