@@ -246,7 +246,7 @@ while (true) {
 	$start = NULL;
 	$timeout = ini_get('default_socket_timeout');
 
-	stream_set_timeout($amiSocket,60); // sets timeout to 5 seconds.
+	stream_set_timeout($amiSocket,60); // sets timeout to 60 seconds.
 	$consecutiveFailures = 0;
 	
     // Keep a loop going to read the socket and parse the resulting commands.
@@ -260,7 +260,7 @@ while (true) {
 		
        if( $buffer === FALSE ) 
 		{
-			logLine(getTimestamp() . " Timeout or Error");
+			logLine(getTimestamp() . " Timeout or Error\n"); // TODO Remove once asteriskLogger never needs restarting.
 			$consecutiveFailures++;
 			/*
 			THIS CAN BE DELETED, used this to simulate socket failure during development
