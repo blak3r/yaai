@@ -54,7 +54,7 @@ $mod_strings = array (
 	'RINGBACK' 				=>	'Waiting for Answer',
 	'INCOMING' 				=>	'Ringing',
 	'RINGING' 				=>	'Ringing',
-	'CONNECTED' 			=>	'Connected',
+	'CONNECTED' 			=>	'Connected2',
 	'DIAL'					=>  'Ringing',
 	'HANGUP'                =>  'Finished',
 	
