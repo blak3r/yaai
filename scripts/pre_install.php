@@ -58,6 +58,7 @@ function pre_install() {
  //  		array(1, 'Asterisk', 'custom/modules/Asterisk/include/AsteriskJS.php','AsteriskJS', 'echoJavaScript'));
 
    // creates Asterisk logging table
+   // TODO detect if it's MSSQL and raise error
     if (empty($db)) {
         if (!class_exists('DBManagerFactory')) {
             die("no db available");

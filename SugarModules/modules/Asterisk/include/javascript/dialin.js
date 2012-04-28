@@ -288,7 +288,7 @@ function createChatBox(chatboxid, checkMinimizeCookie, chatboxtitle, chatboxcall
 	chatboxid+'" class="chatboxtextarea" onkeydown="javascript:return checkChatBoxInputKey(event,this,\''+chatboxid+'\');"></textarea>' +
 	'<div class="chatboxbuttons"><table width="100%"><tr><td valign="bottom"><span style="width=150px;" class="asterisk_save_status">&nbsp;</span>'+
 	'<img id="transferImg_'+
-	chatboxid + '" src="custom/modules/Asterisk/include/TransferIcon-BR-blue4.png" height=19 title="Transfer Call" onclick="javascript:showTransferMenu(\'' + chatboxid + '\');"><TD align="right">'+
+	chatboxid + '" src="custom/modules/Asterisk/include/call_transfer-blue.png" height=19 title="Transfer Call" onclick="javascript:showTransferMenu(\'' + chatboxid + '\');"><TD align="right">'+
 	'<input style="" type="button" name="saveMemo" value="Save" onclick="javascript:saveMemo(\''+chatboxid+'\');"></table></div></div>';
 
 	$(" <div />" ).attr("id","chatbox_"+chatboxid)
@@ -540,11 +540,11 @@ function showTransferMenu( chatboxid, exten ) {
 	if( chatboxid != '' ) {
 		exten = prompt("Please enter the extension number you'd like to transfer to:\n(Leave Blank to cancel)","");
 		
-		if( exten != '') {
-	alert(exten);	
+		if( exten != null && exten != '') {
+	//alert(exten);	
 		callRecordId = getChatCallRecordId( chatboxid );
 			$.post("index.php?entryPoint=AsteriskController&action=transfer", {id: chatboxid, call_record: callRecordId, extension: exten } , function(data){
-				alert(data);
+				//alert(data);
 			});
 		}
 	}

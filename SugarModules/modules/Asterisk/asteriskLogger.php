@@ -3,6 +3,8 @@
  * Asterisk SugarCRM Integration
  * (c) KINAMU Business Solutions AG 2009
  *
+ * Project Home: www.github.com/blak3r/yaai
+ *
  * Parts of this code are (c) 2006. RustyBrick, Inc.  http://www.rustybrick.com/
  * Parts of this code are (c) 2008 vertico software GmbH
  * Parts of this code are (c) 2009 abcona e. K. Angelo Malaguarnera E-Mail admin@abcona.de

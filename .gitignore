@@ -1,6 +1,12 @@
+.idea/*
 *.bak
 *.zip
 *.pnproj
 *.pnps
 copyFromLiveSystem.*
 *unused_icons*
+.idea
+*.idea*
+.idea/*
+.idea/
+*idea*

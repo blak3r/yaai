@@ -211,7 +211,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 	$item['contact_id'] = isset($found['$contactId']) ? $found['$contactId'] : "";
 	$item['company_id'] = isset($found['$companyId']) ? $found['$companyId'] : "";
 	
-	//$item['sqlQuery'] = $queryContact; // Uncomment if you want to debug the query.	
+	//$item['sqlQuery'] = $queryContact; // Uncomment if you want to debug the query.	y
 
 	$response[] = $item;
 	}
@@ -237,6 +237,8 @@ if(count($response) == 0){
 			$item['html'] .= '<img src="http://www.gravatar.com/avatar/'. $gravHash . '?s=160">';
 		}
 		
+		$item['html'] .= '<a onclick="if ( DCMenu.menu ) DCMenu.menu(\'Contacts\',\'Create Contact\', true); return false;" href="#">Create Contact</a><BR>';
+		$item['html'] .= '<a href="index.php?module=Contacts&action=EditView&phone_work=' . $phoneToFind .'">Number2</a>';
 		$responseArray[] = $item;
 	}
 	print json_encode($responseArray);
