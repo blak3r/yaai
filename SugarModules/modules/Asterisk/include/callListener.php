@@ -92,7 +92,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 	$item['asterisk_id'] = $row['asterisk_id'];
 	
 	// All modstrings are in uppercase, so thats what toupper was added for... asterisk 1.6 returns camelcase states perhaps earlier versions didn't.
-	$item['state'] = isset($mod_strings[$row['callstate']]) ? $mod_strings[strtoupper($row['callstate'])] : $row['callstate'];
+	$item['state'] = isset($mod_strings[strtoupper($row['callstate'])]) ? $mod_strings[strtoupper($row['callstate'])] : $row['callstate'];
 	$item['state'] = "'" . $item['state'] . "'";
 
 	$item['id'] = $row['id'];
@@ -189,7 +189,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
         }
         // We only do this expensive query if it's not already set!
         else {
-           // log_entry("Expensive WHERE", "c:\callListenerLog.txt");
+            //log_entry("Expensive WHERE", "c:\callListenerLog.txt");
             $wherePortion = " WHERE (";
             $wherePortion .= sprintf($sqlReplace, "phone_work", $phoneToFind) . " OR ";
             $wherePortion .= sprintf($sqlReplace, "phone_home", $phoneToFind) . " OR ";

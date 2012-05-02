@@ -42,19 +42,15 @@ $mod_strings = array (
 	'ASTERISKLBL_OPEN_CONTACT' 	=>	'Open Contact',
 	'ASTERISKLBL_OPEN_MEMO' 	=>	'Open Memo',
 
-	'ASTERISKLBL_PHONE' 			=>	'Phone',
+    'ASTERISKLBL_PHONE' 			=>	'Phone',
 	'ASTERISKLBL_NAME' 			=>	'Name',
 	'ASTERISKLBL_COMPANY' 		=>	'Account',
-	
-	// TODO add duration, Transfer text, save, etc.
-
-
 	'REQUESTED' 			=>	'Proceeding',
 	'PROCEEDING' 			=>	'Proceeding',
 	'RINGBACK' 				=>	'Waiting for Answer',
 	'INCOMING' 				=>	'Ringing',
 	'RINGING' 				=>	'Ringing',
-	'CONNECTED' 			=>	'Connected2',
+	'CONNECTED' 			=>	'Connected',
 	'DIAL'					=>  'Ringing',
 	'HANGUP'                =>  'Finished',
 	
