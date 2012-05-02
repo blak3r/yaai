@@ -67,7 +67,7 @@ function checkData(data){
 	else {
 		$.each(data, function(entryIndex, entry){
 			var astId = entry['asterisk_id'];
-			astId = astId.replace(/\./g,'-'); // ran into issues with jquery not liking '.' chars in id's.
+			astId = astId.replace(/\./g,'-'); // ran into issues with jquery not liking '.' chars in id's so converted . -> -
 		
 			title = "" + entry['full_name'];
 			if( title.length == 0 ) {
@@ -107,7 +107,9 @@ function checkData(data){
 				setChatTitle(astId, title);
 				
 				$(".call_duration", "#chatbox_"+astId+" .chatboxcontent").text( entry['duration'] ); // Updates duration
-				
+
+                // GITHUB issue #3...
+                // I don't remember why I stopped setting the entire chat
 			}
 			
 			// response is not empty, lets walk through the json array

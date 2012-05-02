@@ -92,7 +92,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 	$item['asterisk_id'] = $row['asterisk_id'];
 	
 	// All modstrings are in uppercase, so thats what toupper was added for... asterisk 1.6 returns camelcase states perhaps earlier versions didn't.
-	$item['state'] = isset($mod_strings[$row['callstate']]) ? $mod_strings[toupper($row['callstate'])] : $row['callstate'];
+	$item['state'] = isset($mod_strings[$row['callstate']]) ? $mod_strings[strtoupper($row['callstate'])] : $row['callstate'];
 	$item['state'] = "'" . $item['state'] . "'";
 
 	$item['id'] = $row['id'];
@@ -176,17 +176,25 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 			";
 			
 		//$sqlReplace= "REGEXP '%s$' = 1";
+)
+        $selectPortion =  "SELECT c.id as contact_id, first_name,	last_name,phone_work, phone_home, phone_mobile, phone_other, a.name as account_name, account_id "
+            . "FROM contacts c left join accounts_contacts ac on (c.id=ac.contact_id) left join accounts a on (ac.account_id=a.id) ";
 
 
-		// ONly match non-deleted contacts added.
-		$queryContact = "SELECT c.id as contact_id, first_name,	last_name,phone_work, phone_home, phone_mobile, phone_other, a.name as account_name, account_id "
-		. "FROM contacts c left join accounts_contacts ac on (c.id=ac.contact_id) left join accounts a on (ac.account_id=a.id) WHERE (";
-		$queryContact .= sprintf($sqlReplace, "phone_work", $phoneToFind) . " OR ";
-		$queryContact .= sprintf($sqlReplace, "phone_home", $phoneToFind) . " OR ";
-		$queryContact .= sprintf($sqlReplace, "phone_other", $phoneToFind) . " OR ";
-		$queryContact .= sprintf($sqlReplace, "assistant_phone", $phoneToFind) . " OR ";
-		$queryContact .= sprintf($sqlReplace, "phone_mobile", $phoneToFind) . ") and c.deleted='0'";
+        if( $row['contact_id'] ) {
+            $wherePortion = " WHERE contacts.id = " . $row['contact_id'];
+        }
+        // We only do this expensive query if it's not already set!
+        else {
+            $wherePortion = " WHERE (";
+            $wherePortion .= sprintf($sqlReplace, "phone_work", $phoneToFind) . " OR ";
+            $wherePortion .= sprintf($sqlReplace, "phone_home", $phoneToFind) . " OR ";
+            $wherePortion .= sprintf($sqlReplace, "phone_other", $phoneToFind) . " OR ";
+            $wherePortion .= sprintf($sqlReplace, "assistant_phone", $phoneToFind) . " OR ";
+            $wherePortion .= sprintf($sqlReplace, "phone_mobile", $phoneToFind) . ") and c.deleted='0'";
+        }
 
+        $queryContact = $selectPortion . $wherePortion;
 		$innerResultSet = $current_user->db->query($queryContact, false);
 
 		while($contactRow = $current_user->db->fetchByAssoc($innerResultSet)){
@@ -257,6 +265,7 @@ function log_entry( $str, $file = "default" ) {
 
 /// printr to string
 function printrs($data) {
+  $str = "";
   if ($data) {
     $str = '<pre>\n';
     $str .= print_r($data, TRUE);
