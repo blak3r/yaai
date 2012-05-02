@@ -163,9 +163,11 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 			    replace(
 			    replace(
 			    replace(
+			    replace(
 			      %s,
 			        ' ', ''),
 			        '+', ''),
+			        '.', ''),
 			        '/', ''),
 			        '(', ''),
 			        ')', ''),
@@ -179,7 +181,6 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 
         $selectPortion =  "SELECT c.id as contact_id, first_name,	last_name,phone_work, phone_home, phone_mobile, phone_other, a.name as account_name, account_id "
             . "FROM contacts c left join accounts_contacts ac on (c.id=ac.contact_id) left join accounts a on (ac.account_id=a.id) ";
-
 
         if( $row['contact_id'] ) {
             $wherePortion = " WHERE c.id='{$row['contact_id']}'";
@@ -209,31 +210,27 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 
             // If we haven't saved contact_id to database table yet...
             if( empty( $row['contact_id'] ) ) {
+                // TODO improve query security... sanitize inputs.
                 $insertQuery = "UPDATE asterisk_log SET contact_id='{$contactRow['contact_id']}' WHERE call_record_id='{$row['call_record_id']}'";
 		        $current_user->db->query($insertQuery, false);
             }
 		}
 
-
-
-		
 		// TODO optimize this... can I grab this some other way? This is just to get the primary email address... might be a faster way to do this?
-
-        if( !empty($cid) )
+        if( !empty($cid) && $sugar_config['asterisk_gravatar_integration_enabled'])
         {
             $bean = new Contact();
             $bean->retrieve( $cid );
             $gravEmailAddress = $bean->emailAddress->getPrimaryAddress($bean);
+            //log_entry(printrs($bean), "c:\callListenerLog.txt");
         }
-		
-		//log_entry(printrs($bean), "c:\callListenerLog.txt");
 	}
 
     // TODO when no contact is found we should present a menu,
     // Multiple contacts, let user pick.
     // No Contact matching have (+) icon,
     //'<a onclick="if ( DCMenu.menu ) DCMenu.menu(\'Contacts\',\'Create Contact\', true); return false;" href="#">Create Contact</a><BR>';
-   // $createNewContactLink = '<a href="index.php?module=Contacts&action=EditView&phone_work=' . $phoneToFind .'">Create  Add To  Relate</a>';
+    // $createNewContactLink = '<a href="index.php?module=Contacts&action=EditView&phone_work=' . $phoneToFind .'">Create  Add To  Relate</a>';
 
 
     $item['full_name'] = isset($found['$contactFullName']) ? $found['$contactFullName'] : "";//$createNewContactLink;
@@ -261,15 +258,16 @@ if(count($response) == 0){
 		$item['html'] = str_replace("\r", "", $item['html']);
 		ob_clean();
 		
-		
-		// TODO wrap in an if gravatar...
-		if( !empty($gravEmailAddress) ) {
-			$gravHash = md5( strtolower( trim( $gravEmailAddress ) ) );
-			$item['html'] .= '<img src="http://www.gravatar.com/avatar/'. $gravHash . '?s=160">';
-		}
-		
-		$item['html'] .= '<a onclick="if ( DCMenu.menu ) DCMenu.menu(\'Contacts\',\'Create Contact\', true); return false;" href="#">Create Contact</a><BR>';
-		$item['html'] .= '<a href="index.php?module=Contacts&action=EditView&phone_work=' . $phoneToFind .'">Number2</a>';
+
+        if( $sugar_config['asterisk_gravatar_integration_enabled'] ) {
+		    if( !empty($gravEmailAddress) ) {
+			    $gravHash = md5( strtolower( trim( $gravEmailAddress ) ) );
+		    	$item['html'] .= '<img src="http://www.gravatar.com/avatar/'. $gravHash . '?s=160">';
+		    }
+		    $item['html'] .= '<a onclick="if ( DCMenu.menu ) DCMenu.menu(\'Contacts\',\'Create Contact\', true); return false;" href="#">Create Contact</a><BR>';
+		    $item['html'] .= '<a href="index.php?module=Contacts&action=EditView&phone_work=' . $phoneToFind .'">Number2</a>';
+        }
+
 		$responseArray[] = $item;
 	}
 	print json_encode($responseArray);
