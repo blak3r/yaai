@@ -153,7 +153,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 
 	$gravEmailAddress = ""; //clear address
 	$found = array();
-	if(strlen($phoneToFind) > 5){
+	if(strlen($phoneToFind) > 5) {
 		$sqlReplace = "
 			    replace(
 			    replace(
@@ -163,29 +163,32 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 			    replace(
 			    replace(
 			    replace(
-			      %s, 
-			        ' ', ''), 
-			        '+', ''), 
-			        '/', ''), 
-			        '(', ''), 
-			        ')', ''), 
-			        '[', ''), 
-			        ']', ''), 
-			        '-', '') 
+			      %s,
+			        ' ', ''),
+			        '+', ''),
+			        '/', ''),
+			        '(', ''),
+			        ')', ''),
+			        '[', ''),
+			        ']', ''),
+			        '-', '')
 			        REGEXP '%s$' = 1
 			";
 			
 		//$sqlReplace= "REGEXP '%s$' = 1";
-)
+
         $selectPortion =  "SELECT c.id as contact_id, first_name,	last_name,phone_work, phone_home, phone_mobile, phone_other, a.name as account_name, account_id "
             . "FROM contacts c left join accounts_contacts ac on (c.id=ac.contact_id) left join accounts a on (ac.account_id=a.id) ";
 
 
         if( $row['contact_id'] ) {
-            $wherePortion = " WHERE contacts.id = " . $row['contact_id'];
+            $wherePortion = " WHERE c.id='{$row['contact_id']}'";
+            log_entry("easy WHERE $selectPortion $wherePortion\n", "c:\callListenerLog.txt");
+
         }
         // We only do this expensive query if it's not already set!
         else {
+            log_entry("Expensive WHERE", "c:\callListenerLog.txt");
             $wherePortion = " WHERE (";
             $wherePortion .= sprintf($sqlReplace, "phone_work", $phoneToFind) . " OR ";
             $wherePortion .= sprintf($sqlReplace, "phone_home", $phoneToFind) . " OR ";
@@ -203,17 +206,37 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 			$found['$contactId'] = $contactRow['contact_id'];
 			$cid =  $contactRow['contact_id'];
 			$found['$companyId'] = $contactRow['account_id'];
+
+            // If we haven't saved contact_id to database table yet...
+            if( empty( $row['contact_id'] ) ) {
+                $insertQuery = "UPDATE asterisk_log SET contact_id='{$contactRow['contact_id']}' WHERE call_record_id='{$row['call_record_id']}'";
+		        $current_user->db->query($insertQuery, false);
+            }
 		}
+
+
+
 		
 		// TODO optimize this... can I grab this some other way? This is just to get the primary email address... might be a faster way to do this?
-		$bean = new Contact();
-		$bean->retrieve( $cid );
-		$gravEmailAddress = $bean->emailAddress->getPrimaryAddress($bean);		
+
+        if( !empty($cid) )
+        {
+            $bean = new Contact();
+            $bean->retrieve( $cid );
+            $gravEmailAddress = $bean->emailAddress->getPrimaryAddress($bean);
+        }
 		
 		//log_entry(printrs($bean), "c:\callListenerLog.txt");
 	}
-	
-	$item['full_name'] = isset($found['$contactFullName']) ? $found['$contactFullName'] : "";
+
+    // TODO when no contact is found we should present a menu,
+    // Multiple contacts, let user pick.
+    // No Contact matching have (+) icon,
+    //'<a onclick="if ( DCMenu.menu ) DCMenu.menu(\'Contacts\',\'Create Contact\', true); return false;" href="#">Create Contact</a><BR>';
+   // $createNewContactLink = '<a href="index.php?module=Contacts&action=EditView&phone_work=' . $phoneToFind .'">Create  Add To  Relate</a>';
+
+
+    $item['full_name'] = isset($found['$contactFullName']) ? $found['$contactFullName'] : "";//$createNewContactLink;
 
 	$item['company'] = isset($found['$company']) ? $found['$company'] : "";
 	$item['contact_id'] = isset($found['$contactId']) ? $found['$contactId'] : "";
