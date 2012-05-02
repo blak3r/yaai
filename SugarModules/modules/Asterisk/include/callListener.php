@@ -184,12 +184,12 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 
         if( $row['contact_id'] ) {
             $wherePortion = " WHERE c.id='{$row['contact_id']}'";
-            log_entry("easy WHERE $selectPortion $wherePortion\n", "c:\callListenerLog.txt");
+          //  log_entry("Quick WHERE $selectPortion $wherePortion\n", "c:\callListenerLog.txt");
 
         }
         // We only do this expensive query if it's not already set!
         else {
-            log_entry("Expensive WHERE", "c:\callListenerLog.txt");
+           // log_entry("Expensive WHERE", "c:\callListenerLog.txt");
             $wherePortion = " WHERE (";
             $wherePortion .= sprintf($sqlReplace, "phone_work", $phoneToFind) . " OR ";
             $wherePortion .= sprintf($sqlReplace, "phone_home", $phoneToFind) . " OR ";
@@ -202,6 +202,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 		$innerResultSet = $current_user->db->query($queryContact, false);
 
 		while($contactRow = $current_user->db->fetchByAssoc($innerResultSet)){
+            // TODO detect when there are multiple contacts returned here and then implement the radio button select.
 			$found['$contactFullName'] = $contactRow['first_name'] . " " . $contactRow['last_name'];
 			$found['$company'] = $contactRow['account_name'];
 			$found['$contactId'] = $contactRow['contact_id'];
