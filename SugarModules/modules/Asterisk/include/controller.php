@@ -96,6 +96,26 @@ else if( $_REQUEST['action'] == "updateUIState" ) {
 		trigger_error("Update UIState-Query failed: $query");
 	}
 }
+else if( $_REQUEST['action'] == "setContactId" ) {
+    $current_language = $_SESSION['authenticated_user_language'];
+    if(empty($current_language)) {
+        $current_language = $sugar_config['default_language'];
+    }
+    require("custom/modules/Asterisk/language/" . $current_language . ".lang.php");
+    $cUser = new User();
+    $cUser->retrieve($_SESSION['authenticated_user_id']);
+
+    // query log
+    // Very basic santization
+    $contactId = preg_replace('/[^a-z0-9\-\. ]/i', '', $_REQUEST['contact_id']);   // mysql_real_escape_string($_REQUEST['ui_state']);
+    $callRecord = preg_replace('/[^a-z0-9\-\. ]/i', '', $_REQUEST['call_record']); // mysql_real_escape_string($_REQUEST['call_record']);
+    $query = "update asterisk_log set contact_id=\"$contactId\" where call_record_id=\"$callRecord\"";
+
+    $resultSet = $cUser->db->query($query, false);
+    if($cUser->db->checkError()) {
+        trigger_error("Update setContactId-Query failed: $query");
+    }
+}
 else if( $_REQUEST['action'] == "call") {
 
 // TODO: For some reason this code isn't working... I think it's getting the extension.

@@ -77,8 +77,9 @@ $callinPrefix = $sugar_config['asterisk_dialinPrefix'];
 // Original query that returns only "Active" Calls -- query below gives me ones that were updated in last hour (so user can still put notes on them).
 //$query = " SELECT * FROM asterisk_log WHERE (callstate = 'Dial' OR callstate = 'Connected') AND (channel LIKE 'SIP/{$current_user->asterisk_ext_c}%')";
 
+// NeedID is the default call state for outbound calls, an entry in asterisk_log is created before a call record is created.  See GITHUB issue #
 $lastHour = date('Y-m-d H:i:s',time() - 1*60*60);
-$query = " SELECT * FROM asterisk_log WHERE \"$lastHour\" < timestampCall AND (uistate IS NULL OR uistate != \"Closed\") AND (channel LIKE 'SIP/{$current_user->asterisk_ext_c}%' OR channel LIKE 'Local%{$current_user->asterisk_ext_c}%')";
+$query = " SELECT * FROM asterisk_log WHERE \"$lastHour\" < timestampCall AND (uistate IS NULL OR uistate != \"Closed\") AND (callstate != 'NeedID') AND (channel LIKE 'SIP/{$current_user->asterisk_ext_c}%' OR channel LIKE 'Local%{$current_user->asterisk_ext_c}%')";
 
 $resultSet = $current_user->db->query($query, false);
 if($current_user->db->checkError()){
@@ -179,11 +180,12 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 			
 		//$sqlReplace= "REGEXP '%s$' = 1";
 
+        // TODO fix the join so that account is optional... I think just add INNER
         $selectPortion =  "SELECT c.id as contact_id, first_name,	last_name,phone_work, phone_home, phone_mobile, phone_other, a.name as account_name, account_id "
             . "FROM contacts c left join accounts_contacts ac on (c.id=ac.contact_id) left join accounts a on (ac.account_id=a.id) ";
 
         if( $row['contact_id'] ) {
-            $wherePortion = " WHERE c.id='{$row['contact_id']}'";
+            $wherePortion = " WHERE c.id='{$row['contact_id']}' and c.deleted='0' and ac.deleted='0' and a.deleted='0'";
           //  log_entry("Quick WHERE $selectPortion $wherePortion\n", "c:\callListenerLog.txt");
 
         }
@@ -195,31 +197,46 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
             $wherePortion .= sprintf($sqlReplace, "phone_home", $phoneToFind) . " OR ";
             $wherePortion .= sprintf($sqlReplace, "phone_other", $phoneToFind) . " OR ";
             $wherePortion .= sprintf($sqlReplace, "assistant_phone", $phoneToFind) . " OR ";
-            $wherePortion .= sprintf($sqlReplace, "phone_mobile", $phoneToFind) . ") and c.deleted='0'";
+            $wherePortion .= sprintf($sqlReplace, "phone_mobile", $phoneToFind) . ") and c.deleted='0' and ac.deleted='0'";
         }
 
         $queryContact = $selectPortion . $wherePortion;
+        log_entry($queryContact,"c:\callListenerLog.txt");
 		$innerResultSet = $current_user->db->query($queryContact, false);
+
+        log_entry(printrs($innerResultSet),"c:\callListenerLog.txt");
+
+        $isMultipleContactCase = false;
+        $radioButtonCode = "";
+
+        if( $innerResultSet->num_rows > 1 ) {
+            $isMultipleContactCase = true;
+            log_entry("multcontact case\n","c:\callListenerLog.txt");
+        }
 
 		while($contactRow = $current_user->db->fetchByAssoc($innerResultSet)){
             // TODO detect when there are multiple contacts returned here and then implement the radio button select.
-			$found['$contactFullName'] = $contactRow['first_name'] . " " . $contactRow['last_name'];
-			$found['$company'] = $contactRow['account_name'];
-			$found['$contactId'] = $contactRow['contact_id'];
-			$cid =  $contactRow['contact_id'];
-			$found['$companyId'] = $contactRow['account_id'];
+            $found['$contactFullName'] = $contactRow['first_name'] . " " . $contactRow['last_name'];
+            log_entry($found['$contactFullName'] . "id=". $contactRow['contact_id'] . "\n","c:\callListenerLog.txt");
+            $found['$company'] = $contactRow['account_name'];
+            $found['$contactId'] = $contactRow['contact_id'];
+            $cid =  $contactRow['contact_id'];
+            $found['$companyId'] = $contactRow['account_id'];
+
+            $radioButtonCode .= "<input type=radio name=contactSelect onclick=\"javascript:setContactId('{$row['call_record_id']}','{$found['$contactId']}')\" value={$found['$contactId']}>&nbsp;{$found['$contactFullName']}/{$found['$company']}<BR>";
 
             // If we haven't saved contact_id to database table yet...
             if( empty( $row['contact_id'] ) ) {
                 // TODO improve query security... sanitize inputs.
+              //FIXME reenable two lines below - enabled for testing.
                 $insertQuery = "UPDATE asterisk_log SET contact_id='{$contactRow['contact_id']}' WHERE call_record_id='{$row['call_record_id']}'";
 		        $current_user->db->query($insertQuery, false);
             }
 		}
 
-		// TODO optimize this... can I grab this some other way? This is just to get the primary email address... might be a faster way to do this?
         if( !empty($cid) && $sugar_config['asterisk_gravatar_integration_enabled'])
         {
+            // TODO optimize this... can I grab this some other way? This is just to get the primary email address... might be a faster way to do this?
             $bean = new Contact();
             $bean->retrieve( $cid );
             $gravEmailAddress = $bean->emailAddress->getPrimaryAddress($bean);
@@ -235,7 +252,6 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 
 
     $item['full_name'] = isset($found['$contactFullName']) ? $found['$contactFullName'] : "";//$createNewContactLink;
-
 	$item['company'] = isset($found['$company']) ? $found['$company'] : "";
 	$item['contact_id'] = isset($found['$contactId']) ? $found['$contactId'] : "";
 	$item['company_id'] = isset($found['$companyId']) ? $found['$companyId'] : "";
@@ -267,6 +283,11 @@ if(count($response) == 0){
 		    }
 		    $item['html'] .= '<a onclick="if ( DCMenu.menu ) DCMenu.menu(\'Contacts\',\'Create Contact\', true); return false;" href="#">Create Contact</a><BR>';
 		    $item['html'] .= '<a href="index.php?module=Contacts&action=EditView&phone_work=' . $phoneToFind .'">Number2</a>';
+        }
+
+
+        if( $isMultipleContactCase ) {
+            $item['html'] .= $radioButtonCode;
         }
 
 		$responseArray[] = $item;

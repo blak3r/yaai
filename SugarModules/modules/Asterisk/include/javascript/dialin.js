@@ -7,6 +7,7 @@
 // * Parts of this code are (c) 2009 abcona e. K. Angelo Malaguarnera E-Mail admin@abcona.de
 // * Parts of this code are (c) 2011 Blake Robertson http://www.blakerobertson.com
 // * http://www.sugarforge.org/projects/yaai/
+// * Contribute To Project: http://www.github.com/blak3r/yaai
 // * 
 // * This program is free software; you can redistribute it and/or modify it under
 // * the terms of the GNU General Public License version 3 as published by the
@@ -88,8 +89,9 @@ function checkData(data){
 			}
 			else {
 				$(".asterisk_state", "#chatbox_"+astId+" .chatboxcontent").text(entry['state']);
-				
-				if( entry['state'] == "'Hangup'" ) {
+
+                // TODO this isn't going to work on other languages... Need to pass the language equivalent Hangup label
+				if( entry['state'] == "'Finished'" ) {
 					$("#chatbox_"+astId+" .chatboxhead").css("background-color", "#f99d39");
 					$("#transferImg_"+astId).hide(); // hide transfer icon once call is over.
 				}
@@ -405,6 +407,11 @@ function closeChatBox(chatboxid) {
 		// Tells asterisk_log table that user has closed this entry.
 		$.post("index.php?entryPoint=AsteriskController&action=updateUIState", {id: chatboxid, ui_state: "Closed", call_record: callRecordId} );
 	}
+}
+
+// Called when clicking on radio buttons when multiple contacts exist.
+function setContactId( callRecordId, contactId) {
+    $.post("index.php?entryPoint=AsteriskController&action=setContactId", {call_record: callRecordId, contact_id: contactId} );
 }
 
 // Updates the cookie which stores the state of all the chatboxes (whether minimized or maximized)

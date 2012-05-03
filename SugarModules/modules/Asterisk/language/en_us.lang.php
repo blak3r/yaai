@@ -53,7 +53,6 @@ $mod_strings = array (
 	'CONNECTED' 			=>	'Connected',
 	'DIAL'					=>  'Ringing',
 	'HANGUP'                =>  'Finished',
-	
 
    );
 
