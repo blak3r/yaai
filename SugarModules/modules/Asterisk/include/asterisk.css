@@ -8,7 +8,7 @@
 }
 .asterisk_info td		{	padding: 2px; vertical-align:top;}
 .asterisk_data td		{	padding-left: 6px;}
-.asterisk_info input	{	width: 100%;}
+.asterisk_info input .chatboxtextarea {	width: 100%;}
 .asterisk_create_call input	{	width: 100%;}
 .asterisk_info h4x	{	padding: 0;margin: 0;}
 td.asterisk_state		{	font-weight: bold; text-align: center;}
@@ -18,3 +18,13 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
 	background: 0;
 }
 .asterisk_placeCall:hover {background: 0 !important; border: 0;}
+
+#astmultcontact {
+    //font-size: 100%;
+    //font-size: 1.3em;
+}
+
+#astmultcompany {
+    //font-size: 1em;
+    //font-size: small;
+}
