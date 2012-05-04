@@ -94,7 +94,8 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 	
 	// All modstrings are in uppercase, so thats what toupper was added for... asterisk 1.6 returns camelcase states perhaps earlier versions didn't.
 	$item['state'] = isset($mod_strings[strtoupper($row['callstate'])]) ? $mod_strings[strtoupper($row['callstate'])] : $row['callstate'];
-	$item['state'] = "'" . $item['state'] . "'";
+	$item['is_hangup'] = $item['state'] == $mod_strings['HANGUP'];
+    $item['state'] = "'" . $item['state'] . "'"; // Puts quotes around call state
 
 	$item['id'] = $row['id'];
 	//for opening the relevant phone record when call has been answered
@@ -201,10 +202,10 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
         }
 
         $queryContact = $selectPortion . $wherePortion;
-        log_entry($queryContact,"c:\callListenerLog.txt");
+        //log_entry($queryContact,"c:\callListenerLog.txt");
 		$innerResultSet = $current_user->db->query($queryContact, false);
 
-        log_entry(printrs($innerResultSet),"c:\callListenerLog.txt");
+        //log_entry(printrs($innerResultSet),"c:\callListenerLog.txt");
 
         $isMultipleContactCase = false;
         $radioButtonCode = "";
@@ -214,25 +215,34 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
             log_entry("multcontact case\n","c:\callListenerLog.txt");
         }
 
+        // Once contact_id db column is set, $innerResultSet will only have a single row int it.
 		while($contactRow = $current_user->db->fetchByAssoc($innerResultSet)){
-            // TODO detect when there are multiple contacts returned here and then implement the radio button select.
-            $found['$contactFullName'] = $contactRow['first_name'] . " " . $contactRow['last_name'];
-            log_entry($found['$contactFullName'] . "id=". $contactRow['contact_id'] . "\n","c:\callListenerLog.txt");
-            $found['$company'] = $contactRow['account_name'];
-            $found['$contactId'] = $contactRow['contact_id'];
+            $found['contactFullName'] = $contactRow['first_name'] . " " . $contactRow['last_name'];
+            log_entry($found['contactFullName'] . "id=". $contactRow['contact_id'] . "\n","c:\callListenerLog.txt");
+            $found['company'] = $contactRow['account_name'];
+            $found['contactId'] = $contactRow['contact_id'];
             $cid =  $contactRow['contact_id'];
-            $found['$companyId'] = $contactRow['account_id'];
+            $found['companyId'] = $contactRow['account_id'];
 
-            $radioButtonCode .= "<input type=radio name=contactSelect onclick=\"javascript:setContactId('{$row['call_record_id']}','{$found['$contactId']}')\" value={$found['$contactId']}>&nbsp;{$found['$contactFullName']}/{$found['$company']}<BR>";
+            // Only used in multi match case.
+            $mouseOverTitle = "{$found['contactFullName']} - {$found['company']}"; // decided displaying <contact> - <account> took up too much space and 95% of the time you have multiple contacts its going to be from the same account... so we use mouse over to display account.
+            $radioButtonCode .= "<input type=radio name=contactSelect onclick=\"javascript:setContactId('{$row['call_record_id']}','{$found['contactId']}')\" value={$found['contactId']}>&nbsp;&nbsp;<a id=\"astmultcontact\" title=\"$mouseOverTitle\" href=\"index.php?module=Contacts&action=DetailView&record={$found['contactId']}\">{$found['contactFullName']}</a><BR>";
+            // <a id=\"astmultcompany\" href=\"index.php?module=Accounts&action=DetailView&record={$found['company_id']}\">{$found['company']}</a>
 
-            // If we haven't saved contact_id to database table yet...
-            if( empty( $row['contact_id'] ) ) {
-                // TODO improve query security... sanitize inputs.
-              //FIXME reenable two lines below - enabled for testing.
-                $insertQuery = "UPDATE asterisk_log SET contact_id='{$contactRow['contact_id']}' WHERE call_record_id='{$row['call_record_id']}'";
-		        $current_user->db->query($insertQuery, false);
+            // In the only 1 matching contact case, we can set the contact_id db column to cut down on doing expensive sql queries to find matching contact.
+            if( empty( $row['contact_id'] ) && !$isMultipleContactCase ) {
+                $tempContactId = preg_replace('/[^a-z0-9\-\. ]/i', '', $contactRow['contact_id']);
+                $tempCallRecordId = preg_replace('/[^a-z0-9\-\. ]/i', '', $row['call_record_id']);
+                $insertQuery = "UPDATE asterisk_log SET contact_id='$tempContactId' WHERE call_record_id='$tempCallRecordId'";
+                $current_user->db->query($insertQuery, false);
             }
 		}
+
+        if( $isMultipleContactCase ) {
+            $found['contactFullName'] = $mod_strings["ASTERISKLBL_MULTIPLE_MATCHES"];
+        }
+
+
 
         if( !empty($cid) && $sugar_config['asterisk_gravatar_integration_enabled'])
         {
@@ -251,10 +261,10 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
     // $createNewContactLink = '<a href="index.php?module=Contacts&action=EditView&phone_work=' . $phoneToFind .'">Create  Add To  Relate</a>';
 
 
-    $item['full_name'] = isset($found['$contactFullName']) ? $found['$contactFullName'] : "";//$createNewContactLink;
-	$item['company'] = isset($found['$company']) ? $found['$company'] : "";
-	$item['contact_id'] = isset($found['$contactId']) ? $found['$contactId'] : "";
-	$item['company_id'] = isset($found['$companyId']) ? $found['$companyId'] : "";
+    $item['full_name'] = isset($found['contactFullName']) ? $found['contactFullName'] : "";//$createNewContactLink;
+	$item['company'] = isset($found['company']) ? $found['company'] : "";
+	$item['contact_id'] = isset($found['contactId']) ? $found['contactId'] : "";
+	$item['company_id'] = isset($found['companyId']) ? $found['companyId'] : "";
 	
 	//$item['sqlQuery'] = $queryContact; // Uncomment if you want to debug the query.	y
 
@@ -283,11 +293,6 @@ if(count($response) == 0){
 		    }
 		    $item['html'] .= '<a onclick="if ( DCMenu.menu ) DCMenu.menu(\'Contacts\',\'Create Contact\', true); return false;" href="#">Create Contact</a><BR>';
 		    $item['html'] .= '<a href="index.php?module=Contacts&action=EditView&phone_work=' . $phoneToFind .'">Number2</a>';
-        }
-
-
-        if( $isMultipleContactCase ) {
-            $item['html'] .= $radioButtonCode;
         }
 
 		$responseArray[] = $item;

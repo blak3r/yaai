@@ -81,7 +81,8 @@ function checkData(data){
 			if( -1 == $.inArray(astId, chatBoxes) ) {
 				//alert(entry['call_record_id']);
 				createChatBox(astId,true, title, entry['call_record_id'],entry['direction']);
-				setChatContent(astId, entry['html'] ); 
+				setChatContent(astId, entry['html'] );
+                chatBoxContactNames[astId] = entry['full_name'];
 				
 				if( entry['call_record_id'] == "-1" ) {
 					alert( "Call Record ID returned from server is -1, unable to save call notes for " + title ); // TODO: disable the input box instead of this alert.
@@ -91,7 +92,7 @@ function checkData(data){
 				$(".asterisk_state", "#chatbox_"+astId+" .chatboxcontent").text(entry['state']);
 
                 // TODO this isn't going to work on other languages... Need to pass the language equivalent Hangup label
-				if( entry['state'] == "'Finished'" ) {
+				if( entry['is_hangup']  ) {
 					$("#chatbox_"+astId+" .chatboxhead").css("background-color", "#f99d39");
 					$("#transferImg_"+astId).hide(); // hide transfer icon once call is over.
 				}
@@ -109,6 +110,11 @@ function checkData(data){
 				setChatTitle(astId, title);
 				
 				$(".call_duration", "#chatbox_"+astId+" .chatboxcontent").text( entry['duration'] ); // Updates duration
+
+                // Full name changes when, initially full name was blank or if user manually picks contact associated with call.
+                if( entry['full_name'] != chatBoxContactNames[astId] ) {
+                    setChatContent(astId,entry['html']);
+                }
 
                 // GITHUB issue #3...
                 // I don't remember why I stopped setting the entire chat
@@ -215,6 +221,7 @@ var newMessagesWin = new Array();
 var chatBoxes = new Array();
 var chatBoxCallRecordIds = new Array();
 var chatBoxCallDirections = new Array();
+var chatBoxContactNames = new Array();
 
 /*
 $(document).ready(function(){
@@ -411,6 +418,7 @@ function closeChatBox(chatboxid) {
 
 // Called when clicking on radio buttons when multiple contacts exist.
 function setContactId( callRecordId, contactId) {
+  //alert("invoking setContactId");
     $.post("index.php?entryPoint=AsteriskController&action=setContactId", {call_record: callRecordId, contact_id: contactId} );
 }
 

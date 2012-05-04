@@ -45,7 +45,9 @@ if( $_REQUEST['action'] == "memoSave") {
 
 	$focus = new Call(); //create your module object wich extends SugarBean 
 	$focus->retrieve( $_POST["call_record"] ); // retrieve a row by its id
-		
+
+    // TODO there are going to be language issues in this file... replace all strings with modstring equivalents.
+
 	if( array_key_exists("name",$_POST) ) 
 		$focus->name=$_POST["name"]; 
 	
@@ -164,8 +166,7 @@ else if( $_REQUEST['action'] == "transfer" ) {
 		echo "ERROR: Invalid extension";
 	}
 	
-	//TODO security!!!
-	$callRecord = $_POST["call_record"];
+	$callRecord = preg_replace('/[^a-z0-9\-\. ]/i', '', $_POST["call_record"]);
 	$query = "Select remote_channel from asterisk_log where call_record_id='$callRecord'";
 	
 	$resultSet = $current_user->db->query($query, false);
@@ -174,7 +175,6 @@ else if( $_REQUEST['action'] == "transfer" ) {
 	}
 
 	while($row = $current_user->db->fetchByAssoc($resultSet)){
-		// FIXME destination extension is hardcodeded.
 		$cmd ="ACTION: Redirect\r\nChannel: {$row['remote_channel']}\r\nContext: from-internal\r\nExten: $exten\r\nPriority: 1\r\n\r\n";
 		SendAMICommand($cmd);
 	}
