@@ -4,6 +4,7 @@
 *.pnproj
 *.pnps
 copyFromLiveSystem.*
+copyToLiveSystem.*
 *unused_icons*
 .idea
 *.idea*

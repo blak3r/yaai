@@ -468,7 +468,7 @@ while (true) {
 				
 				if ($e['Event'] == 'Hangup') {
 					$id        = $e['Uniqueid'];
-					$query     = "SELECT direction FROM asterisk_log WHERE asterisk_dest_id = '$id' OR asterisk_id = '$id'";
+					$query     = "SELECT direction,contact_id FROM asterisk_log WHERE asterisk_dest_id = '$id' OR asterisk_id = '$id'";
 					$result    = mysql_checked_query($query);
 					$direction = mysql_fetch_array($result);
 					//var_dump($direction);
@@ -544,18 +544,32 @@ while (true) {
 								//    $callDescription .= sprintf(" %-20s : %-40s\n", "Caller ID", $rawData['callerID']);
 								//    
 								//}
-								
-								// ** EXPERIMENTAL **
-								$assoSugarObject = findSugarObjectByPhoneNumber($rawData['callerID']);
-								$parentID        = NULL;
-								$parentType      = NULL;
-								if ($assoSugarObject && ($assoSugarObject['type'] == 'Contacts')) {
-									$assocAccount = findAccountForContact($assoSugarObject['values']['id']);
-									if ($assocAccount) {
-										$parentType = 'Accounts';
-										$parentID   = $assocAccount;
-									}
-								}
+
+                                // Establish Relationships with the Call and Contact/Account
+                                $beanID = NULL;
+                                $beanType = NULL;
+                                $parentID        = NULL;
+                                $parentType      = NULL;
+                                if( !empty($direction['contact_id']) ){
+                                    logLine("Contact Id already set by callListener to: " . $direction['contact_id'] . "\n");
+                                    $beanID = $direction['contact_id'];
+                                    $beanType = "Contacts";
+                                }
+                                else {
+                                    $assoSugarObject = findSugarObjectByPhoneNumber($rawData['callerID']);
+                                    $beanID = $assoSugarObject['values']['id'];
+                                    $beanType = $assoSugarObject['type'];
+                                }
+                                setRelationshipBetweenCallAndBean($callRecord['sweet']['id'],$beanType,$beanID);
+
+                                if( $beanType == "Contacts" && !empty($beanID) ) {
+                                    $assocAccount = findAccountForContact($beanID);
+                                    if ($assocAccount) {
+                                        $parentType = 'Accounts';
+                                        $parentID   = $assocAccount;
+                                    }
+                                }
+
 								//var_dump($parentType);
 								//var_dump($parentID);
 								echo ("! Call start was " . gmdate('Y-m-d H:i:s', $callStart) . "\n");
@@ -620,28 +634,6 @@ while (true) {
 										)
 									)
 								));
-								
-								//
-								// Establish Relationship if possible
-								//
-								if ($assoSugarObject) {
-									if ($assoSugarObject['type'] == 'Contacts') {
-										$soapArgs   = array(
-											'session' => $soapSessionId,
-											'set_relationship_value' => array(
-												'module1' => 'Calls',
-												'module1_id' => $callRecord['sweet']['id'],
-												'module2' => 'Contacts',
-												'module2_id' => $assoSugarObject['values']['id'],
-											)
-										);
-										logLine("# Establishing relation to contact... Call ID: {$callRecord['sweet']['id']} to Contact ID: {$assoSugarObject['values']['id']}\n");
-										if( $verbose_logging ) {
-											var_dump($soapArgs);
-										}
-										$soapResult = $soapClient->call('set_relationship', $soapArgs);
-									}
-								}
 							}
 						} else {
 							logLine("[$id] FAILED TO FIND A CALL (note: there are two hangups per call, so this might not be an error)\n");
@@ -715,20 +707,33 @@ while (true) {
 									$callDescription .= sprintf(" %-20s : %-40s\n", "Caller ID", $rawData['callerID']);
 									logLine("Adding INBOUND Failed Call, id=$id, call_id = " . $callRecord['sweet']['id'] . "\n");
 								}
-								
-								// ** EXPERIMENTAL **
-								$assoSugarObject = findSugarObjectByPhoneNumber($rawData['callerID']);
-								$parentID        = NULL;
-								$parentType      = NULL;
-								if ($assoSugarObject && ($assoSugarObject['type'] == 'Contacts')) {
-									$assocAccount = findAccountForContact($assoSugarObject['values']['id']);
-									if ($assocAccount) {
-										$parentType = 'Accounts';
-										$parentID   = $assocAccount;
-									}
-								}
-								//var_dump($parentType);
-								//var_dump($parentID);
+
+
+                                // Establish Relationships with the Call and Contact/Account
+                                $beanID = NULL;
+                                $beanType = NULL;
+                                $parentID        = NULL;
+                                $parentType      = NULL;
+                                if( !empty($direction['contact_id']) ){
+                                    logLine("Contact Id already set by callListener to: " . $direction['contact_id'] . "\n");
+                                    $beanID = $direction['contact_id'];
+                                    $beanType = "Contacts";
+                                }
+                                else {
+                                    $assoSugarObject = findSugarObjectByPhoneNumber($rawData['callerID']);
+                                    $beanID = $assoSugarObject['values']['id'];
+                                    $beanType = $assoSugarObject['type'];
+                                }
+                                setRelationshipBetweenCallAndBean($callRecord['sweet']['id'],$beanType,$beanID);
+
+                                if( $beanType == "Contacts" && !empty($beanID) ) {
+                                    $assocAccount = findAccountForContact($beanID);
+                                    if ($assocAccount) {
+                                        $parentType = 'Accounts';
+                                        $parentID   = $assocAccount;
+                                    }
+                                }
+
 								echo ("! Call start was " . gmdate('Y-m-d H:i:s', $callStart) . "\n");
 								
 								//
@@ -791,34 +796,7 @@ while (true) {
 										)
 									)
 								));
-								
-								//
-								// Establish Relationship if possible
-								//
-								if ($assoSugarObject) {
-									if ($assoSugarObject['type'] == 'Contacts') {
-										logLine("# Establishing relation to contact...\n");
-										$soapArgs = array(
-											'session' => $soapSessionId,
-											'set_relationship_value' => array(
-												'module1' => 'Calls',
-												'module1_id' => $callRecord['sweet']['id'],
-												'module2' => 'Contacts',
-												'module2_id' => $assoSugarObject['values']['id']
-											)
-										);
-										logLine("# Establishing relation to contact... Call ID: {$callRecord['sweet']['id']} to Contact ID: {$assoSugarObject['values']['id']}\n");
-										if( $verbose_logging ) {
-											var_dump($soapArgs);
-										}
-										$soapResult = $soapClient->call('set_relationship', $soapArgs);
-										
-										//echo "\n\nPrinting Soap REsult\n\n";
-										//var_dump($soapResult);
-										//echo "\n\n";
-									}
-								}
-							}
+							} // End Inbound Case
 								
 							// In case of multiple extensions when a call is not answered, every extensions produces a failed call record, this will keep the first of those records but delete the rest.
 							$query     = "SELECT asterisk_id FROM asterisk_log WHERE asterisk_dest_id='$id'";
@@ -1110,6 +1088,10 @@ function decode_name_value_list(&$nvl)
 //
 // Attempt to find a Sugar object (Contact,..) by phone number
 //
+// NOTE: As of v2.2, callListener now updates a column in asterisk_log table with contact_id so it doesn't have to perform
+// a complex query each time.  But, since callListener only works when you're logged into sugar and have "Call Notification" on.
+// we still have to try and find object related to phone number here for the other cases.
+//
 //
 function findSugarObjectByPhoneNumber($aPhoneNumber)
 {
@@ -1260,6 +1242,36 @@ function findAccountForContact($aContactId)
     }
 }
 
+/**
+ * Performs a soap call to set a relationship between a call record and a bean (contact)
+ * @param $callRecordId the call record id.
+ * @param $beanType usually "Contacts"
+ * @param $beanId
+ */
+function setRelationshipBetweenCallAndBean($callRecordId,$beanType, $beanId) {
+    global $soapSessionId, $soapClient,$verbose_logging;
+
+    if( !empty($callRecordId) && !empty($beanId) && !empty($beanType)  ) {
+        $soapArgs   = array(
+            'session' => $soapSessionId,
+            'set_relationship_value' => array(
+                'module1' => 'Calls',
+                'module1_id' => $callRecordId,
+                'module2' => $beanType,
+                'module2_id' => $beanId
+            )
+        );
+
+        logLine("# Establishing relation to contact... Call ID: $callRecordId to Bean ID: $beanId\n");
+        if( $verbose_logging ) {
+            var_dump($soapArgs);
+        }
+        $soapResult = $soapClient->call('set_relationship', $soapArgs);
+    }
+    else {
+        logLine("! Invalid Arguments passed to setRelationshipBetweenCallAndBean");
+    }
+}
 
 ///
 /// Given the channel ($rawData['channel']) from the AMI Event, this returns the user ID the call should be assigned to.
