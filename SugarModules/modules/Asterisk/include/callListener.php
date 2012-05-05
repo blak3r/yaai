@@ -246,9 +246,8 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
         if( !isset($found['company']) )
         {
             //log_entry("company not set", "c:\callListenerLog.txt");
-
             if( $row['opencnam'] == NULL ) {
-                log_entry("Null in db\n", "c:\callListenerLog.txt");
+                //log_entry("Null in db\n", "c:\callListenerLog.txt");
                 $tempCnamResult = opencnam_fetch($phoneToFind);
                 $tempCnamResult = preg_replace('/[^a-z0-9\-\. ]/i', '', $tempCnamResult);
                 $tempCallRecordId = preg_replace('/[^a-z0-9\-\. ]/i', '', $row['call_record_id']);
@@ -256,7 +255,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
                 $current_user->db->query($cnamUpdateQuery, false);
                 $row['opencnam'] = $tempCnamResult;
             }
-            log_entry($row['opencnam'], "c:\callListenerLog.txt");
+            //log_entry($row['opencnam'], "c:\callListenerLog.txt");
             $item['callerid'] = $row['opencnam'];
         }
 
