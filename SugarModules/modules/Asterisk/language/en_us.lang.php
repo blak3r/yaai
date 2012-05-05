@@ -57,8 +57,10 @@ $mod_strings = array (
 
     // Added in v2.2
     'ASTERISKLBL_DURATION' => 'Duration',
-    'ASTERISKLBL_SELECTCONTACT' => 'Select Contact:',
+    'ASTERISKLBL_SELECTCONTACT' => 'Select Contact',
     'ASTERISKLBL_MULTIPLE_MATCHES' => "Multiple Matches",
+    'ASTERISKLBL_CALLERID' => 'CallerID'
+
 
    );
 

@@ -212,7 +212,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 
         if( $innerResultSet->num_rows > 1 ) {
             $isMultipleContactCase = true;
-            log_entry("multcontact case\n","c:\callListenerLog.txt");
+            //log_entry("multcontact case\n","c:\callListenerLog.txt");
         }
 
         // Once contact_id db column is set, $innerResultSet will only have a single row int it.
@@ -242,7 +242,23 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
             $found['contactFullName'] = $mod_strings["ASTERISKLBL_MULTIPLE_MATCHES"];
         }
 
+        // Check OpenCNAM if we don't already have the Company Name in Sugar.
+        if( !isset($found['company']) )
+        {
+            //log_entry("company not set", "c:\callListenerLog.txt");
 
+            if( $row['opencnam'] == NULL ) {
+                log_entry("Null in db\n", "c:\callListenerLog.txt");
+                $tempCnamResult = opencnam_fetch($phoneToFind);
+                $tempCnamResult = preg_replace('/[^a-z0-9\-\. ]/i', '', $tempCnamResult);
+                $tempCallRecordId = preg_replace('/[^a-z0-9\-\. ]/i', '', $row['call_record_id']);
+                $cnamUpdateQuery = "UPDATE asterisk_log SET opencnam='$tempCnamResult' WHERE call_record_id='$tempCallRecordId'";
+                $current_user->db->query($cnamUpdateQuery, false);
+                $row['opencnam'] = $tempCnamResult;
+            }
+            log_entry($row['opencnam'], "c:\callListenerLog.txt");
+            $item['callerid'] = $row['opencnam'];
+        }
 
         if( !empty($cid) && $sugar_config['asterisk_gravatar_integration_enabled'])
         {
@@ -303,6 +319,16 @@ if(count($response) == 0){
 
 sugar_cleanup();
 
+function opencnam_fetch( $phoneNumber ) {
+    $request_url = "https://api.opencnam.com/v1/phone/" . $phoneNumber . "?format=text";
+
+    $response = file_get_contents($request_url);
+    if( empty($response) ) {
+        $response = file_get_contents($request_url);  // I found that in browser at least, first call always returned "", then second time it worked.
+    }
+
+    return $response;
+}
 
 // just for debugging purposes
 function log_entry( $str, $file = "default" ) {
