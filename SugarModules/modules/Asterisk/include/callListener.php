@@ -318,13 +318,17 @@ if(count($response) == 0){
 
 sugar_cleanup();
 
+// Retrieves caller ID information using the opencnam rest service.
 function opencnam_fetch( $phoneNumber ) {
     $request_url = "https://api.opencnam.com/v1/phone/" . $phoneNumber . "?format=text";
 
-    $response = file_get_contents($request_url);
-    if( empty($response) ) {
-        $response = file_get_contents($request_url);  // I found that in browser at least, first call always returned "", then second time it worked.
-    }
+    $i=0;
+    do {
+        $response = file_get_contents($request_url); // First call returns with 404 immediately with free api, 2nd call will succeed. See https://github.com/blak3r/yaai/issues/5
+        if( empty($response) ) {
+            usleep(50000); // wait 50ms
+        }
+    }while($i++ < 3 && empty($response) );
 
     return $response;
 }
