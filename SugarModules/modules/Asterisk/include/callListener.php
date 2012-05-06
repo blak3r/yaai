@@ -212,7 +212,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 
         if( $innerResultSet->num_rows > 1 ) {
             $isMultipleContactCase = true;
-            log_entry("multcontact case\n","c:\callListenerLog.txt");
+            //log_entry("multcontact case\n","c:\callListenerLog.txt");
         }
 
         // Once contact_id db column is set, $innerResultSet will only have a single row int it.
@@ -242,7 +242,22 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
             $found['contactFullName'] = $mod_strings["ASTERISKLBL_MULTIPLE_MATCHES"];
         }
 
-
+        // Check OpenCNAM if we don't already have the Company Name in Sugar.
+        if( !isset($found['company']) )
+        {
+            //log_entry("company not set", "c:\callListenerLog.txt");
+            if( $row['opencnam'] == NULL ) {
+                //log_entry("Null in db\n", "c:\callListenerLog.txt");
+                $tempCnamResult = opencnam_fetch($phoneToFind);
+                $tempCnamResult = preg_replace('/[^a-z0-9\-\. ]/i', '', $tempCnamResult);
+                $tempCallRecordId = preg_replace('/[^a-z0-9\-\. ]/i', '', $row['call_record_id']);
+                $cnamUpdateQuery = "UPDATE asterisk_log SET opencnam='$tempCnamResult' WHERE call_record_id='$tempCallRecordId'";
+                $current_user->db->query($cnamUpdateQuery, false);
+                $row['opencnam'] = $tempCnamResult;
+            }
+            //log_entry($row['opencnam'], "c:\callListenerLog.txt");
+            $item['callerid'] = $row['opencnam'];
+        }
 
         if( !empty($cid) && $sugar_config['asterisk_gravatar_integration_enabled'])
         {
@@ -303,6 +318,20 @@ if(count($response) == 0){
 
 sugar_cleanup();
 
+// Retrieves caller ID information using the opencnam rest service.
+function opencnam_fetch( $phoneNumber ) {
+    $request_url = "https://api.opencnam.com/v1/phone/" . $phoneNumber . "?format=text";
+
+    $i=0;
+    do {
+        $response = file_get_contents($request_url); // First call returns with 404 immediately with free api, 2nd call will succeed. See https://github.com/blak3r/yaai/issues/5
+        if( empty($response) ) {
+            usleep(50000); // wait 50ms
+        }
+    }while($i++ < 3 && empty($response) );
+
+    return $response;
+}
 
 // just for debugging purposes
 function log_entry( $str, $file = "default" ) {

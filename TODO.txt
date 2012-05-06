@@ -27,10 +27,10 @@ Versions Developed with:
 
 * ***On Inbound calls (such as Ray Lewis 9:56am on 10/16/2012) we have lots of failed calls.  Presumably 1 for my cell phone etc...
 
-* Multiple Matching Contact Handling, provide user with option to pick who it is?  At the very least need to fix outbound calling
+* DONE -  Multiple Matching Contact Handling, provide user with option to pick who it is?  At the very least need to fix outbound calling
   - Todo this, we need to add a new action to controller.php and add a new column to asteriskLog.  The action=setContactId will pass a contact id which will then get written to the asteriskLog db table.  Then, in asteriskLogger we check if the contactId is already set before trying to make the relation.
 
-* Need to do custom code for Contacts Subpanels.. (doesn't show magic call icon there).
+* DONE - Need to do custom code for Contacts Subpanels.. (doesn't show magic call icon there).
 
 * Update language files for german and whatever the other language is.
 
@@ -51,6 +51,9 @@ Versions Developed with:
 
 
 ==[ Configuration Changes Needed]===
+
+Add gravatar one,
+Add opencnam enabled / apikey
 
 * Need configurable Channel detection in order to assign calls to users when they answer on cell phones. 
 * Add a configurable option 
