@@ -19,13 +19,18 @@
                     <!-- Add template support here... OLD <a href="index.php?module=Contacts&action=DetailView&record=<?php print $item['contact_id']; ?>">  -->
 					    <?php
 					         if($isMultipleContactCase ) {
-					            print "<TD colspan=\"2\"><B>{$mod_strings['ASTERISKLBL_SELECTCONTACT']}</B><br><span class=\"call_contacts\">$radioButtonCode</span></TD></TR>";
+					            print "<TD colspan=\"2\"><B>{$mod_strings['ASTERISKLBL_SELECTCONTACT']}:</B><br><span class=\"call_contacts\">$radioButtonCode</span></TD></TR>";
                              }
                              else {
                                  print "<td>{$mod_strings['ASTERISKLBL_NAME']}:</td><td><a href=\"index.php?module=Contacts&action=DetailView&record={$item['contact_id']}\"><span class=\"call_contacts\">{$item['full_name']}</span></a></td></TR>";
                                  print "<TR><td>{$mod_strings['ASTERISKLBL_COMPANY']}</td><td>";
                                  print "<a href=\"index.php?module=Accounts&action=DetailView&record={$item['company_id']}\">{$item['company']}</a></td></tr>";
                              }
+
+                             if( isset( $item['callerid'] ) ) {
+                                print "<tr><TD>{$mod_strings['ASTERISKLBL_CALLERID']}:</TD><TD>{$item['callerid']}</TD></tr>";
+                             }
+
                         ?>
 
 			<tr>
