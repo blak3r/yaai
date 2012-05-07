@@ -714,10 +714,15 @@ while (true) {
 									}
 								} else {
 									$callStatus      = "Missed";
-									$callName        = sprintf("Failed call (%s) ", $e['Cause-txt']);
-									$callDescription = "Missed/failed call\n";
+									$callName        = "Missed Call";
+                                    $callDescription = "Missed/failed call ({$e['Cause-txt']}\n";
 									$callDescription .= "------------------\n";
-									$callDescription .= sprintf(" %-20s : %-40s\n", "Caller ID", $rawData['callerID']);
+									$callDescription .= sprintf(" %-20s : %-40s\n", "Phone Number", $rawData['callerID']);
+                                    if( $rawData['opencnam'] ) {
+                                        $callName .= " - " . $rawData['opencnam'];
+                                        $callDescription .= sprintf(" %-20s : %-40s\n", "Caller ID", $rawData['opencnam']);
+                                    }
+
 									logLine("Adding INBOUND Failed Call, id=$id, call_id = " . $callRecord['sweet']['id'] . "\n");
 								}
 
@@ -755,6 +760,10 @@ while (true) {
                                         $parentType = 'Accounts';
                                         $parentID   = $assocAccount;
                                     }
+                                }
+                                else if( $beanType == "Accounts") {
+                                    $parentType="Accounts";
+                                    $parentID=$beanID;
                                 }
 
 								echo ("! Call start was " . gmdate('Y-m-d H:i:s', $callStart) . "\n");
@@ -833,7 +842,7 @@ while (true) {
 							while ($call_record_id = mysql_fetch_array($result)) {
 								//For testing purposes
 								//$query = "SELECT id FROM calls WHERE id='" . $call_record_id['call_record_id'] . "' AND name LIKE 'Failed call%'";
-								$query = "DELETE FROM calls WHERE id='" . $call_record_id['call_record_id'] . "' AND name LIKE 'Failed call%'";
+								$query = "DELETE FROM calls WHERE id='" . $call_record_id['call_record_id'] . "' AND name LIKE 'Missed call%'";
 								$rq    = mysql_checked_query($query);
 								
 								if( mysql_affected_rows() > 0 ) {
