@@ -1225,6 +1225,7 @@ function findSugarObjectByPhoneNumber($aPhoneNumber)
     $soapArgs = array(
         'session' => $soapSessionId,
         'module_name' => 'Contacts',
+        'select_fields' => array( 'id','account_id' ),
         // 2nd version 'query' => "((contacts.phone_work = '$searchPattern') OR (contacts.phone_mobile = '$searchPattern') OR (contacts.phone_home = '$searchPattern') OR (contacts.phone_other = '$searchPattern'))", );
         // Original...
 		//'query' => "((contacts.phone_work LIKE '$searchPattern') OR (contacts.phone_mobile LIKE '$searchPattern') OR (contacts.phone_home LIKE '$searchPattern') OR (contacts.phone_other LIKE '$searchPattern'))"
@@ -1246,6 +1247,30 @@ function findSugarObjectByPhoneNumber($aPhoneNumber)
     if( !isSoapResultAnError($soapResult))
     {
         $resultDecoded = decode_name_value_list($soapResult['entry_list'][0]['name_value_list']);
+
+        if( count($soapResult['entry_list']) > 1 ) {
+            $foundMultipleAccounts = FALSE;
+            $account_id = $resultDecoded['account_id'];
+            // TODO I had 43 entries returned for 2 contacts with matching number... need better distinct support.  Apparently, no way to do this via soap... probably need to create a new service endpoint.
+            for($i=1; $i<count($soapResult['entry_list']); $i++ ) {
+                $resultDecoded = decode_name_value_list($soapResult['entry_list'][$i]['name_value_list']);
+                if( $account_id != $resultDecoded['account_id'] ) {
+                    $foundMultipleAccounts = TRUE;
+                }
+            }
+            if( !$foundMultipleAccounts )
+            {
+                $result = array();
+                $result['id'] = $account_id;
+                logLine("Found multiple contacts -- all belong to same account, associating call with account.\n");
+                return array( 'type' => 'Accounts', 'values' => $result );
+            }
+            else {
+                logLine("Multiple contacts matched multiple accounts, Not associating\n");
+                return FALSE;
+            }
+        }
+
         //print "--- Decoded get_entry_list() FOR GET CONTACT --------------------------------------\n";
         //var_dump($resultDecoded);
         //print "-----------------------------------------------------------------------------\n";
