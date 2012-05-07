@@ -380,8 +380,10 @@ function createChatBox(chatboxid, checkMinimizeCookie, chatboxtitle, chatboxcall
 	});
 
 	$("#chatbox_"+chatboxid).click(function() {
-		if ($('#chatbox_'+chatboxid+' .chatboxcontent').css('display') != 'none') {
-			$("#chatbox_"+chatboxid+" .chatboxtextarea").focus();
+		if ($('#chatbox_'+chatboxid+' .chatboxcontent').css('display') != 'none')
+        {
+            // TODO Investigate... this sets focus to textarea whenever anywhere is clicked in chatbox, needs to be tweaked if I add other inputboxes and could be cause of focus stealing problems which happen occasionally.
+            $("#chatbox_"+chatboxid+" .chatboxtextarea").focus();
 		}
 	});
 

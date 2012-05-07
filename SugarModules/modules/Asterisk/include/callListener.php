@@ -198,7 +198,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
             $wherePortion .= sprintf($sqlReplace, "phone_home", $phoneToFind) . " OR ";
             $wherePortion .= sprintf($sqlReplace, "phone_other", $phoneToFind) . " OR ";
             $wherePortion .= sprintf($sqlReplace, "assistant_phone", $phoneToFind) . " OR ";
-            $wherePortion .= sprintf($sqlReplace, "phone_mobile", $phoneToFind) . ") and c.deleted='0' and ac.deleted='0'";
+            $wherePortion .= sprintf($sqlReplace, "phone_mobile", $phoneToFind) . ") and c.deleted='0' and ac.deleted='0' and a.deleted='0'";
         }
 
         $queryContact = $selectPortion . $wherePortion;
@@ -269,14 +269,9 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
         }
 	}
 
-    // TODO when no contact is found we should present a menu,
-    // Multiple contacts, let user pick.
-    // No Contact matching have (+) icon,
-    //'<a onclick="if ( DCMenu.menu ) DCMenu.menu(\'Contacts\',\'Create Contact\', true); return false;" href="#">Create Contact</a><BR>';
-    // $createNewContactLink = '<a href="index.php?module=Contacts&action=EditView&phone_work=' . $phoneToFind .'">Create  Add To  Relate</a>';
+    $isNoMatchingContactCase = !isset($found['contactFullName']);
 
-
-    $item['full_name'] = isset($found['contactFullName']) ? $found['contactFullName'] : "";//$createNewContactLink;
+    $item['full_name'] = isset($found['contactFullName']) ? $found['contactFullName'] : "";
 	$item['company'] = isset($found['company']) ? $found['company'] : "";
 	$item['contact_id'] = isset($found['contactId']) ? $found['contactId'] : "";
 	$item['company_id'] = isset($found['companyId']) ? $found['companyId'] : "";

@@ -56,8 +56,11 @@ print "# Sugar root set to [$sugarRoot]\n";
 //print "# PHP include path set to [" . get_include_path() . "]\n";
 
 // Specify a custom sugar root on commandline when in test mode (I used this to debug from eclipse)
-if( $argc > 2 && $argv[1] == "test" ) {
-	$sugarRoot = $argv[2];
+if( $argc > 2 ) {
+	$sugarRoot = $argv[2] ;
+    if( !endsWith($sugarRoot,"/")){
+        $sugarRoot .= "/";
+    }
 	print "New sugar root is: " . $sugarRoot;
 }
 
@@ -556,9 +559,19 @@ while (true) {
                                     $beanType = "Contacts";
                                 }
                                 else {
-                                    $assoSugarObject = findSugarObjectByPhoneNumber($rawData['callerID']);
-                                    $beanID = $assoSugarObject['values']['id'];
-                                    $beanType = $assoSugarObject['type'];
+                                    $assocAccount = findSugarAccountByPhoneNumber($rawData['callerID']);
+                                    if( $assocAccount != FALSE ) {
+                                        logLine("Found a matching account, relating to account instead of contact\n");
+                                        $beanID = $assocAccount['values']['id'];
+                                        $beanType = $assocAccount['type'];
+                                        $parentType = 'Accounts';
+                                        $parentID   = $beanID;
+                                    }
+                                    else {
+                                        $assoSugarObject = findSugarObjectByPhoneNumber($rawData['callerID']);
+                                        $beanID = $assoSugarObject['values']['id'];
+                                        $beanType = $assoSugarObject['type'];
+                                    }
                                 }
                                 setRelationshipBetweenCallAndBean($callRecord['sweet']['id'],$beanType,$beanID);
 
@@ -720,9 +733,19 @@ while (true) {
                                     $beanType = "Contacts";
                                 }
                                 else {
-                                    $assoSugarObject = findSugarObjectByPhoneNumber($rawData['callerID']);
-                                    $beanID = $assoSugarObject['values']['id'];
-                                    $beanType = $assoSugarObject['type'];
+                                    $assocAccount = findSugarAccountByPhoneNumber($rawData['callerID']);
+                                    if( $assocAccount != FALSE ) {
+                                        logLine("Found a matching account, relating to account instead of contact\n");
+                                        $beanID = $assocAccount['values']['id'];
+                                        $beanType = $assocAccount['type'];
+                                        $parentType = 'Accounts';
+                                        $parentID   = $beanID;
+                                    }
+                                    else {
+                                        $assoSugarObject = findSugarObjectByPhoneNumber($rawData['callerID']);
+                                        $beanID = $assoSugarObject['values']['id'];
+                                        $beanType = $assoSugarObject['type'];
+                                    }
                                 }
                                 setRelationshipBetweenCallAndBean($callRecord['sweet']['id'],$beanType,$beanID);
 
@@ -816,7 +839,7 @@ while (true) {
 								if( mysql_affected_rows() > 0 ) {
 									logLine("Cleaning up Failed Calls part2, DELETED call_record_id = {$call_record_id['call_record_id']}\n");
 								}
-								$total_result = mysql_fetch_array($rq);
+								//$total_result = mysql_fetch_array($rq);
 								//var_dump($total_result);
 							}
 						}
@@ -1086,6 +1109,57 @@ function decode_name_value_list(&$nvl)
 
 
 //
+// Attempt to find a Sugar Account with a matching phone number.
+//
+function findSugarAccountByPhoneNumber($aPhoneNumber)
+{
+    global $soapClient, $soapSessionId;
+    logLine("# +++ find AccountByPhoneNumber($aPhoneNumber)\n");
+
+    // Add if phonenumber .length == 10
+    $searchPattern = $aPhoneNumber;
+
+    $aPhoneNumber = preg_replace( '/\D/', '', $aPhoneNumber); // removes everything that isn't a digit.
+    if( preg_match('/([0-9]{7})$/',$aPhoneNumber,$matches) ){
+        $aPhoneNumber = $matches[1];
+    }
+
+    $regje = preg_replace( '/(\d)/', '$1\[^\\d\]*',$aPhoneNumber);
+    $regje = '(' . $regje . ')$';
+
+    $soapArgs = array(
+        'session' => $soapSessionId,
+        'module_name' => 'Accounts',
+        'query' => "accounts.phone_office REGEXP '$regje' OR accounts.phone_alternate REGEXP '$regje'",
+    );
+
+    // print "--- SOAP get_entry_list() ----- ARGS ----------------------------------------\n";
+    // var_dump($soapArgs);
+    // print "-----------------------------------------------------------------------------\n";
+
+    $soapResult = $soapClient->call('get_entry_list', $soapArgs);
+
+    //print "--- SOAP get_entry_list() FOR GET CONTACT ------------------------------------\n";
+    //var_dump($soapResult);
+    //print "-----------------------------------------------------------------------------\n";
+
+    if( !isSoapResultAnError($soapResult))
+    {
+        $resultDecoded = decode_name_value_list($soapResult['entry_list'][0]['name_value_list']);
+        //print "--- Decoded get_entry_list() FOR GET CONTACT --------------------------------------\n";
+        //var_dump($resultDecoded);
+        //print "-----------------------------------------------------------------------------\n";
+        return array(
+            'type' => 'Accounts',
+            'values' => $resultDecoded
+        );
+    }
+
+    return FALSE;
+}
+
+
+//
 // Attempt to find a Sugar object (Contact,..) by phone number
 //
 // NOTE: As of v2.2, callListener now updates a column in asterisk_log table with contact_id so it doesn't have to perform
@@ -1096,12 +1170,13 @@ function decode_name_value_list(&$nvl)
 function findSugarObjectByPhoneNumber($aPhoneNumber)
 {
     global $soapClient, $soapSessionId;
-    logLine("# +++ findSugarObjectByPhoneNumber($aPhoneNumber)\n");
+    logLine("# +++ find ContactByPhoneNumber($aPhoneNumber)\n");
     
     // Add if phonenumber .length == 10
     $searchPattern = $aPhoneNumber;
     //$searchPattern = regexify($aPhoneNumber);
-    
+
+
     //
     // Plan A: Attempt to locate an object in Contacts
     //        $soapResult = $soapClient->call('get_entry' , array('session' => $soapSessionId, 'module_name' => 'Calls', 'id' => $callRecId));
@@ -1144,16 +1219,15 @@ function findSugarObjectByPhoneNumber($aPhoneNumber)
     
     logLine("  findSugarObjectByPhoneNumber: Contact query components- Phone: $aPhoneNumber   RegEx: $regje\n");
     //*******/
-    
+
+
+
     $soapArgs = array(
         'session' => $soapSessionId,
         'module_name' => 'Contacts',
-        // the original query made matches to anything that had parts of the searchpattern in it, this one looks for the exact phonenumber
-        
         // 2nd version 'query' => "((contacts.phone_work = '$searchPattern') OR (contacts.phone_mobile = '$searchPattern') OR (contacts.phone_home = '$searchPattern') OR (contacts.phone_other = '$searchPattern'))", );
-        // Original... 
+        // Original...
 		//'query' => "((contacts.phone_work LIKE '$searchPattern') OR (contacts.phone_mobile LIKE '$searchPattern') OR (contacts.phone_home LIKE '$searchPattern') OR (contacts.phone_other LIKE '$searchPattern'))"
-     
 		// Liz Version: Only works on mysql
 		'query' => "contacts.phone_home REGEXP '$regje' OR contacts.phone_mobile REGEXP '$regje' OR contacts.phone_work REGEXP '$regje' OR contacts.phone_other REGEXP '$regje' OR contacts.phone_fax REGEXP '$regje'",
    
@@ -1169,13 +1243,8 @@ function findSugarObjectByPhoneNumber($aPhoneNumber)
     //var_dump($soapResult);
     //print "-----------------------------------------------------------------------------\n";
     
-    if ($soapResult['error']['number'] != 0) {
-        logLine("! Warning: SOAP error " . $soapResult['error']['number'] . " " . $soapResult['error']['string'] . "\n");
-    } 
-	else if( $soapResult['result_count'] == 0 ) {
-		logLine("! No results returned\n");
-	}
-	else {
+    if( !isSoapResultAnError($soapResult))
+    {
         $resultDecoded = decode_name_value_list($soapResult['entry_list'][0]['name_value_list']);
         //print "--- Decoded get_entry_list() FOR GET CONTACT --------------------------------------\n";
         //var_dump($resultDecoded);
@@ -1224,7 +1293,9 @@ function findAccountForContact($aContactId)
         return FALSE;
     } else {
         // var_dump($soapResult);
-        
+
+        isSoapResultAnError($soapResult);
+
         $assocCount = count($soapResult['ids']);
         
         if ($assocCount == 0) {
@@ -1240,6 +1311,25 @@ function findAccountForContact($aContactId)
             return $assoAccountID;
         }
     }
+}
+
+/**
+ * prints soap result info
+ * Returns true if results were returned, FALSE if an error or no results are returned.
+ *
+ * @param $soapResult
+ */
+function isSoapResultAnError($soapResult) {
+    $retVal = FALSE;
+    if ($soapResult['error']['number'] != 0) {
+        logLine("! Warning: SOAP error " . $soapResult['error']['number'] . " " . $soapResult['error']['string'] . "\n");
+        $retVal = TRUE;
+    }
+    else if( $soapResult['result_count'] == 0 ) {
+        logLine("! No results returned\n");
+        $retVal = TRUE;
+    }
+    return $retVal;
 }
 
 /**
@@ -1262,11 +1352,12 @@ function setRelationshipBetweenCallAndBean($callRecordId,$beanType, $beanId) {
             )
         );
 
-        logLine("# Establishing relation to contact... Call ID: $callRecordId to Bean ID: $beanId\n");
+        logLine("# Establishing relation to $beanType... Call ID: $callRecordId to Bean ID: $beanId\n");
         if( $verbose_logging ) {
             var_dump($soapArgs);
         }
         $soapResult = $soapClient->call('set_relationship', $soapArgs);
+        isSoapResultAnError($soapResult);
     }
     else {
         logLine("! Invalid Arguments passed to setRelationshipBetweenCallAndBean");
