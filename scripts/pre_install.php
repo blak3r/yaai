@@ -90,14 +90,19 @@ function pre_install() {
         $query .= "hangup_cause integer default NULL,";
         $query .= "hangup_cause_txt varchar(45) default NULL,";
         $query .= "asterisk_dest_id varchar(45) default NULL,";
-        $query .= "contact_id VARCHAR(36) NULL DEFAULT NULL,"; // added in v2.0 to keep track of contact.  Helps when it matches multiple ones.
-        $query .= "opencnam VARCHAR(16) NULL DEFAULT NULL,"; // added in v2.2 to keep track of whether number had been looked up in opencnam yet.
+        $query .= "contact_id VARCHAR(36) DEFAULT NULL,"; // added in v2.0 to keep track of contact.  Helps when it matches multiple ones.
+        $query .= "opencnam VARCHAR(16) DEFAULT NULL,"; // added in v2.2 to keep track of whether number had been looked up in opencnam yet.
         $query .= "PRIMARY KEY (id)";
         $query .= ")";
         $db->query($query, false, "Error creating call table: " . $query);
     }
 
-    add_column_if_not_exist($db,"asterisk_log","opencnam", "VARCHAR(16) NULL DEFAULT NULL");
+    // Columns Added in v2.0
+    add_column_if_not_exist($db,"asterisk_log","uistate", "VARCHAR(10) DEFAULT NULL");
+    add_column_if_not_exist($db,"asterisk_log","remote_channel", "VARCHAR(30) DEFAULT NULL");
+    add_column_if_not_exist($db,"asterisk_log","contact_id", "VARCHAR(36) DEFAULT NULL");
+    // Columns Added in v2.3
+    add_column_if_not_exist($db,"asterisk_log","opencnam", "VARCHAR(16) DEFAULT NULL");
 }
 
 // http://www.edmondscommerce.co.uk/mysql/mysql-add-column-if-not-exists-php-function/

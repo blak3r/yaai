@@ -63,7 +63,7 @@ $manifest = array (
                    'published_date' => '2012-04-02',
                    'type' => 'module',
                    'version' => '2.3.0.9 for v6.x',
-                   'remove_tables' => 'prompt',
+                   'remove_tables' => 'true',  /** This does absolutely nothing since our asterisk log table is created manually instead of as a bean **/
                    );
 
 $installdefs = array (
