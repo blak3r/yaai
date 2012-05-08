@@ -15,42 +15,12 @@
                                 // Multiple contacts, let user pick.
                                 // No Contact matching have (+) icon,
                                 //'<a onclick="if ( DCMenu.menu ) DCMenu.menu(\'Contacts\',\'Create Contact\', true); return false;" href="#">Create Contact</a><BR>';
-                                $createNewContactLink = '<a href="index.php?module=Contacts&action=EditView&phone_work=' . $phoneToFind .'">Create New</a>';
-//function open_popup(module_name,width,height,initial_filter,close_popup,hide_clear_button,popup_request_data,popup_mode,create,metadata)
-//,//"&account_id_advanced="+this.form.billing_account_id.value+"&account_name_advanced="+this.form.billing_account_name.value+"",
-            $selectContact = <<<EOT
-<form name="asteriskRelate">
-    <input type='hidden' size="" id='asteriskRelateContactId' name="relateContactId"  />
-    <input type='hidden' tabindex="0" name="billing_contact_name" tabindex="0" id="billing_contact_name" class="sqsEnabled yui-ac-input" autocomplete="off" />
-    <script type="text/javascript">
-        SUGAR.util.doWhen(
-                "typeof(sqs_objects) != 'undefined' && typeof(sqs_objects['EditView_billing_contact_name']) != 'undefined'",
-                enableQS
-        );
-    </script>
-</form>
-<!--
-<button type="button" name="btn_billing_contact_name" id="btn_billing_contact_name" tabindex="0" title="Select Contact" class="button firstChild" value="Select Contact"
--->
-<span class="id-ff multiple">
-<a href="#" onclick='open_popup(
-"Contacts",
-600,
-400,
-"",
-true,
-true,
-{"call_back_function":"set_return","form_name":"asteriskRelate","field_to_name_array":{"id":"relateContactId","last_name":"relateContactName"}},
-"single",
-true
-);' >Relate</a>
-EOT;
                                 // TODO put $selectContact back in.
-                                print "<TR><TD colspan=\"2\">$createNewContactLink </TD></TR>";
+                                print "<TR><TD colspan=\"2\">$createNewContactLink&nbsp;&nbsp;&nbsp;$selectContactTextCode</TD></TR>";
                              }
                              else {
-                                 print "<TR><td>{$mod_strings['ASTERISKLBL_NAME']}:</td><td><a href=\"index.php?module=Contacts&action=DetailView&record={$item['contact_id']}\"><span class=\"call_contacts\">{$item['full_name']}</span></a></td></TR>";
-                                 print "<TR><td>{$mod_strings['ASTERISKLBL_COMPANY']}</td><td>";
+                                 print "<TR><td>{$mod_strings['ASTERISKLBL_NAME']}:</td><td><a href=\"index.php?module=Contacts&action=DetailView&record={$item['contact_id']}\"><span class=\"call_contacts\">{$item['full_name']}</span></a>&nbsp;$selectContactIconCode</td></TR>";
+                                 print "<TR><td>{$mod_strings['ASTERISKLBL_COMPANY']}:</td><td>";
                                  print "<a href=\"index.php?module=Accounts&action=DetailView&record={$item['company_id']}\">{$item['company']}</a></td></tr>";
                              }
 
@@ -59,7 +29,6 @@ EOT;
                              }
 
                         ?>
-
             <tr >
                 <td style="width: 20%;"><?php print $mod_strings['ASTERISKLBL_PHONE']; ?>:</td>
                 <td><?php print $item['phone_number']; ?></td>
@@ -74,3 +43,4 @@ EOT;
 		</table>
 	</div>
 </div>
+<?php print $popupFormCode ?>
