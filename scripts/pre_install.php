@@ -66,9 +66,10 @@ function pre_install() {
         $db = & DBManagerFactory::getInstance();
     }
 
-	$query = "DROP TABLE IF EXISTS asterisk_log";
-	$db->query($query, false, "Error dropping asterisk_log table: " . $query);
+	//$query = "DROP TABLE IF EXISTS asterisk_log";
+	//$db->query($query, false, "Error dropping asterisk_log table: " . $query);
 
+/*
 	$query = "CREATE TABLE asterisk_log (";
 	$query .= "id int(10) unsigned NOT NULL auto_increment,";
 	$query .= "call_record_id char(36) default NULL,";
@@ -93,8 +94,25 @@ function pre_install() {
 	$query .= "opencnam VARCHAR(16) NULL DEFAULT NULL,"; // added in v2.2 to keep track of whether number had been looked up in opencnam yet.
     $query .= "PRIMARY KEY (id)";
 	$query .= ")";
-
 	$db->query($query, false, "Error creating call table: " . $query);
+    */
+
+    add_column_if_not_exist($db,"asterisk_log","opencnam", "VARCHAR(16) NULL DEFAULT NULL");
+}
+
+// http://www.edmondscommerce.co.uk/mysql/mysql-add-column-if-not-exists-php-function/
+function add_column_if_not_exist($db, $table, $column, $column_attr = "VARCHAR( 255 ) NULL" ){
+    $exists = false;
+    $columns = $db->query("show columns from $table");
+    while($c = $db->fetch_assoc($columns)){
+        if($c['Field'] == $column){
+            $exists = true;
+            break;
+        }
+    }
+    if(!$exists){
+        $db->query("ALTER TABLE `$table` ADD `$column`  $column_attr");
+    }
 }
 
 ?>
