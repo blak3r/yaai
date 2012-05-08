@@ -36,13 +36,14 @@
 
 
 $(document).ready(function()
-{	
-	$('.phone,#phone_work,#phone_other,#phone_mobile').each(function()
+{
+    //.asterisk_phoneNumber is the deprecated v1.x class
+	$('.phone,#phone_work,#phone_other,#phone_mobile,.asterisk_phoneNumber').each(function()
 	{
 		var phoneNr = $(this).text().trim();
-		
-		//alert(phoneNr);
-		if(phoneNr.length > 1)
+
+        // Regex searches the inner html to see if a child element has phone class, this prevents a given number from having more then one click to dial icon appear.
+        if(phoneNr.length > 1 && !/(class="phone"|id="?#phone)/.test($(this).html()))
 		{
 			var contactId = $('input[name="record"]', document.forms['DetailView']).attr('value');
 			if (!contactId)

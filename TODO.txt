@@ -1,3 +1,20 @@
+NOTE: this file is no longer the official TODO list.
+I moved it to the wiki page: https://github.com/blak3r/yaai/wiki/Project-TODO-List
+
+GO HERE:
+https://github.com/blak3r/yaai/wiki/Project-TODO-List
+https://github.com/blak3r/yaai/wiki/Project-TODO-List
+https://github.com/blak3r/yaai/wiki/Project-TODO-List
+https://github.com/blak3r/yaai/wiki/Project-TODO-List
+https://github.com/blak3r/yaai/wiki/Project-TODO-List
+https://github.com/blak3r/yaai/wiki/Project-TODO-List
+https://github.com/blak3r/yaai/wiki/Project-TODO-List
+https://github.com/blak3r/yaai/wiki/Project-TODO-List
+
+I tend to use this file to temporarily put notes when i'm not already logged into github.
+
+
+
 sqs_objects['EditView_shipping_contact_name']={
 "form":"EditView",
 "method":"get_contact_array",
@@ -8,11 +25,6 @@ sqs_objects['EditView_shipping_contact_name']={
 "group":"or",
 "conditions":[{"name":"first_name","op":"like_custom","end":"%","value":""},{"name":"last_name","op":"like_custom","end":"%","value":""}],
 "order":"last_name","limit":"30","no_match_text":"No Match"};
-
-
-TEst extension overlay still works.
-Inbound calls are detected properly.
-Poll Rate variable works.
 
 Documentation:
 If you have a custom dial plan.  You must do the following.
@@ -49,8 +61,6 @@ Versions Developed with:
 ==[ Minor Bugs ]================
 
 * $sugar_config['asterisk_dialin_ext_match'] = 'Local\/(?:.*?)(\d\d\d?\d?\d?)@'; -- Make this take 3-11 digits.  If longer then say 5 characters we need to implement a method to look at users's mobile phones.
-* (I think that's been resolved...) If there is no user extension that matches, the call gets assigned to NULL
-
 
 
 ==[ Potential Enhancements]=========================
