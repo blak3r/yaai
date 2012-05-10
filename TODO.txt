@@ -1,6 +1,30 @@
-TEst extension overlay still works.
-Inbound calls are detected properly.
-Poll Rate variable works.
+NOTE: this file is no longer the official TODO list.
+I moved it to the wiki page: https://github.com/blak3r/yaai/wiki/Project-TODO-List
+
+GO HERE:
+https://github.com/blak3r/yaai/wiki/Project-TODO-List
+https://github.com/blak3r/yaai/wiki/Project-TODO-List
+https://github.com/blak3r/yaai/wiki/Project-TODO-List
+https://github.com/blak3r/yaai/wiki/Project-TODO-List
+https://github.com/blak3r/yaai/wiki/Project-TODO-List
+https://github.com/blak3r/yaai/wiki/Project-TODO-List
+https://github.com/blak3r/yaai/wiki/Project-TODO-List
+https://github.com/blak3r/yaai/wiki/Project-TODO-List
+
+I tend to use this file to temporarily put notes when i'm not already logged into github.
+
+
+
+sqs_objects['EditView_shipping_contact_name']={
+"form":"EditView",
+"method":"get_contact_array",
+"modules":["Contacts"],
+"field_list":["salutation","first_name","last_name","id"],
+"populate_list":["shipping_contact_name","shipping_contact_id","shipping_contact_id","shipping_contact_id"],
+"required_list":["shipping_contact_id"],
+"group":"or",
+"conditions":[{"name":"first_name","op":"like_custom","end":"%","value":""},{"name":"last_name","op":"like_custom","end":"%","value":""}],
+"order":"last_name","limit":"30","no_match_text":"No Match"};
 
 Documentation:
 If you have a custom dial plan.  You must do the following.
@@ -37,8 +61,6 @@ Versions Developed with:
 ==[ Minor Bugs ]================
 
 * $sugar_config['asterisk_dialin_ext_match'] = 'Local\/(?:.*?)(\d\d\d?\d?\d?)@'; -- Make this take 3-11 digits.  If longer then say 5 characters we need to implement a method to look at users's mobile phones.
-* (I think that's been resolved...) If there is no user extension that matches, the call gets assigned to NULL
-
 
 
 ==[ Potential Enhancements]=========================
@@ -54,9 +76,11 @@ Versions Developed with:
 
 Add gravatar one,
 Add opencnam enabled / apikey
-
+$rgDetectRegex = "/^Local\/RG/i"; // TODO make this a configuration option
+$rgCellRingRegex = "/^Local\/\d{7,10}/i";// TODO make this a configuration option.... This detects in a RG when an outside line is called (usually for a cellphone)... for some reason the cell shows up as the Channel (aka the source)... We detect this by finding a number thats at least 7-10 characters long..
+Add option to save short calls (ie inbound calls that weren't answered) as failed (which shows up in activities) or Held.
 * Need configurable Channel detection in order to assign calls to users when they answer on cell phones. 
-* Add a configurable option 
+
 
 * (DONE) Need to add dialin prefix (its in sugarListener)
 * (DONE) Need to make config option for the dialout.  Currently hardcoded to /SIP (in my case i need to do the Local/##@sugarsip/n... see CreateCall... for some reason I don't need it in callListener (presumably b/c it's already SIP at that point).

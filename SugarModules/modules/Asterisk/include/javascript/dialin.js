@@ -380,8 +380,10 @@ function createChatBox(chatboxid, checkMinimizeCookie, chatboxtitle, chatboxcall
 	});
 
 	$("#chatbox_"+chatboxid).click(function() {
-		if ($('#chatbox_'+chatboxid+' .chatboxcontent').css('display') != 'none') {
-			$("#chatbox_"+chatboxid+" .chatboxtextarea").focus();
+		if ($('#chatbox_'+chatboxid+' .chatboxcontent').css('display') != 'none')
+        {
+            // TODO Investigate... this sets focus to textarea whenever anywhere is clicked in chatbox, needs to be tweaked if I add other inputboxes and could be cause of focus stealing problems which happen occasionally.
+            $("#chatbox_"+chatboxid+" .chatboxtextarea").focus();
 		}
 	});
 
@@ -566,6 +568,51 @@ function showTransferMenu( chatboxid, exten ) {
 		}
 	}
 }
+
+
+/**
+ * Relate Contact Callback method.
+ * This is called by the open_popup sugar call when a contact is selected.
+ *
+ * I basically copied the set_return method and added some stuff onto the bottom.  I couldn't figure out how to add
+ * change events to my form elements.  This method wouldn't be needed if I figured that out.
+ */
+var from_popup_return2  = false;
+function relate_popup_callback(popup_reply_data)
+{
+    from_popup_return2 = true;
+    var form_name = popup_reply_data.form_name;
+    var name_to_value_array = popup_reply_data.name_to_value_array;
+
+    for (var the_key in name_to_value_array)
+    {
+        if(the_key == 'toJSON')
+        {
+            /* just ignore */
+        }
+        else
+        {
+            var displayValue=name_to_value_array[the_key].replace(/&amp;/gi,'&').replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/&#039;/gi,'\'').replace(/&quot;/gi,'"');;
+            if(window.document.forms[form_name] && window.document.forms[form_name].elements[the_key])
+            {
+                window.document.forms[form_name].elements[the_key].value = displayValue;
+                SUGAR.util.callOnChangeListers(window.document.forms[form_name].elements[the_key]);
+            }
+        }
+}
+
+    // Everything above is from the default set_return method in parent_popup_helper.
+    var contactId = window.document.forms[form_name].elements['relateContactId'].value;
+    if( contactId != null ) {
+        //alert("Setting Contact Id");
+        setContactId(form_name,contactId);
+    }
+    else {
+        alert("Error updating related Contact");
+    }
+}
+
+
 
 
 /**
