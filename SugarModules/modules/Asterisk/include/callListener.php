@@ -218,7 +218,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
         // Once contact_id db column is set, $innerResultSet will only have a single row int it.
 		while($contactRow = $current_user->db->fetchByAssoc($innerResultSet)){
             $found['contactFullName'] = $contactRow['first_name'] . " " . $contactRow['last_name'];
-            log_entry($found['contactFullName'] . "id=". $contactRow['contact_id'] . "\n","c:\callListenerLog.txt");
+            //log_entry($found['contactFullName'] . "id=". $contactRow['contact_id'] . "\n","c:\callListenerLog.txt");
             $found['company'] = $contactRow['account_name'];
             $found['contactId'] = $contactRow['contact_id'];
             $cid =  $contactRow['contact_id'];

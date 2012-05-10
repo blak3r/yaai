@@ -9,7 +9,8 @@
  * Parts of this code are (c) 2008 vertico software GmbH
  * Parts of this code are (c) 2009 abcona e. K. Angelo Malaguarnera E-Mail admin@abcona.de
  * Parts of this code are (c) 2011 Blake Robertson http://www.blakerobertson.com
- * http://www.sugarforge.org/projects/yaai/
+ * Sugarforge: http://www.sugarforge.org/projects/yaai/
+ * GitHub: http://www.github.com/blak3r/yaai
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License version 3 as published by the
@@ -256,9 +257,12 @@ while (true) {
 	
     // Keep a loop going to read the socket and parse the resulting commands.
 	// Apparently there is no good way to detect if socket is still alive??? 
-	// This is my hack... if we fail 60 times in a row we reconnect to manager... So, at most 1 hours of calls can be missed.
-	// But, I suspect that fgets will return very quickly if socket error has occurred.
-	// Perhaps you can check socket error some other way then socket_read?
+	// This is my hack... if we fail 60 times in a row we reconnect to manager...
+    // I suspect that fgets will return very quickly if socket error has occurrs
+	// So, it'll reach 60 very quickly and then force relogin.
+    // Otherwise, every hour it'll just relogin.
+    // Perhaps you can check socket error some other way then socket_read?
+    // All I know is this reconnect method has made my asteriskLogger a lot more stable.
     while ($consecutiveFailures < 60 && !safe_feof($amiSocket, $start) && (microtime(true) - $start) < $timeout) {
         $buffer = fgets($amiSocket, 4096);
         // echo("# Read " . strlen($buffer) . " "  . $buffer . "\n");
@@ -267,15 +271,6 @@ while (true) {
 		{
 			logLine(getTimestamp() . " Timeout or Error\n"); // TODO Remove once asteriskLogger never needs restarting.
 			$consecutiveFailures++;
-			/*
-			THIS CAN BE DELETED, used this to simulate socket failure during development
-			if( $consecutiveFailures >= 2 ) {
-				fclose($amiSocket);
-				if( feof($amiSocket) ) {
-					echo "feof returns: true\n";
-					}
-			}
-			*/
 		}
 		else {
 			$consecutiveFailures = 0;
