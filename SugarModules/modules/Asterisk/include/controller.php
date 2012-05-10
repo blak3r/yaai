@@ -117,6 +117,21 @@ else if( $_REQUEST['action'] == "setContactId" ) {
     if($cUser->db->checkError()) {
         trigger_error("Update setContactId-Query failed: $query");
     }
+
+    // Adds the new relationship!  (This must be done here in case the call has already been hungup as that's when asteriskLogger sets relations)
+    $focus = new Call();
+    $focus->retrieve($callRecord);
+    $focus->load_relationship('contacts');
+    // Remove any contacts already associated with call (if there are any)
+    foreach ($focus->contacts->getBeans() as $contact) {
+        $focus->contacts->delete($callRecord,$contact->id);
+    }
+    $focus->contacts->add($contactId); // Add the new one!
+    $contactBean = new Contact();
+    $contactBean->retrieve($contactId);
+    $focus->parent_id = $contactBean->account_id;
+    $focus->parent_type = "Accounts";
+    $focus->save();
 }
 else if( $_REQUEST['action'] == "call") {
 

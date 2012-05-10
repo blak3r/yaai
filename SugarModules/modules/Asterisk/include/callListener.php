@@ -198,7 +198,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
             $wherePortion .= sprintf($sqlReplace, "phone_home", $phoneToFind) . " OR ";
             $wherePortion .= sprintf($sqlReplace, "phone_other", $phoneToFind) . " OR ";
             $wherePortion .= sprintf($sqlReplace, "assistant_phone", $phoneToFind) . " OR ";
-            $wherePortion .= sprintf($sqlReplace, "phone_mobile", $phoneToFind) . ") and c.deleted='0' and ac.deleted='0'";
+            $wherePortion .= sprintf($sqlReplace, "phone_mobile", $phoneToFind) . ") and c.deleted='0' and ac.deleted='0' and a.deleted='0'";
         }
 
         $queryContact = $selectPortion . $wherePortion;
@@ -259,6 +259,19 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
             $item['callerid'] = $row['opencnam'];
         }
 
+        $popupFormCode = <<<EOT1
+<form name="{$item['call_record_id']}">
+    <input type='hidden' size="" name="relateContactId"/>
+    <input type='hidden' name="relateContactName"/>
+</form>
+EOT1;
+        $createNewContactLink = '<a class="asteriskActionsLinks"  href="index.php?module=Contacts&action=EditView&phone_work=' . $phoneToFind .'" title="Create a new contact with this phone number">Create New</a>';
+        $selectContactOpenPopupJs= 'open_popup( "Contacts", 600, 400, "", true, true, {"call_back_function":"relate_popup_callback","form_name":"' . $item['call_record_id'] . '","field_to_name_array":{"id":"relateContactId","last_name":"relateContactName"}},"single",true);';
+
+        // TODO replace english sentences with entries in modstrings
+        $selectContactIconCode = '<a href="#" onclick=\'' . $selectContactOpenPopupJs . '\' title="Click to relate this call with a different contact"><img width="12" src="custom/modules/Asterisk/include/close_16.png"></a>';
+        $selectContactTextCode = '<a class="asteriskActionsLinks" href="#" onclick=\'' . $selectContactOpenPopupJs . '\' title="Relate this call with an existing contact.">Relate To</a>';
+        /*
         if( !empty($cid) && $sugar_config['asterisk_gravatar_integration_enabled'])
         {
             // TODO optimize this... can I grab this some other way? This is just to get the primary email address... might be a faster way to do this?
@@ -267,16 +280,12 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
             $gravEmailAddress = $bean->emailAddress->getPrimaryAddress($bean);
             //log_entry(printrs($bean), "c:\callListenerLog.txt");
         }
-	}
+        */
+    }
 
-    // TODO when no contact is found we should present a menu,
-    // Multiple contacts, let user pick.
-    // No Contact matching have (+) icon,
-    //'<a onclick="if ( DCMenu.menu ) DCMenu.menu(\'Contacts\',\'Create Contact\', true); return false;" href="#">Create Contact</a><BR>';
-    // $createNewContactLink = '<a href="index.php?module=Contacts&action=EditView&phone_work=' . $phoneToFind .'">Create  Add To  Relate</a>';
+    $isNoMatchingContactCase = !isset($found['contactFullName']);
 
-
-    $item['full_name'] = isset($found['contactFullName']) ? $found['contactFullName'] : "";//$createNewContactLink;
+    $item['full_name'] = isset($found['contactFullName']) ? $found['contactFullName'] : "";
 	$item['company'] = isset($found['company']) ? $found['company'] : "";
 	$item['contact_id'] = isset($found['contactId']) ? $found['contactId'] : "";
 	$item['company_id'] = isset($found['companyId']) ? $found['companyId'] : "";
@@ -300,7 +309,7 @@ if(count($response) == 0){
 		$item['html'] = str_replace("\r", "", $item['html']);
 		ob_clean();
 		
-
+/*
         if( $sugar_config['asterisk_gravatar_integration_enabled'] ) {
 		    if( !empty($gravEmailAddress) ) {
 			    $gravHash = md5( strtolower( trim( $gravEmailAddress ) ) );
@@ -309,7 +318,7 @@ if(count($response) == 0){
 		    $item['html'] .= '<a onclick="if ( DCMenu.menu ) DCMenu.menu(\'Contacts\',\'Create Contact\', true); return false;" href="#">Create Contact</a><BR>';
 		    $item['html'] .= '<a href="index.php?module=Contacts&action=EditView&phone_work=' . $phoneToFind .'">Number2</a>';
         }
-
+*/
 		$responseArray[] = $item;
 	}
 	print json_encode($responseArray);
