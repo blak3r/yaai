@@ -53,7 +53,7 @@ $manifest = array (
                          ,'PRO'
                           ,'ENT'
                          ),
-                   'readme'=>'README_INSTALLER',
+                   'readme'=>'README',
                    'key'=>'',
                    'author' => 'Blake Robertson / KINAMU Business Solutions AG / abcona active business consulting',
                    'description' => 'Integrates Asterisk telephony features into SugarCRM.',
@@ -62,8 +62,8 @@ $manifest = array (
                    'name' => 'Asterisk SugarCRM Connector',
                    'published_date' => '2012-04-02',
                    'type' => 'module',
-                   'version' => '2.0.3 for v6.x',
-                   'remove_tables' => 'prompt',
+                   'version' => '2.3.0.9 for v6.x',
+                   'remove_tables' => 'true',  /** This does absolutely nothing since our asterisk log table is created manually instead of as a bean **/
                    );
 
 $installdefs = array (
@@ -136,6 +136,12 @@ $installdefs = array (
                                     'to' => 'custom/working/modules/Contacts/metadata/listviewdefs.php',
                                     ),
 							*/
+
+                             array (
+                                    'from' => '<basepath>/SugarModules/include/SugarFields/Fields/Phone/ListView.tpl',
+                                    'to' => 'custom/include/SugarFields/Fields/Phone/ListView.tpl',
+                             ),
+
                              array (
                                     'from' => '<basepath>/SugarModules/include/javascript/jquery/jquery.pack.js',
                                     'to' => 'custom/include/javascript/jquery/jquery.pack.js',

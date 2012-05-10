@@ -10,7 +10,7 @@ else
 	VERSION=$1
 fi
 
-zip -r yaii-$VERSION.zip * -x .git* *.zip *.bak *.pnps *.pnproj *.eclipse *.svn
+zip -r yaii-$VERSION.zip * -x .git* *.zip *.bak *.pnps *.pnproj *.eclipse *.svn copyTo*.sh copyFrom*.sh *.bat *.idea
 
 echo ""
 echo ""
