@@ -90,8 +90,15 @@ else if( $_REQUEST['action'] == "updateUIState" ) {
 	// query log
 	// Very basic santization
 	$uiState = preg_replace('/[^a-z0-9\-\. ]/i', '', $_REQUEST['ui_state']); //  mysql_real_escape_string($_REQUEST['ui_state']);
-	$callRecord = preg_replace('/[^a-z0-9\-\. ]/i', '', $_REQUEST['call_record']); //mysql_real_escape_string($_REQUEST['call_record']);
-	$query = "update asterisk_log set uistate=\"$uiState\" where call_record_id=\"$callRecord\"";  
+        $callRecord = preg_replace('/[^a-z0-9\-\. ]/i', '', $_REQUEST['call_record']); //mysql_real_escape_string($_REQUEST['call_record']);
+        $asteriskID = preg_replace('/-/','.',$_REQUEST['id']);
+        if (isset($_REQUEST['call_record'])){
+        $query = "update asterisk_log set uistate=\"$uiState\" where call_record_id=\"$callRecord\"";
+        }
+        else
+        {
+        $query = "update asterisk_log set uistate=\"$uiState\" where asterisk_id=\"$asteriskID\"";
+        }
 
 	$resultSet = $cUser->db->query($query, false);
 	if($cUser->db->checkError()) {
