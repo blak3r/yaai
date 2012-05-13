@@ -182,11 +182,11 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 		//$sqlReplace= "REGEXP '%s$' = 1";
 
         // TODO fix the join so that account is optional... I think just add INNER
-        $selectPortion =  "SELECT c.id as contact_id, first_name,	last_name,phone_work, phone_home, phone_mobile, phone_other, a.name as account_name, account_id "
+      $selectPortion =  "SELECT c.id as contact_id, first_name,	last_name,phone_work, phone_home, phone_mobile, phone_other, a.name as account_name, account_id "
             . "FROM contacts c left join accounts_contacts ac on (c.id=ac.contact_id) left join accounts a on (ac.account_id=a.id) ";
 
         if( $row['contact_id'] ) {
-            $wherePortion = " WHERE c.id='{$row['contact_id']}' and c.deleted='0' and ac.deleted='0' and a.deleted='0'";
+            $wherePortion = " WHERE c.id='{$row['contact_id']}' and c.deleted='0' and (ac.deleted='0' or ac.deleted is null) and (a.deleted='0' or a.deleted is null)";
           //  log_entry("Quick WHERE $selectPortion $wherePortion\n", "c:\callListenerLog.txt");
 
         }
@@ -198,7 +198,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
             $wherePortion .= sprintf($sqlReplace, "phone_home", $phoneToFind) . " OR ";
             $wherePortion .= sprintf($sqlReplace, "phone_other", $phoneToFind) . " OR ";
             $wherePortion .= sprintf($sqlReplace, "assistant_phone", $phoneToFind) . " OR ";
-            $wherePortion .= sprintf($sqlReplace, "phone_mobile", $phoneToFind) . ") and c.deleted='0' and ac.deleted='0' and a.deleted='0'";
+            $wherePortion .= sprintf($sqlReplace, "phone_mobile", $phoneToFind) . ") and c.deleted='0' and (ac.deleted='0' or ac.deleted is null) and (a.deleted='0' or a.deleted is null)";
         }
 
         $queryContact = $selectPortion . $wherePortion;
