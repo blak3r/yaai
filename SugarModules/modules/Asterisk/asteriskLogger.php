@@ -71,11 +71,7 @@ if( $argc > 2 ) {
 //
 require_once($sugarRoot . "include/nusoap/nusoap.php");
 
-
-// chdir is the root of all evil :-}
-// chdir("../");
-
-//class to check if a soap call failed(session time-out), if it did reconnect and execute the call again.
+// Wrapper class auto logins in if session expires. 
 class SugarSoap extends nusoapclient
 {
     public $sessionid;
@@ -87,7 +83,6 @@ class SugarSoap extends nusoapclient
         parent::__construct($endpoint, $something);
         $this->login();
     }
-    
     
     function login()
     {
@@ -180,18 +175,19 @@ $auth_array = array(
         'password' => $sugarSoapCredential
     )
 );
-$soapClient = new SugarSoap($sugarSoapEndpoint . '?wsdl', true, $auth_array);
-
-//$soapLogin = $soapClient->call('login', $auth_array);
-//var_dump($soapLogin);
+$soapClient = new SugarSoap($sugarSoapEndpoint . '?wsdl', true, $auth_array); // This method logs in also
 $soapSessionId = $soapClient->sessionid;
-//var_dump($soapSessionId);
 $userGUID      = $soapClient->call('get_user_id', array(
     $soapSessionId
 ));
-//var_dump($userGUID);
+
+
+if( empty($userGUID) || empty($soapSessionId) ) {
+	logLine( "! FATAL: SOAP login failed, something didnt get set by login... check your site_url:" . $soapSessionId . " user=" . $auth_array['user_auth']['user_name'] . " GUID=" . $userGUID . "\n");
+}
+p
 logLine( "! Successful SOAP login id=" . $soapSessionId . " user=" . $auth_array['user_auth']['user_name'] . " GUID=" . $userGUID . "\n");
-//die;
+
 
 
 

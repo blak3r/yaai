@@ -186,29 +186,31 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
             . "FROM contacts c left join accounts_contacts ac on (c.id=ac.contact_id) left join accounts a on (ac.account_id=a.id) ";
 
         if( $row['contact_id'] ) {
-            $wherePortion = " WHERE c.id='{$row['contact_id']}' and c.deleted='0' and ac.deleted='0' and a.deleted='0'";
-          //  log_entry("Quick WHERE $selectPortion $wherePortion\n", "c:\callListenerLog.txt");
+            $wherePortion = " WHERE c.id='{$row['contact_id']}' and c.deleted='0' and (ac.deleted='0' OR ac.deleted is null) and (a.deleted='0' or a.deleted is null)";
+            //log_entry("Quick WHERE $selectPortion $wherePortion\n", "c:\callListenerLog.txt");
 
         }
         // We only do this expensive query if it's not already set!
         else {
-            //log_entry("Expensive WHERE", "c:\callListenerLog.txt");
+            //log_entry("Expensive WHERE " . "\n", "c:\callListenerLog.txt");
             $wherePortion = " WHERE (";
             $wherePortion .= sprintf($sqlReplace, "phone_work", $phoneToFind) . " OR ";
             $wherePortion .= sprintf($sqlReplace, "phone_home", $phoneToFind) . " OR ";
             $wherePortion .= sprintf($sqlReplace, "phone_other", $phoneToFind) . " OR ";
             $wherePortion .= sprintf($sqlReplace, "assistant_phone", $phoneToFind) . " OR ";
-            $wherePortion .= sprintf($sqlReplace, "phone_mobile", $phoneToFind) . ") and c.deleted='0' and ac.deleted='0' and a.deleted='0'";
+            $wherePortion .= sprintf($sqlReplace, "phone_mobile", $phoneToFind) . ") and c.deleted='0' and (ac.deleted='0' OR ac.deleted is null) and (a.deleted='0' or a.deleted is null)";
         }
 
         $queryContact = $selectPortion . $wherePortion;
-        //log_entry($queryContact,"c:\callListenerLog.txt");
+       // log_entry($queryContact . "\n","c:\callListenerLog.txt");
 		$innerResultSet = $current_user->db->query($queryContact, false);
 
         //log_entry(printrs($innerResultSet),"c:\callListenerLog.txt");
 
         $isMultipleContactCase = false;
         $radioButtonCode = "";
+
+        //log_entry("Num Rows:" . $innerResultSet->num_rows );
 
         if( $innerResultSet->num_rows > 1 ) {
             $isMultipleContactCase = true;

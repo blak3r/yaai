@@ -17,6 +17,11 @@
                                 //'<a onclick="if ( DCMenu.menu ) DCMenu.menu(\'Contacts\',\'Create Contact\', true); return false;" href="#">Create Contact</a><BR>';
                                 // TODO put $selectContact back in.
                                 print "<TR><TD colspan=\"2\">$createNewContactLink&nbsp;&nbsp;&nbsp;$selectContactTextCode</TD></TR>";
+
+                                if( !empty( $item['company_id'] ) ) {
+                                    print "<TR><td>{$mod_strings['ASTERISKLBL_COMPANY']}:</td><td>";
+                                    print "<a href=\"index.php?module=Accounts&action=DetailView&record={$item['company_id']}\">{$item['company']}</a></td></tr>";
+                                }
                              }
                              else {
                                  print "<TR><td>{$mod_strings['ASTERISKLBL_NAME']}:</td><td><a href=\"index.php?module=Contacts&action=DetailView&record={$item['contact_id']}\"><span class=\"call_contacts\">{$item['full_name']}</span></a>&nbsp;$selectContactIconCode</td></TR>";

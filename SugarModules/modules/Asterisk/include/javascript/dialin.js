@@ -412,9 +412,14 @@ function closeChatBox(chatboxid) {
 		restructureChatBoxes();
 		
 		callRecordId = getChatCallRecordId( chatboxid );
-		
-		// Tells asterisk_log table that user has closed this entry.
-		$.post("index.php?entryPoint=AsteriskController&action=updateUIState", {id: chatboxid, ui_state: "Closed", call_record: callRecordId} );
+
+        if( callRecordId == null ) {
+            alert("Call popup notification logic error.  Please refresh page to close boxes.")
+        }
+        else {
+		    // Tells asterisk_log table that user has closed this entry.
+		    $.post("index.php?entryPoint=AsteriskController&action=updateUIState", {id: chatboxid, ui_state: "Closed", call_record: callRecordId} );
+        }
 	}
 }
 
