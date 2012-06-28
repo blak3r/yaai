@@ -337,8 +337,9 @@ function opencnam_fetch( $phoneNumber ) {
     $i=0;
     do {
         $response = file_get_contents($request_url); // First call returns with 404 immediately with free api, 2nd call will succeed. See https://github.com/blak3r/yaai/issues/5
-        if( empty($response) ) {
-            usleep(50000); // wait 50ms
+        // "Currently running a lookup for phone '7858647222'. Please check back in a few seconds."
+        if( empty($response) || strpos($response, "running a lookup") !== false) {
+            usleep(50000*(i+1)); // wait 50ms
         }
     }while($i++ < 3 && empty($response) );
 
