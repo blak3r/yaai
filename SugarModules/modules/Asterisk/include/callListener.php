@@ -152,6 +152,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 
 	// delete leading zeros
 	$phoneToFind = ltrim($phoneToFind, '0');
+    $phoneToFind = preg_replace('/\D/','',$phoneToFind); // Removes and non digits such as + chars.
 
 	$gravEmailAddress = ""; //clear address
 	$found = array();
