@@ -60,7 +60,18 @@ $mod_strings = array (
     'ASTERISKLBL_DURATION' => 'Продолжительность',
     'ASTERISKLBL_SELECTCONTACT' => 'Выберите контакт',
     'ASTERISKLBL_MULTIPLE_MATCHES' => "Несколько совпадений",
-    'ASTERISKLBL_CALLERID' => 'ID звонившего'
+    'ASTERISKLBL_CALLERID' => 'CallerID',
+
+    // For asteriskLogger.php SOAP call entries
+    'CALL_AUTOMATIC_RECORD'         => '** Авто-запись **',
+	'CALL_IN_LIMBO'                 => 'В процессе',
+	'CALL_STATUS_HELD'              => 'Принят',
+	'CALL_STATUS_MISSED'            => 'Пропущен',
+	'CALL_NAME_CALL'                => 'Звонок',
+	'CALL_NAME_MISSED'              => 'Пропущенный звонок',
+	'CALL_DESCRIPTION_CALLER_ID'    => 'Номер звонившего',
+	'CALL_DESCRIPTION_MISSED'       => 'Пропущенный/неудачный звонок',
+	'CALL_DESCRIPTION_PHONE_NUMBER' => 'Номер телефона'
 
    );
 

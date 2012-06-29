@@ -120,6 +120,10 @@ $asteriskUser          = "Username: " . $sugar_config['asterisk_user'] . "\r\n";
 $asteriskSecret        = "Secret: " . $sugar_config['asterisk_secret'] . "\r\n";
 $asteriskMatchInternal = $sugar_config['asterisk_expr'];
 
+// Load localization if available
+$locale_path = $sugarRoot . 'custom/modules/Asterisk/language/' . $sugar_config['default_language'] . '.lang.php';
+if (file_exists($locale_path)) include_once $locale_path;
+
 // Make regex pattern compatible with preg_match
 if( !startsWith($asteriskMatchInternal, '/' ) ) {
 		$asteriskMatchInternal = '/' . $asteriskMatchInternal . '/i';
@@ -298,11 +302,11 @@ while (true) {
 						'name_value_list' => array(
 							array(
 								'name' => 'name',
-								'value' => '** Automatic record **'
+								'value' => $mod_strings['CALL_AUTOMATIC_RECORD']
 							),
 							array(
 								'name' => 'status',
-								'value' => 'In Limbo'
+								'value' => $mod_strings['CALL_IN_LIMBO']
 							),
 							array(
 								'name' => 'assigned_user_id',
@@ -521,8 +525,8 @@ while (true) {
 								// BR: 3/16/2012 I originally had this check to make sure call was longer then 5 seconds... I don't know why. Whey you have callStatus of Missed it creates a task which is undesirable.
 								// So i'm commenting it out.  If it's April and I still haven't deleted this comment it's safe to delete this code.
 								//if ($callDurationRaw > 02) {
-									$callStatus = "Held";
-									$callName   = $callDirection . " Call";
+									$callStatus = $mod_strings['CALL_STATUS_HELD'];
+									$callName   = $callDirection . " " . $mod_strings['CALL_NAME_CALL'];
 
 									// This means call description was updated through AJAX so lets not overwrite the subject/description already assigned to the call.
 									if (!empty($callRecord['sweet']['description'])) {
@@ -693,10 +697,10 @@ while (true) {
 								$callName        = NULL;
 								$callDescription = "";
 								if ($callDurationRaw > 15) {
-									$callStatus = "Held";
+									$callStatus = $mod_strings['CALL_STATUS_HELD'];
 									//$callName = "Successfull call";
 
-									$callName = $callDirection . " Call";
+									$callName = $callDirection . " " . $mod_strings['CALL_NAME_CALL'];
 
 									// This means call description was updated through AJAX so lets not overwrite the subject/description already assigned to the call.
 									if (!empty($callRecord['sweet']['description'])) {
@@ -704,14 +708,14 @@ while (true) {
 										$callDescription = $callRecord['sweet']['description'];
 									}
 								} else {
-									$callStatus      = "Missed";
-									$callName        = "Missed Call";
-                                    $callDescription = "Missed/failed call ({$e['Cause-txt']}\n";
+									$callStatus      = $mod_strings['CALL_STATUS_MISSED'];
+									$callName        = $mod_strings['CALL_NAME_MISSED'];
+                                    $callDescription = "{$mod_strings['CALL_DESCRIPTION_MISSED']} ({$e['Cause-txt']}\n";
 									$callDescription .= "------------------\n";
-									$callDescription .= sprintf(" %-20s : %-40s\n", "Phone Number", $rawData['callerID']);
+									$callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['CALL_DESCRIPTION_PHONE_NUMBER'], $rawData['callerID']);
                                     if( $rawData['opencnam'] ) {
                                         $callName .= " - " . $rawData['opencnam'];
-                                        $callDescription .= sprintf(" %-20s : %-40s\n", "Caller ID", $rawData['opencnam']);
+                                        $callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['CALL_DESCRIPTION_CALLER_ID'], $rawData['opencnam']);
                                     }
 
 									logLine("Adding INBOUND Failed Call, id=$id, call_id = " . $callRecord['sweet']['id'] . "\n");
