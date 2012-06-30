@@ -33,17 +33,6 @@
  * Section 5 of the GNU General Public License version 3.
  *
  */
-//$mod_strings = array (
-//  'LBL_MANAGE_ASTERISK' => 'Конфигураци�? ASTERISK',
-//  'LBL_ASTERISK_HOST' => 'Хо�?т',
-//  'LBL_ASTERISK_PORT' => 'Порт',
-//  'LBL_ASTERISK_USER' => 'Пользователь',
-//  'LBL_ASTERISK_SECRET' => 'Пароль',
-//  'LBL_ASTERISK_PREFIX' => 'Dialout префик�?',
-//  'LBL_ASTERISK_CONTEXT' => 'Конек�?т',
-//  'LBL_ASTERISK_EXPR' => 'Регек�?п дл�? вход�?щих звонков',
-//  'LBL_ASTERISK_EXPR_DESC' => 'Dialpattern like PHP show Doku',
-//  );
 
 if (!isset($mod_strings)) { $mod_strings = array(); }
 
@@ -53,9 +42,19 @@ $mod_strings['LBL_ASTERISK_PORT'] = 'Порт';
 $mod_strings['LBL_ASTERISK_USER'] = 'Пользователь';
 $mod_strings['LBL_ASTERISK_SECRET'] = 'Пароль';
 $mod_strings['LBL_ASTERISK_PREFIX'] = 'Dialout префикс';
+$mod_strings['LBL_ASTERISK_DIALINPREFIX'] = 'Dialin префикс';
 $mod_strings['LBL_ASTERISK_CONTEXT'] = 'Контекст';
 $mod_strings['LBL_ASTERISK_EXPR'] = 'Регексп для входящих/исходящих звонков';
 $mod_strings['LBL_ASTERISK_EXPR_DESC'] = 'Regular expression to match incoming calls';
 $mod_strings['LBL_ASTERISK_SOAPUSER'] = 'Asterisk Soap-Юзер';
+
+$mod_strings['LBL_ASTERISK_LOG_FILE'] = 'Путь к лог-файлу';
+$mod_strings['LBL_ASTERISK_DIALOUT_CHANNEL'] = 'Канал Dialout';
+$mod_strings['LBL_ASTERISK_DIALOUT_CHANNEL_DESC'] = 'Регулярное выражение, ### будет заменено на расширение текущего пользователя';
+$mod_strings['LBL_ASTERISK_DIALIN_EXT_MATCH'] = 'Дополнительный регексп для расширений пользователей';
+$mod_strings['LBL_ASTERISK_CALL_SUBJECT_INBOUND_ABBR'] = 'Префикс темы для входящих звонков';
+$mod_strings['LBL_ASTERISK_CALL_SUBJECT_OUTBOUND_ABBR'] = 'Префикс темы для исходящих звонков';
+$mod_strings['LBL_ASTERISK_CALL_SUBJECT_MAX_LENGTH'] = 'Макс. длина темы';
+$mod_strings['LBL_ASTERISK_LISTENER_POLL_RATE'] = 'Частота опроса AJAX в миллисекундах';
 
 ?>
