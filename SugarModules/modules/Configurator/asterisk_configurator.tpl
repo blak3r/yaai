@@ -125,15 +125,6 @@
 			<input type='text' name='asterisk_dialinPrefix' size="45" value='{$asterisk_dialinPrefix}'>
 		</td>		
 	</tr><tr>
-		<td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_EXPR}: </td>
-		<td width="25%" class="dataField">
-		{if empty($config.asterisk_expr )}
-			{assign var='asterisk_expr' value=$asterisk_config.asterisk_expr}
-		{else}
-			{assign var='asterisk_expr' value=$config.asterisk_expr}
-		{/if}
-			<input type='text' name='asterisk_expr' size="45" value='{$asterisk_expr}'>
-		</td>
 		<td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_SOAPUSER}: </td>
 		<td width="25%" class="dataField">
 		{if empty($config.asterisk_soapuser )}
@@ -142,8 +133,34 @@
 			{assign var='asterisk_soapuser' value=$config.asterisk_soapuser}
 		{/if}
 			<input type='text' name='asterisk_soapuser' size="45" value='{$asterisk_soapuser}'>
+            <br/><span style="font-size:0.7em;color: gray;">*Note this is a SugarCRM user (Not an Asterisk User) that will be used by asteriskLogger when making SOAP calls.</span>
 		</td>
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_SOAPPASS}: </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_soappass )}
+            {assign var='asterisk_soapppass' value=$asterisk_config.asterisk_soappass}
+            {else}
+            {assign var='asterisk_soapppass' value=$config.asterisk_soappass}
+        {/if}
+            <input type='text' name='asterisk_soappass' size="45" value='{$asterisk_soappass}'>
+            <br/><span style="font-size:0.9em;color: gray;">*Password may not be displayed here after reloading page.  I'm not sure why but saving still works.  I thought this behavior was actually ideal for security purposes!  When in doubt, look in config.override.ini for asterisk_soappass to confirm..</span>
+        </td>
 	</tr>
+
+    <tr>
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_EXPR}: </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_expr )}
+            {assign var='asterisk_expr' value=$asterisk_config.asterisk_expr}
+            {else}
+            {assign var='asterisk_expr' value=$config.asterisk_expr}
+        {/if}
+            <input type='text' name='asterisk_expr' size="45" value='{$asterisk_expr}'>
+        </td>
+        <TD>&nbsp;</TD>
+        <td>&nbsp;</td>
+    </tr>
+
 	
 	<!-- Added in yaii 2.0 -->
 
