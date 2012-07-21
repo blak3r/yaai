@@ -75,9 +75,7 @@ QUERY8;
 			// If you already have jquery being loaded then you might want to comment out both.
 			// The Asterisk connector isn't picky as to what version of JQuery is used.  Anything 1.3.2 or greater should work fine.
 			//echo $conditionalJqueryIncludeScript;
-
-            // TODO improve so this check tests if version is less than 6.5.0
-			if( $sugar_config['sugar_version'] != "6.5.0" ) {
+            if( preg_match("/^6\.[1-4]/",$sugar_config['sugar_version']) ) {
 			    echo '<script type="text/javascript" src="custom/include/javascript/jquery/jquery.pack.js"></script>';
             }
 			//	echo '<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>';
