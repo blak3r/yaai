@@ -44,7 +44,7 @@ $manifest = array (
                           'regex_matches' =>
                           array (
 							1 => '6\.4\.\d',
-							2 => '6\.\d\.\d',  /** matches 6.x.x **/
+							2 => '6\.[0-5]\.\d',  /** matches 6.1.x,6.2.x,6.3.x,6.4.x,6.5.x **/
                                  ),
                           ),
                    'acceptable_sugar_flavors' =>
@@ -60,9 +60,9 @@ $manifest = array (
                    'icon' => '',
                    'is_uninstallable' => true,
                    'name' => 'Asterisk SugarCRM Connector',
-                   'published_date' => '2012-06-28',
+                   'published_date' => '2012-07-21',
                    'type' => 'module',
-                   'version' => '2.3.4.0 for v6.x',
+                   'version' => '2.4.0 for v6.x',
                    'remove_tables' => 'true',  /** This does absolutely nothing since our asterisk log table is created manually instead of as a bean **/
                    );
 

@@ -88,7 +88,10 @@ class SugarSoap extends nusoapclient
     {
         $result          = parent::call('login', $this->auth_array);
         $this->sessionid = $result['id'];
-        //print_r($result);
+        if( $this->sessionid == -1 ) {
+            logLine("! Soap login failed!\n");
+            print_r($result);
+        }
         return ($result);
     }
 
@@ -103,7 +106,6 @@ class SugarSoap extends nusoapclient
         }
         //print_r($result);
         return ($result);
-
     }
 }
 
@@ -133,7 +135,7 @@ if( !startsWith($asteriskMatchInternal, '/' ) ) {
 $calloutPrefix = isset($sugar_config['asterisk_prefix']) ? $sugar_config['asterisk_prefix'] : "";
 echo ("# Callout prefix is [$calloutPrefix]\n");
 
-$callinPrefix = isset($sugar_config['asterisk_dialinPrefix']) ? $sugar_config['asterisk_dialinPrefix'] : "+1";
+$callinPrefix = isset($sugar_config['asterisk_dialinPrefix']) ? $sugar_config['asterisk_dialinPrefix'] : "";
 echo ("# Callin prefix is [$callinPrefix]\n");
 echo ("asteriskMatchInternal = $asteriskMatchInternal\n");
 
@@ -153,9 +155,11 @@ $sql_db         = mysql_select_db($sugar_config['dbconfig']['db_name']);
 
 
 // Get SOAP config
-$sugarSoapEndpoint   = $sugar_config['site_url'] . "/soap.php";
+$sugarSoapEndpoint   = $sugar_config['site_url'] . "/soap.php";//"/soap.php";
 $sugarSoapUser       = $sugar_config['asterisk_soapuser'];
-$sugarSoapCredential = ""; {
+$sugarSoapCredential = md5($sugar_config['asterisk_soappass']);
+/*
+{
     $sql       = "select user_hash from users where user_name='$sugarSoapUser'";
     $sqlResult = mysql_query($sql);
     if ($sqlResult) {
@@ -166,6 +170,7 @@ $sugarSoapCredential = ""; {
         die();
     }
 }
+*/
 
 
 //
@@ -186,12 +191,13 @@ $userGUID      = $soapClient->call('get_user_id', array(
 ));
 
 
-if( empty($userGUID) || empty($soapSessionId) ) {
+if( empty($userGUID) || empty($soapSessionId) || $userGUID == -1 ) {
 	logLine( "! FATAL: SOAP login failed, something didnt get set by login... check your site_url:" . $soapSessionId . " user=" . $auth_array['user_auth']['user_name'] . " GUID=" . $userGUID . "\n");
+    die();
 }
-
-logLine( "! Successful SOAP login id=" . $soapSessionId . " user=" . $auth_array['user_auth']['user_name'] . " GUID=" . $userGUID . "\n");
-
+else {
+    logLine( "! Successful SOAP login id=" . $soapSessionId . " user=" . $auth_array['user_auth']['user_name'] . " GUID=" . $userGUID . "\n");
+}
 
 
 
@@ -315,7 +321,7 @@ while (true) {
 						)
 					);
 					$soapResult = $soapClient->call('set_entry', $set_entry_params);
-
+print_r( $soapResult );
 					$callRecordId = $soapResult['id'];
 					logLine("! Successfully created CALL record with id=" . $callRecordId . "\n");
 
