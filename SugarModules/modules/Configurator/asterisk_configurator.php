@@ -52,6 +52,7 @@ $asterisk_config['asterisk_dialinPrefix'] = '+1';
 $asterisk_config['asterisk_context'] = 'from-internal';
 $asterisk_config['asterisk_expr'] = '^(sip\/[1-9][0-9][0-9]?[0-9]?-|Local)';
 $asterisk_config['asterisk_soapuser'] = 'admin';
+$asterisk_config['asterisk_soappass'] = 'soap_password';
 
 $asterisk_config['asterisk_log_file'] = '';
 $asterisk_config['asterisk_dialout_channel'] = 'SIP/###';
@@ -128,6 +129,8 @@ $javascript->addFieldGeneric('asterisk_call_subject_outbound_abbr', "varchar", $
 $javascript->addFieldGeneric('asterisk_call_subject_max_length', "varchar", $mod_strings['LBL_ASTERISK_CALL_SUBJECT_MAX_LENGTH'], TRUE, "");
 $javascript->addFieldGeneric('asterisk_listener_poll_rate', "varchar", $mod_strings['LBL_ASTERISK_LISTENER_POLL_RATE'], TRUE, "");
 
+// Added in yaai-2.4
+$javascript->addFieldGeneric("asterisk_soappass", "varchar", $mod_strings['LBL_ASTERISK_SOAPPASS'], TRUE, "");
 
 
 echo $javascript->getScript();

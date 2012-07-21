@@ -204,7 +204,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
         }
 
         $queryContact = $selectPortion . $wherePortion;
-        //log_entry($queryContact . "\n","c:\callListenerLog.txt");
+        //log_entry($queryContacfastert . "\n","c:\callListenerLog.txt");
 		$innerResultSet = $current_user->db->query($queryContact, false);
 
         //log_entry(printrs($innerResultSet),"c:\callListenerLog.txt");
