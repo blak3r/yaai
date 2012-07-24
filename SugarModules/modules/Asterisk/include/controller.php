@@ -190,7 +190,8 @@ else if( $_REQUEST['action'] == "transfer" ) {
 	}
 
 	while($row = $current_user->db->fetchByAssoc($resultSet)){
-		$cmd ="ACTION: Redirect\r\nChannel: {$row['remote_channel']}\r\nContext: from-internal\r\nExten: $exten\r\nPriority: 1\r\n\r\n";
+		$context = $sugar_config['asterisk_context'];
+		$cmd ="ACTION: Redirect\r\nChannel: {$row['remote_channel']}\r\nContext: $context\r\nExten: $exten\r\nPriority: 1\r\n\r\n";
 		SendAMICommand($cmd);
 	}
 	
