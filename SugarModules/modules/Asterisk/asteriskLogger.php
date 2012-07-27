@@ -531,7 +531,7 @@ print_r( $soapResult );
 								// BR: 3/16/2012 I originally had this check to make sure call was longer then 5 seconds... I don't know why. Whey you have callStatus of Missed it creates a task which is undesirable.
 								// So i'm commenting it out.  If it's April and I still haven't deleted this comment it's safe to delete this code.
 								//if ($callDurationRaw > 02) {
-									$callStatus = $mod_strings['CALL_STATUS_HELD'];
+									$callStatus = 'Held';
 									$callName   = $callDirection . " " . $mod_strings['CALL_NAME_CALL'];
 
 									// This means call description was updated through AJAX so lets not overwrite the subject/description already assigned to the call.
@@ -703,7 +703,7 @@ print_r( $soapResult );
 								$callName        = NULL;
 								$callDescription = "";
 								if ($callDurationRaw > 15) {
-									$callStatus = $mod_strings['CALL_STATUS_HELD'];
+									$callStatus = 'Held';
 									//$callName = "Successfull call";
 
 									$callName = $callDirection . " " . $mod_strings['CALL_NAME_CALL'];
@@ -714,7 +714,7 @@ print_r( $soapResult );
 										$callDescription = $callRecord['sweet']['description'];
 									}
 								} else {
-									$callStatus      = $mod_strings['CALL_STATUS_MISSED'];
+									$callStatus      = 'Missed';
 									$callName        = $mod_strings['CALL_NAME_MISSED'];
                                     $callDescription = "{$mod_strings['CALL_DESCRIPTION_MISSED']} ({$e['Cause-txt']}\n";
 									$callDescription .= "------------------\n";
