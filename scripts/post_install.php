@@ -49,8 +49,22 @@ function post_install() {
 
 ?>
 <br /><br />
-<span style="font-size: 2em;"><strong>Please review the documentation!  There are several additional steps that must be taken.</strong></span> 
-<br /><span style="font-size: 1.3em;">The User Guide can be found on the Project website here: <a href="https://github.com/blak3r/yaai/wiki/User-Manual">https://github.com/blak3r/yaai/wiki/User-Manual</a></span>
+<span style="font-size: 1.6em;"><strong>Please review the documentation!  There are several additional steps that must be taken.</strong></span>
+<br /><span style="font-size: 1.3em;">The User Guide can be found on the Project website here: <a href="https://github.com/blak3r/yaai/wiki/User-Manual">https://github.com/blak3r/yaai/wiki/User-Manual</a>.  Please note the fairly comprehensive troubleshooting section at the end of the manual.</span>
+<br>
+<BR>
+<span style="font-size: 1.6em;"><strong>Donate to YAAI</strong></span>
+<br /><span style="font-size:1.3em;">Please consider making a donation to the project.  Your contribution allows me to spend more time improving/supporting.
+We're also in great need of some help from developers.  Please see: <a href="https://github.com/blak3r/yaai/wiki/Project-TODO-List">https://github.com/blak3r/yaai/wiki/Project-TODO-List</a> for ways you can help.</span>
+<P>
+    <BR/>
+  <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+      <input type="hidden" name="cmd" value="_s-xclick">
+      <input type="hidden" name="hosted_button_id" value="FA36DGSYQ3NE6">
+      <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+      <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+  </form>
+</P>
 
 <?php
   }

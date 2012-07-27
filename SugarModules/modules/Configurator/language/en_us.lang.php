@@ -47,6 +47,7 @@ $mod_strings['LBL_ASTERISK_CONTEXT'] = 'Dial Context';
 $mod_strings['LBL_ASTERISK_EXPR'] = 'Dialpattern for inbound/outbound matching';
 $mod_strings['LBL_ASTERISK_EXPR_DESC'] = 'Regular expression to match incoming calls';
 $mod_strings['LBL_ASTERISK_SOAPUSER'] = 'Asterisk Soap-User';
+$mod_strings['LBL_ASTERISK_SOAPPASS'] = 'Asterisk Soap-Pass';
 
 $mod_strings['LBL_ASTERISK_LOG_FILE'] = 'Log File Path';
 $mod_strings['LBL_ASTERISK_DIALOUT_CHANNEL'] = 'Dialout Channel';
