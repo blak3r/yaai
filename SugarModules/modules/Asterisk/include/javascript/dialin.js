@@ -553,9 +553,7 @@ function saveMemo( chatboxid ) {
 			callRecordId = getChatCallRecordId( chatboxid );
 			var theDirection = chatBoxCallDirections[chatboxid];
 			//alert( chatboxid + "callid: " + callRecordId + "   " + chatBoxCallRecordIds[chatboxid]);
-		    if( callRecordId == null ) {
-                alert("Not going to save properly");
-            }
+
 			$.post("index.php?entryPoint=AsteriskController&action=memoSave", {id: chatboxid, call_record: callRecordId, description: message, direction: theDirection} , function(data){
 				//message = message.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");
 				$("#chatbox_"+chatboxid+" .asterisk_save_status").html('Call Details Saved').css("display","block").fadeOut(5000); 
@@ -564,7 +562,7 @@ function saveMemo( chatboxid ) {
 		}
 		
 		// If you don't want SAVE button to also close then comment out line below
-		//closeChatBox(chatboxid); // FIXME REENABLE
+		closeChatBox(chatboxid); 
 }
 
 function showTransferMenu( chatboxid, exten ) {
