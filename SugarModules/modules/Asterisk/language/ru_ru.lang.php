@@ -57,10 +57,10 @@ $mod_strings = array (
 	'HANGUP'				=>	'Завершено',
 
 	// Added in v2.2
-    'ASTERISKLBL_DURATION' => 'Продолжительность',
-    'ASTERISKLBL_SELECTCONTACT' => 'Выберите контакт',
-    'ASTERISKLBL_MULTIPLE_MATCHES' => "Несколько совпадений",
-    'ASTERISKLBL_CALLERID' => 'CallerID',
+	'ASTERISKLBL_DURATION'         => 'Продолжительность',
+	'ASTERISKLBL_SELECTCONTACT'    => 'Выберите контакт',
+	'ASTERISKLBL_MULTIPLE_MATCHES' => "Несколько совпадений",
+	'ASTERISKLBL_CALLERID'         => 'CallerID',
 
     // For asteriskLogger.php SOAP call entries
     'CALL_AUTOMATIC_RECORD'         => '** Авто-запись **',
