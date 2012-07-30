@@ -311,6 +311,8 @@ function createChatBox(chatboxid, checkMinimizeCookie, chatboxtitle, chatboxcall
 	setChatTitle(chatboxid,chatboxtitle);
 
 	chatBoxCallRecordIds[chatboxid]=chatboxcallrecordid;
+    //alert( getChatCallRecordId(chatboxid) + " is == " + chatboxcallrecordid);
+
 	chatBoxCallDirections[chatboxid]=direction;
 
 
@@ -413,13 +415,16 @@ function closeChatBox(chatboxid) {
 		
 		callRecordId = getChatCallRecordId( chatboxid );
 
-        if( callRecordId == null ) {
-            alert("Call popup notification logic error.  Please refresh page to close boxes.")
-        }
-        else {
-		    // Tells asterisk_log table that user has closed this entry.
-		    $.post("index.php?entryPoint=AsteriskController&action=updateUIState", {id: chatboxid, ui_state: "Closed", call_record: callRecordId} );
-        }
+        //if( callRecordId == null ) {
+        //    alert("Call popup notification logic error.  Please refresh page to close boxes. Length =" + chatBoxCallRecordIds )
+        //}
+
+        // NOTE: For some unknown reason, on pages with AJAX the array that getChatCallRecordId uses just returns null for known valid records...
+        //       Controller.php now looks at the id field as well for the callRecordId.  This is okay since the current implementation uses callRecordId for the chatboxid.
+
+        // Tells asterisk_log table that user has closed this entry.
+		$.post("index.php?entryPoint=AsteriskController&action=updateUIState", {id: chatboxid, ui_state: "Closed", call_record: callRecordId} );
+
 	}
 }
 
@@ -548,7 +553,9 @@ function saveMemo( chatboxid ) {
 			callRecordId = getChatCallRecordId( chatboxid );
 			var theDirection = chatBoxCallDirections[chatboxid];
 			//alert( chatboxid + "callid: " + callRecordId + "   " + chatBoxCallRecordIds[chatboxid]);
-						
+		    if( callRecordId == null ) {
+                alert("Not going to save properly");
+            }
 			$.post("index.php?entryPoint=AsteriskController&action=memoSave", {id: chatboxid, call_record: callRecordId, description: message, direction: theDirection} , function(data){
 				//message = message.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");
 				$("#chatbox_"+chatboxid+" .asterisk_save_status").html('Call Details Saved').css("display","block").fadeOut(5000); 
@@ -557,7 +564,7 @@ function saveMemo( chatboxid ) {
 		}
 		
 		// If you don't want SAVE button to also close then comment out line below
-		closeChatBox(chatboxid);
+		//closeChatBox(chatboxid); // FIXME REENABLE
 }
 
 function showTransferMenu( chatboxid, exten ) {
