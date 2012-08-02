@@ -562,7 +562,7 @@ function saveMemo( chatboxid ) {
 		}
 		
 		// If you don't want SAVE button to also close then comment out line below
-		closeChatBox(chatboxid); 
+		closeChatBox(chatboxid);
 }
 
 function showTransferMenu( chatboxid, exten ) {
