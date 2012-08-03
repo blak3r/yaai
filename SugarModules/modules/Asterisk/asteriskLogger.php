@@ -886,7 +886,8 @@ print_r( $soapResult );
 						//$call_rec_id = mysql_fetch_array($result);
 						//var_dump($call_rec_id);
 						while ($call_rec_id = mysql_fetch_array($result)) {
-							$query = "DELETE FROM calls WHERE id='" . $call_rec_id['call_record_id'] . "'";
+                            logLine("Deleting Call Record: " . $call_rec_id['call_record_id'] );
+                            $query = "DELETE FROM calls WHERE id='" . $call_rec_id['call_record_id'] . "'";
 							$rc    = mysql_checked_query($query);
 						}
 
@@ -895,9 +896,39 @@ print_r( $soapResult );
 							{
 							$query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=NOW() WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
 							$rc    = mysql_checked_query($query);
-
 						}
 					}
+
+                    // Here we add support for complicated Ring Groups such as x1 ---> 615  ---> 710,722,735
+                    //                                                            \--> 620  ---> 810,811,812
+                    // Check if both channels are internal... Then, check the asterisk_log table to see if an entry exists where Channel matches one of them... if so then change it out.
+                    // TBD: does this work when we go from 615 -> 620
+                    // TBD: does answering on a cell phone and not pressing 1 to accept cause a bridge event that messes this up?  s
+                    if( isCallInternal($e['Channel1'],$e['Channel2'] )) {
+                        logLine("Internal Bridge Event Detected\n");
+                        if( preg_match('/(.*);(.*)/',$e['Channel1'],$matches) ) {
+                            $chanToFind = $matches[1] . '%';
+                            $query     = "SELECT id FROM asterisk_log WHERE channel like '$chanToFind' and direction='I' ";
+                            logLine("Internal: $query\n");
+                            $result    = mysql_checked_query($query);
+
+                            if( mysql_num_rows( $result) > 1){
+                                logLine("Internal ERROR: MULTIPLE MATCHING LINES IN ASTERISK LOG... BRIDGE LOGIC ISN'T BULLETPROOF\n");
+                            }
+                            else if( mysql_num_rows($result) == 1 ) {
+                                logLine("Internal Changing the channel to: {$e['Channel2']}\n" );
+                                $result_id = mysql_fetch_array($result);
+                                $chan2 = $e['Channel2'];
+                                $theId = $result_id['id'];
+                                $query = "UPDATE asterisk_log SET channel='$chan2' WHERE id='$theId'";
+                                logLine("UPDATE QUERY: $query\n");
+                                mysql_checked_query($query);
+                            }
+                        }
+                        else {
+                            logLine("Internal Didn't match regex.\n");
+                        }
+                    }
 				}
 				//Asterisk Manager 1.0
 
@@ -955,6 +986,11 @@ exit(0);
 // Helper functions *
 // ******************
 
+function isCallInternal($chan1, $chan2) {
+   global $asteriskMatchInternal;
+   return (preg_match($asteriskMatchInternal,$chan1) && preg_match($asteriskMatchInternal, $chan2));
+}
+
 // go through and parse the event
 function getEvent($event)
 {
@@ -989,6 +1025,7 @@ function dumpEvent(&$event)
 {
     // Skip 'Newexten' events - there just toooo many of 'em || For Asterisk manager 1.1 i choose to ignore another stack of events cause the log is populated with useless events
     if ($event['Event'] === 'Newexten' || $event['Event'] == 'UserEvent' || $event['Event'] == 'AGIExec' || $event['Event'] == 'Newchannel' || $event['Event'] == 'Newstate' || $event['Event'] == 'ExtensionStatus') {
+        LogLine("! AMI Event '". $event['Event']. " surpressed.\n");
         return;
     }
 

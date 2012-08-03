@@ -340,10 +340,10 @@ function opencnam_fetch( $phoneNumber ) {
         $response = file_get_contents($request_url); // First call returns with 404 immediately with free api, 2nd call will succeed. See https://github.com/blak3r/yaai/issues/5
         // "Currently running a lookup for phone '7858647222'. Please check back in a few seconds."
         if( empty($response) || strpos($response, "running a lookup") !== false) {
-            usleep(50000*(i+1)); // wait 50ms
+            usleep(100000*(i+1)); // wait 100ms, 200ms, then 300ms, then 400, then 500.
         }
-    }while($i++ < 3 && empty($response) );
-
+    }while($i++ < 5 && empty($response) );
+    log_entry("Open_CNAM for $phoneNumber took: $i attempts (5max) and returned: " . response . "\n", "c:\opencnam_log.txt"); // TODO remove in production code.
     return $response;
 }
 
