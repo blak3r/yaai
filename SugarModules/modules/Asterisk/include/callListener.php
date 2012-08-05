@@ -343,7 +343,7 @@ function opencnam_fetch( $phoneNumber ) {
             usleep(100000*(i+1)); // wait 100ms, 200ms, then 300ms, then 400, then 500.
         }
     }while($i++ < 5 && empty($response) );
-    log_entry("Open_CNAM for $phoneNumber took: $i attempts (5max) and returned: " . response . "\n", "c:\opencnam_log.txt"); // TODO remove in production code.
+    log_entry("Open_CNAM for $phoneNumber took: $i attempts (5max) and returned: " . $response . "\n", "c:\opencnam_log.txt"); // TODO remove in production code.
     return $response;
 }
 
