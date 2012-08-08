@@ -321,7 +321,7 @@ while (true) {
 						)
 					);
 					$soapResult = $soapClient->call('set_entry', $set_entry_params);
-print_r( $soapResult );
+                    //print_r( $soapResult );
 					$callRecordId = $soapResult['id'];
 					logLine("! Successfully created CALL record with id=" . $callRecordId . "\n");
 
@@ -330,12 +330,12 @@ print_r( $soapResult );
 					$tmpCallerID = trim($e['CallerIDNum']); //Asterisk Manager 1.0 $e['CallerID']
 
 
-					if (startsWith($calloutPrefix,$tmpCallerID)) {
+					if (startsWith($tmpCallerID,$calloutPrefix)) {
 						logLine ("* Stripping callout prefix: $calloutPrefix\n");
 						$tmpCallerID = substr($tmpCallerID, strlen($calloutPrefix));
 					}
 
-					if (startsWith($callinPrefix,$tmpCallerID)) {
+					if (startsWith($tmpCallerID,$callinPrefix)) {
 						logLine ("* Stripping callin prefix: $calloutPrefix\n");
 						$tmpCallerID = substr($tmpCallerID, strlen($callinPrefix));
 					}
@@ -365,9 +365,7 @@ print_r( $soapResult );
 						} else if (!preg_match($asteriskMatchInternal, $e['Channel'])) {
 							$query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall, asterisk_dest_id) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s')", $e['UniqueID'], $callRecordId, $e['Destination'], $e['Channel'], 'Dial', 'I', $tmpCallerID, 'NOW()', $e['DestUniqueID']);
 							$callDirection = 'Inbound';
-
 							logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $e['Channel'] . ' eDestination=' . $e['Destination'] . "\n");
-
 						}
 						mysql_checked_query($query);
 
