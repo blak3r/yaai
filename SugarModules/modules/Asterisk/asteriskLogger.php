@@ -287,6 +287,10 @@ while (true) {
 				$e             = getEvent($event);
 				dumpEvent($e); // prints to screen
 
+                if ($e['Event'] == 'Join' && !empty($e['Queue']) /*&& in_array($e['Queue'], $allowedQueueIds)*/ )
+                {
+                    $channel = $e['Channel']; // TODO add a map for relating queue channels to UniqueId
+                }
 
 				//
 				// Call Event
@@ -295,6 +299,15 @@ while (true) {
 					{
 					logLine("! Dial Event src=" . $e['Channel'] . " dest=" . $e['Destination'] . "\n"); //Asterisk Manager 1.1
 					//print "! Dial Event src=" . $e['Source'] . " dest=" . $e['Destination'] . "\n"; 	//Asterisk Manager 1.0
+
+                    $eChannel = $e['Channel'];
+
+                    // Attempt to make compatible with AMI 1.0
+                    if( !empty($e['Source']) ) {
+                        $eChannel = $e['Source'];
+                    }
+
+                    $eDestination = $e['Destination'];
 
 					//
 					// Before we log this Dial event, we create a corresponding object in Calls module.
@@ -342,14 +355,23 @@ while (true) {
 
 					logLine("* CallerID is: $tmpCallerID\n");
 
+                    // Check to see if this Dial Event is coming off a Queue.  If so we override the channel with the one we saved previously in Join Event.
+                    if (!empty($e['ConnectedLineNum'])
+                        /*&& in_array($e['ConnectedLineNum'], $allowedQueueIds)*/
+                        && $channel)  // TODO add a map for relating queue channels to UniqueId
+                    {
+                        logLine("Inbound From QUEUE detected, overriding: {$e['Channel']} with $channel");
+                        $eChannel = $channel;
+                    }
+
 					$rgDetectRegex = "/^Local\/RG/i"; // TODO make this a configuration option
 					$rgCellRingRegex = "/^Local\/\d{7,10}/i";// TODO make this a configuration option.... This detects in a RG when an outside line is called (usually for a cellphone)... for some reason the cell shows up as the Channel (aka the source)... We detect this by finding a number thats at least 7-10 characters long..
 
 					// Check if both ends of the call are internal (then delete created (** Automatic record **) record)
 					// 2nd condition looks for Local/RG-52-4102152497
-					if ( (preg_match($asteriskMatchInternal, $e['Channel']) && preg_match($asteriskMatchInternal, $e['Destination'])) ||
-						 preg_match($rgDetectRegex, $e['Destination'] ) ||
-						 preg_match($rgCellRingRegex, $e['Channel']) )
+					if ( (preg_match($asteriskMatchInternal, $eChannel) && preg_match($asteriskMatchInternal, $eDestination)) ||
+						 preg_match($rgDetectRegex, $eDestination ) ||
+						 preg_match($rgCellRingRegex, $eChannel) )
 					{
 						deleteCall($callRecordId);
 						logLine("INTERNAL call detected, Deleting Call Record $callRecordId\n");
@@ -357,15 +379,15 @@ while (true) {
 					else
 					{
 						//Asterisk Manager 1.1 (If the call is internal, this will be skipped)
-						if (preg_match($asteriskMatchInternal, $e['Channel']) && !preg_match($asteriskMatchInternal, $e['Destination'])) {
-							$query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", $e['DestUniqueID'], $callRecordId, $e['Channel'], $e['Destination'], 'NeedID', 'O', $tmpCallerID, 'NOW()');
+						if (preg_match($asteriskMatchInternal, $eChannel) && !preg_match($asteriskMatchInternal, $eDestination)) {
+							$query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", $e['DestUniqueID'], $callRecordId, $eChannel, $eDestination, 'NeedID', 'O', $tmpCallerID, 'NOW()');
 							$callDirection = 'Outbound';
-							logLine("OUTBOUND state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $e['Channel'] . ' eDestination=' . $e['Destination'] . "\n");
+							logLine("OUTBOUND state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
 
-						} else if (!preg_match($asteriskMatchInternal, $e['Channel'])) {
-							$query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall, asterisk_dest_id) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s')", $e['UniqueID'], $callRecordId, $e['Destination'], $e['Channel'], 'Dial', 'I', $tmpCallerID, 'NOW()', $e['DestUniqueID']);
+						} else if (!preg_match($asteriskMatchInternal, $eChannel)) {
+							$query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall, asterisk_dest_id) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s')", $e['UniqueID'], $callRecordId, $eDestination, $eChannel, 'Dial', 'I', $tmpCallerID, 'NOW()', $e['DestUniqueID']);
 							$callDirection = 'Inbound';
-							logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $e['Channel'] . ' eDestination=' . $e['Destination'] . "\n");
+							logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
 						}
 						mysql_checked_query($query);
 
@@ -389,7 +411,7 @@ while (true) {
 						$query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s',%s)",
 						$e['SrcUniqueID'],
 						$callRecordId,
-						$e['Destination'],
+						$eDestination,
 						'Dial',
 						'I',
 						$tmpCallerID,
