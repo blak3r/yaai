@@ -6,6 +6,7 @@
  * Parts of this code are (c) 2006. RustyBrick, Inc.  http://www.rustybrick.com/
  * Parts of this code are (c) 2008 vertico software GmbH 
  * Parts of this code are (c) 2009 abcona e. K. Angelo Malaguarnera E-Mail admin@abcona.de
+ * Parts of this code are (c) 2012 Blake Robertson http://www.blakerobertson.com
  * http://www.sugarforge.org/projects/yaai/
  *
  * This program is free software; you can redistribute it and/or modify it under
@@ -347,7 +348,7 @@ function opencnam_fetch( $phoneNumber ) {
             $found = true;
         }
     } while($i++ < 7 && $found == false );
-    //log_entry("Open_CNAM for $phoneNumber took: $i attempts (8max) and returned: " . $response . "\n", "c:\opencnam_log.txt"); // TODO remove in production code.
+    log_entry("Open_CNAM for $phoneNumber took: $i attempts (8max) and returned: " . $response . "\n", "c:\opencnam_log.txt"); // TODO remove in production code.
     if( empty($response) ){
         $response = " "; // return a space character so it doesn't keep attempting to lookup number next time callListener is called.
     }

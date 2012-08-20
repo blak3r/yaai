@@ -158,19 +158,19 @@ $sql_db         = mysql_select_db($sugar_config['dbconfig']['db_name']);
 $sugarSoapEndpoint   = $sugar_config['site_url'] . "/soap.php";//"/soap.php";
 $sugarSoapUser       = $sugar_config['asterisk_soapuser'];
 $sugarSoapCredential = md5($sugar_config['asterisk_soappass']);
-/*
-{
-    $sql       = "select user_hash from users where user_name='$sugarSoapUser'";
-    $sqlResult = mysql_query($sql);
-    if ($sqlResult) {
-        $rowData             = mysql_fetch_assoc($sqlResult);
-        $sugarSoapCredential = $rowData['user_hash'];
-    } else {
-        logLine("! FATAL: Cannot find login credentials for user $sugarSoapUser\n");
-        die();
-    }
+
+// Here we check if LDAP Authentication is used, if so we must build credential differently
+$q = mysql_query('select value from config where category=\'system\' and name=\'ldap_enabled\'');
+$r = mysql_fetch_assoc($q);
+if($r['value'] != 1){
+    $sugarSoapCredential = md5($sugar_config['asterisk_soappass']);
 }
-*/
+else{
+    $q = mysql_query('select value from config where category=\'ldap\' and name=\'enc_key\'');
+    $r = mysql_fetch_assoc($q);
+    $ldap_enc_key = substr(md5($r['value']),0,24);
+    $sugarSoapCredential = bin2hex(mcrypt_cbc(MCRYPT_3DES, $ldap_enc_key, $sugar_config['asterisk_soappass'], MCRYPT_ENCRYPT, 'password'));
+}
 
 
 //
