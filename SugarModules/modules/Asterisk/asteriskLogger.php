@@ -43,6 +43,9 @@ $mysql_loq_queries = 0;
 $mysql_log_results = 0;
 $verbose_log = 0;
 
+// All Sugar timestamps are UTC
+date_default_timezone_set('UTC');
+
 //
 // Say hello, setup include path(s)
 //
@@ -153,6 +156,8 @@ $sql_db         = mysql_select_db($sugar_config['dbconfig']['db_name']);
 // Note only use this for development
 //mysql_query('DELETE FROM asterisk_log');
 
+// Set all MySQL dates to UTC
+mysql_query("SET time_zone='+00:00'");
 
 // Get SOAP config
 $sugarSoapEndpoint   = $sugar_config['site_url'] . "/soap.php";//"/soap.php";
@@ -360,12 +365,12 @@ print_r( $soapResult );
 					{
 						//Asterisk Manager 1.1 (If the call is internal, this will be skipped)
 						if (preg_match($asteriskMatchInternal, $e['Channel']) && !preg_match($asteriskMatchInternal, $e['Destination'])) {
-							$query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", $e['DestUniqueID'], $callRecordId, $e['Channel'], $e['Destination'], 'NeedID', 'O', $tmpCallerID, 'NOW()');
+							$query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", $e['DestUniqueID'], $callRecordId, $e['Channel'], $e['Destination'], 'NeedID', 'O', $tmpCallerID, 'FROM_UNIXTIME('.time().')');
 							$callDirection = 'Outbound';
 							logLine("OUTBOUND state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $e['Channel'] . ' eDestination=' . $e['Destination'] . "\n");
 
 						} else if (!preg_match($asteriskMatchInternal, $e['Channel'])) {
-							$query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall, asterisk_dest_id) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s')", $e['UniqueID'], $callRecordId, $e['Destination'], $e['Channel'], 'Dial', 'I', $tmpCallerID, 'NOW()', $e['DestUniqueID']);
+							$query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall, asterisk_dest_id) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s')", $e['UniqueID'], $callRecordId, $e['Destination'], $e['Channel'], 'Dial', 'I', $tmpCallerID, 'FROM_UNIXTIME('.time().')', $e['DestUniqueID']);
 							$callDirection = 'Inbound';
 
 							logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $e['Channel'] . ' eDestination=' . $e['Destination'] . "\n");
@@ -385,7 +390,7 @@ print_r( $soapResult );
 						'NeedID',
 						'O',
 						$tmpCallerID,
-						'NOW()'
+						FROM_UNIXTIME('.time().')
 						);
 						$callDirection = 'Outbound';
 						}
@@ -397,7 +402,7 @@ print_r( $soapResult );
 						'Dial',
 						'I',
 						$tmpCallerID,
-						'NOW()'
+						FROM_UNIXTIME('.time().')
 						);
 						$callDirection = 'Inbound';
 						}
@@ -493,7 +498,7 @@ print_r( $soapResult );
 							//
 							$rawData      = $callRecord['bitter']; // raw data from asterisk_log
 							$query        = sprintf("UPDATE asterisk_log SET callstate='%s', timestampHangup=%s, hangup_cause=%d, hangup_cause_txt='%s' WHERE asterisk_id='%s'", //asterisk_dest_id was asterisk_id
-								'Hangup', 'NOW()', $e['Cause'], $e['Cause-txt'], $id);
+								'Hangup', 'FROM_UNIXTIME('.time().')', $e['Cause'], $e['Cause-txt'], $id);
 							$updateResult = mysql_checked_query($query);
 							if ($updateResult) {
 								$assignedUser = findUserIdFromChannel( $rawData['channel'] );
@@ -505,11 +510,14 @@ print_r( $soapResult );
 								//
 								// Calculate call duration...
 								//
+								$failedCall      = FALSE;
 								$hangupTime      = time();
 								$callDurationRaw = 0; // call duration in seconds, only matters if timestampLink != NULL
 								if ($rawData['timestampLink'] != NULL) {
 									$callStartLink   = strtotime($rawData['timestampLink']);
 									$callDurationRaw = $hangupTime - $callStartLink;
+								} else {
+									$failedCall = TRUE;
 								}
 								$callStart = strtotime($rawData['timestampCall']);
 
@@ -530,24 +538,28 @@ print_r( $soapResult );
 
 								// BR: 3/16/2012 I originally had this check to make sure call was longer then 5 seconds... I don't know why. Whey you have callStatus of Missed it creates a task which is undesirable.
 								// So i'm commenting it out.  If it's April and I still haven't deleted this comment it's safe to delete this code.
-								//if ($callDurationRaw > 02) {
+								//if (!$failedCall) {
 									$callStatus = 'Held';
-									$callName   = $callDirection . " " . $mod_strings['CALL_NAME_CALL'];
+									$callName   = $mod_strings['ASTERISKLBL_GOING_OUT'];
 
 									// This means call description was updated through AJAX so lets not overwrite the subject/description already assigned to the call.
 									if (!empty($callRecord['sweet']['description'])) {
 										$callName        = $callRecord['sweet']['name'];
 										$callDescription = $callRecord['sweet']['description'];
 									}
-								//}
-								//else {
-								//    $callStatus      = "Missed";
-								//    $callName        = sprintf("Failed call (%s) ", $e['Cause-txt']);
-								//    $callDescription = "Missed/failed call\n";
-								//    $callDescription .= "------------------\n";
-								//    $callDescription .= sprintf(" %-20s : %-40s\n", "Caller ID", $rawData['callerID']);
-								//
-								//}
+								// } else {
+								//     $callStatus      = 'Missed';
+								// 	$callName        = $mod_strings['CALL_NAME_MISSED'];
+        //                             $callDescription = "{$mod_strings['CALL_DESCRIPTION_MISSED']} ({$e['Cause-txt']}\n";
+								// 	$callDescription .= "------------------\n";
+								// 	$callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['CALL_DESCRIPTION_PHONE_NUMBER'], $rawData['callerID']);
+        //                             if( $rawData['opencnam'] ) {
+        //                                 $callName .= " - " . $rawData['opencnam'];
+        //                                 $callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['CALL_DESCRIPTION_CALLER_ID'], $rawData['opencnam']);
+        //                             }
+
+								// 	logLine("Adding OUTBOUND Failed Call, id=$id, call_id = " . $callRecord['sweet']['id'] . "\n");
+								// }
 
                                 // Establish Relationships with the Call and Contact/Account
                                 $beanID = NULL;
@@ -667,7 +679,7 @@ print_r( $soapResult );
 							//
 							$rawData      = $callRecord['bitter']; // raw data from asterisk_log
 							$query        = sprintf("UPDATE asterisk_log SET callstate='%s', timestampHangup=%s, hangup_cause=%d, hangup_cause_txt='%s' WHERE asterisk_dest_id='%s'", //asterisk_dest_id was asterisk_id
-								'Hangup', 'NOW()', $e['Cause'], $e['Cause-txt'], $id);
+								'Hangup', 'FROM_UNIXTIME('.time().')', $e['Cause'], $e['Cause-txt'], $id);
 							$updateResult = mysql_checked_query($query);
 							if ($updateResult) {
 								$assignedUser = findUserIdFromChannel( $rawData['channel'] );
@@ -680,11 +692,14 @@ print_r( $soapResult );
 								//
 								// Calculate call duration...
 								//
+								$failedCall      = FALSE;
 								$hangupTime      = time();
 								$callDurationRaw = 0; // call duration in seconds, only matters if timestampLink != NULL
 								if ($rawData['timestampLink'] != NULL) {
 									$callStartLink   = strtotime($rawData['timestampLink']);
 									$callDurationRaw = $hangupTime - $callStartLink;
+								} else {
+									$failedCall = TRUE;
 								}
 								$callStart = strtotime($rawData['timestampCall']);
 
@@ -702,11 +717,11 @@ print_r( $soapResult );
 								$callStatus      = NULL;
 								$callName        = NULL;
 								$callDescription = "";
-								if ($callDurationRaw > 15) {
+								if (!$failedCall) {
 									$callStatus = 'Held';
 									//$callName = "Successfull call";
 
-									$callName = $callDirection . " " . $mod_strings['CALL_NAME_CALL'];
+									$callName = $mod_strings['ASTERISKLBL_COMING_IN'];
 
 									// This means call description was updated through AJAX so lets not overwrite the subject/description already assigned to the call.
 									if (!empty($callRecord['sweet']['description'])) {
@@ -872,10 +887,10 @@ print_r( $soapResult );
 					}
 					if ($callDirection == "Inbound") {
 						// Inbound bridge event
-						$query  = "UPDATE asterisk_log SET callstate='Connected', timestampLink=NOW() WHERE asterisk_dest_id='" . $e['Uniqueid1'] . "' OR asterisk_dest_id='" . $e['Uniqueid2'] . "'";
+						$query  = "UPDATE asterisk_log SET callstate='Connected', timestampLink=FROM_UNIXTIME(".time().") WHERE asterisk_dest_id='" . $e['Uniqueid1'] . "' OR asterisk_dest_id='" . $e['Uniqueid2'] . "'";
 						$rc     = mysql_checked_query($query);
 						// und vice versa .. woher immer der call kam
-						// $query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=NOW() WHERE asterisk_id='" . $e['Uniqueid2'] . "'";
+						// $query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid2'] . "'";
 						// $record = mysql_query($query);
 						// to delete all the extra inbound records created by the hangup event.
 						$id1    = $e['Uniqueid1'];
@@ -893,7 +908,7 @@ print_r( $soapResult );
 					} else {
 						if ($e['Event'] == 'Bridge') //Outbound bridge event
 							{
-							$query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=NOW() WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
+							$query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
 							$rc    = mysql_checked_query($query);
 
 						}
@@ -903,11 +918,11 @@ print_r( $soapResult );
 
 				/*if($e['Event'] == 'Link')
 				{
-				$query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=NOW() WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
+				$query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
 				$rc = mysql_checked_query($query);
 
 				// und vice versa .. woher immer der call kam
-				// $query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=NOW() WHERE asterisk_id='" . $e['Uniqueid2'] . "'";
+				// $query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid2'] . "'";
 				// $record = mysql_query($query);
 				};*/
 
