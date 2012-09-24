@@ -163,19 +163,19 @@ mysql_query("SET time_zone='+00:00'");
 $sugarSoapEndpoint   = $sugar_config['site_url'] . "/soap.php";//"/soap.php";
 $sugarSoapUser       = $sugar_config['asterisk_soapuser'];
 $sugarSoapCredential = md5($sugar_config['asterisk_soappass']);
-/*
-{
-    $sql       = "select user_hash from users where user_name='$sugarSoapUser'";
-    $sqlResult = mysql_query($sql);
-    if ($sqlResult) {
-        $rowData             = mysql_fetch_assoc($sqlResult);
-        $sugarSoapCredential = $rowData['user_hash'];
-    } else {
-        logLine("! FATAL: Cannot find login credentials for user $sugarSoapUser\n");
-        die();
-    }
+
+// Here we check if LDAP Authentication is used, if so we must build credential differently
+$q = mysql_query('select value from config where category=\'system\' and name=\'ldap_enabled\'');
+$r = mysql_fetch_assoc($q);
+if($r['value'] != 1){
+    $sugarSoapCredential = md5($sugar_config['asterisk_soappass']);
 }
-*/
+else{
+    $q = mysql_query('select value from config where category=\'ldap\' and name=\'enc_key\'');
+    $r = mysql_fetch_assoc($q);
+    $ldap_enc_key = substr(md5($r['value']),0,24);
+    $sugarSoapCredential = bin2hex(mcrypt_cbc(MCRYPT_3DES, $ldap_enc_key, $sugar_config['asterisk_soappass'], MCRYPT_ENCRYPT, 'password'));
+}
 
 
 //
@@ -292,6 +292,10 @@ while (true) {
 				$e             = getEvent($event);
 				dumpEvent($e); // prints to screen
 
+                if ($e['Event'] == 'Join' && !empty($e['Queue']) /*&& in_array($e['Queue'], $allowedQueueIds)*/ )
+                {
+                    $channel = $e['Channel']; // TODO add a map for relating queue channels to UniqueId
+                }
 
 				//
 				// Call Event
@@ -300,6 +304,15 @@ while (true) {
 					{
 					logLine("! Dial Event src=" . $e['Channel'] . " dest=" . $e['Destination'] . "\n"); //Asterisk Manager 1.1
 					//print "! Dial Event src=" . $e['Source'] . " dest=" . $e['Destination'] . "\n"; 	//Asterisk Manager 1.0
+
+                    $eChannel = $e['Channel'];
+
+                    // Attempt to make compatible with AMI 1.0
+                    if( !empty($e['Source']) ) {
+                        $eChannel = $e['Source'];
+                    }
+
+                    $eDestination = $e['Destination'];
 
 					//
 					// Before we log this Dial event, we create a corresponding object in Calls module.
@@ -326,7 +339,7 @@ while (true) {
 						)
 					);
 					$soapResult = $soapClient->call('set_entry', $set_entry_params);
-print_r( $soapResult );
+                    //print_r( $soapResult );
 					$callRecordId = $soapResult['id'];
 					logLine("! Successfully created CALL record with id=" . $callRecordId . "\n");
 
@@ -335,46 +348,50 @@ print_r( $soapResult );
 					$tmpCallerID = trim($e['CallerIDNum']); //Asterisk Manager 1.0 $e['CallerID']
 
 
-					if (startsWith($calloutPrefix,$tmpCallerID)) {
+					if (startsWith($tmpCallerID,$calloutPrefix)) {
 						logLine ("* Stripping callout prefix: $calloutPrefix\n");
 						$tmpCallerID = substr($tmpCallerID, strlen($calloutPrefix));
 					}
 
-					if (startsWith($callinPrefix,$tmpCallerID)) {
+					if (startsWith($tmpCallerID,$callinPrefix)) {
 						logLine ("* Stripping callin prefix: $calloutPrefix\n");
 						$tmpCallerID = substr($tmpCallerID, strlen($callinPrefix));
 					}
 
 					logLine("* CallerID is: $tmpCallerID\n");
 
+                    // Check to see if this Dial Event is coming off a Queue.  If so we override the channel with the one we saved previously in Join Event.
+                    if (!empty($e['ConnectedLineNum'])
+                        /*&& in_array($e['ConnectedLineNum'], $allowedQueueIds)*/
+                        && $channel)  // TODO add a map for relating queue channels to UniqueId
+                    {
+                        logLine("Inbound From QUEUE detected, overriding: {$e['Channel']} with $channel");
+                        $eChannel = $channel;
+                    }
+
 					$rgDetectRegex = "/^Local\/RG/i"; // TODO make this a configuration option
 					$rgCellRingRegex = "/^Local\/\d{7,10}/i";// TODO make this a configuration option.... This detects in a RG when an outside line is called (usually for a cellphone)... for some reason the cell shows up as the Channel (aka the source)... We detect this by finding a number thats at least 7-10 characters long..
 
 					// Check if both ends of the call are internal (then delete created (** Automatic record **) record)
 					// 2nd condition looks for Local/RG-52-4102152497
-					if ( (preg_match($asteriskMatchInternal, $e['Channel']) && preg_match($asteriskMatchInternal, $e['Destination'])) ||
-						 preg_match($rgDetectRegex, $e['Destination'] ) ||
-						 preg_match($rgCellRingRegex, $e['Channel']) )
+					if ( (preg_match($asteriskMatchInternal, $eChannel) && preg_match($asteriskMatchInternal, $eDestination)) ||
+						 preg_match($rgDetectRegex, $eDestination ) ||
+						 preg_match($rgCellRingRegex, $eChannel) )
 					{
-						$query = "DELETE FROM calls WHERE id='$callRecordId'";
-						mysql_checked_query($query);
-						// TODO what about the other tables.. like the calls_cstm?  Why not use soap for this?
-						logLine("INTERNAL call detected, Deleting Call Record $callRecordId affected: " . mysql_affected_rows() . " rows.\n");
+						deleteCall($callRecordId);
+						logLine("INTERNAL call detected, Deleting Call Record $callRecordId\n");
 					}
 					else
 					{
 						//Asterisk Manager 1.1 (If the call is internal, this will be skipped)
-						if (preg_match($asteriskMatchInternal, $e['Channel']) && !preg_match($asteriskMatchInternal, $e['Destination'])) {
-							$query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", $e['DestUniqueID'], $callRecordId, $e['Channel'], $e['Destination'], 'NeedID', 'O', $tmpCallerID, 'FROM_UNIXTIME('.time().')');
+						if (preg_match($asteriskMatchInternal, $eChannel) && !preg_match($asteriskMatchInternal, $eDestination)) {
+							$query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", $e['DestUniqueID'], $callRecordId, $eChannel, $eDestination, 'NeedID', 'O', $tmpCallerID, 'FROM_UNIXTIME('.time().')');
 							$callDirection = 'Outbound';
-							logLine("OUTBOUND state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $e['Channel'] . ' eDestination=' . $e['Destination'] . "\n");
-
-						} else if (!preg_match($asteriskMatchInternal, $e['Channel'])) {
-							$query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall, asterisk_dest_id) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s')", $e['UniqueID'], $callRecordId, $e['Destination'], $e['Channel'], 'Dial', 'I', $tmpCallerID, 'FROM_UNIXTIME('.time().')', $e['DestUniqueID']);
+							logLine("OUTBOUND state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
+						} else if (!preg_match($asteriskMatchInternal, $eChannel)) {
+							$query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall, asterisk_dest_id) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s')", $e['UniqueID'], $callRecordId, $eDestination, $eChannel, 'Dial', 'I', $tmpCallerID, 'FROM_UNIXTIME('.time().')', $e['DestUniqueID']);
 							$callDirection = 'Inbound';
-
-							logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $e['Channel'] . ' eDestination=' . $e['Destination'] . "\n");
-
+							logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
 						}
 						mysql_checked_query($query);
 
@@ -398,7 +415,7 @@ print_r( $soapResult );
 						$query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s',%s)",
 						$e['SrcUniqueID'],
 						$callRecordId,
-						$e['Destination'],
+						$eDestination,
 						'Dial',
 						'I',
 						$tmpCallerID,
@@ -846,8 +863,9 @@ print_r( $soapResult );
 								));
 							} // End Inbound Case
 
-							// In case of multiple extensions when a call is not answered, every extensions produces a failed call record, this will keep the first of those records but delete the rest.
-							$query     = "SELECT asterisk_id FROM asterisk_log WHERE asterisk_dest_id='$id'";
+							// In case of multiple extensions when a call is not answered, every extensions produces a failed call record,
+                            // this will keep the first of those records but delete the rest. (LIMIT 1,999999999999 in query returns all but first match.)
+                           	$query     = "SELECT asterisk_id FROM asterisk_log WHERE asterisk_dest_id='$id'";
 							$result    = mysql_checked_query($query);
 							$result_id = mysql_fetch_array($result);
 							logLine("Cleaning up Failed Calls part1, asterisk_id = ".$result_id['asterisk_id']."\n");
@@ -856,14 +874,14 @@ print_r( $soapResult );
 							$result    = mysql_checked_query($query);
 
 							while ($call_record_id = mysql_fetch_array($result)) {
-								//For testing purposes
-								//$query = "SELECT id FROM calls WHERE id='" . $call_record_id['call_record_id'] . "' AND name LIKE 'Failed call%'";
-								$query = "DELETE FROM calls WHERE id='" . $call_record_id['call_record_id'] . "' AND name LIKE 'Missed call%'";
+                                $query = "DELETE FROM calls WHERE id='" . $call_record_id['call_record_id'] . "' AND name LIKE '{$mod_strings['CALL_NAME_MISSED']}%'";
 								$rq    = mysql_checked_query($query);
 
 								if( mysql_affected_rows() > 0 ) {
 									logLine("Cleaning up Failed Calls part2, DELETED call_record_id = {$call_record_id['call_record_id']}\n");
-								}
+                                    $query = "DELETE FROM calls_cstm WHERE id_c='{$call_record_id['call_record_id']}'";
+                                     mysql_checked_query($query);
+                                }
 								//$total_result = mysql_fetch_array($rq);
 								//var_dump($total_result);
 							}
@@ -901,8 +919,8 @@ print_r( $soapResult );
 						//$call_rec_id = mysql_fetch_array($result);
 						//var_dump($call_rec_id);
 						while ($call_rec_id = mysql_fetch_array($result)) {
-							$query = "DELETE FROM calls WHERE id='" . $call_rec_id['call_record_id'] . "'";
-							$rc    = mysql_checked_query($query);
+                            logLine("Deleting Call Record: " . $call_rec_id['call_record_id'] );
+                            deleteCall( $call_rec_id['call_record_id'] );
 						}
 
 					} else {
@@ -910,9 +928,38 @@ print_r( $soapResult );
 							{
 							$query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
 							$rc    = mysql_checked_query($query);
-
 						}
 					}
+
+                    // Here we add support for complicated Ring Groups such as x1 ---> 615  ---> 710,722,735
+                    //                                                            \--> 620  ---> 810,811,812
+                    // Check if both channels are internal... Then, check the asterisk_log table to see if an entry exists where Channel matches one of them... if so then change it out.
+                    // TBD: does answering on a cell phone and not pressing 1 to accept cause a bridge event that messes this up?  s
+                    if( isCallInternal($e['Channel1'],$e['Channel2'] )) {
+                        logLine("Internal Bridge Event Detected\n");
+                        if( preg_match('/(.*);(.*)/',$e['Channel1'],$matches) ) {
+                            $chanToFind = $matches[1] . '%';
+                            $query     = "SELECT id FROM asterisk_log WHERE channel like '$chanToFind' and direction='I' ";
+                            logLine("Internal: $query\n");
+                            $result    = mysql_checked_query($query);
+                            // TODO clean up all these logLines.
+                            if( mysql_num_rows( $result) > 1){
+                                logLine("Internal ERROR: MULTIPLE MATCHING LINES IN ASTERISK LOG... BRIDGE LOGIC ISN'T BULLETPROOF\n");
+                            }
+                            else if( mysql_num_rows($result) == 1 ) {
+                                logLine("Internal Changing the channel to: {$e['Channel2']}\n" );
+                                $result_id = mysql_fetch_array($result);
+                                $chan2 = $e['Channel2'];
+                                $theId = $result_id['id'];
+                                $query = "UPDATE asterisk_log SET channel='$chan2' WHERE id='$theId'";
+                                logLine("UPDATE QUERY: $query\n");
+                                mysql_checked_query($query);
+                            }
+                        }
+                        else {
+                            logLine("Internal Didn't match regex.\n");
+                        }
+                    }
 				}
 				//Asterisk Manager 1.0
 
@@ -970,6 +1017,11 @@ exit(0);
 // Helper functions *
 // ******************
 
+function isCallInternal($chan1, $chan2) {
+   global $asteriskMatchInternal;
+   return (preg_match($asteriskMatchInternal,$chan1) && preg_match($asteriskMatchInternal, $chan2));
+}
+
 // go through and parse the event
 function getEvent($event)
 {
@@ -1004,6 +1056,7 @@ function dumpEvent(&$event)
 {
     // Skip 'Newexten' events - there just toooo many of 'em || For Asterisk manager 1.1 i choose to ignore another stack of events cause the log is populated with useless events
     if ($event['Event'] === 'Newexten' || $event['Event'] == 'UserEvent' || $event['Event'] == 'AGIExec' || $event['Event'] == 'Newchannel' || $event['Event'] == 'Newstate' || $event['Event'] == 'ExtensionStatus') {
+        LogLine("! AMI Event '". $event['Event']. " surpressed.\n");
         return;
     }
 
@@ -1017,6 +1070,19 @@ function dumpEvent(&$event)
     logLine("! ---------------------------------------------------------------------\n");
 }
 
+/**
+ * Removes a call record from the database.
+ * @param $callRecordId - Call Record ID.  Note: param is assumed to be sanitized.
+ */
+function deleteCall( $callRecordId ) {
+    // NOTE: there is one other place in this file that Delete's a call, so if this code is ever refactored
+    //       to use SOAP, be sure to refactor that one.
+    $query = "DELETE FROM calls WHERE id='$callRecordId'";
+    $rc = mysql_checked_query($query);
+    $query = "DELETE FROM calls_cstm WHERE id='$callRecordId'";
+    mysql_checked_query($query);
+    return $rc;
+}
 
 //
 // Locate associated record in "Calls" module
@@ -1235,6 +1301,7 @@ function findSugarObjectByPhoneNumber($aPhoneNumber)
     // TODO figure out what that 2nd case could be the elseif part...
 
     $aPhoneNumber = preg_replace( '/\D/', '', $aPhoneNumber); // removes everything that isn't a digit.
+    // TODO make the '7' below a configurable parameter... some may prefer to match on 10.
 	if( preg_match('/([0-9]{7})$/',$aPhoneNumber,$matches) ){
 		$aPhoneNumber = $matches[1];
 	}
@@ -1250,13 +1317,12 @@ function findSugarObjectByPhoneNumber($aPhoneNumber)
     $soapArgs = array(
         'session' => $soapSessionId,
         'module_name' => 'Contacts',
-        'select_fields' => array( 'id','account_id' ),
+        'select_fields' => array( 'id','account_id','last_name' ),
         // 2nd version 'query' => "((contacts.phone_work = '$searchPattern') OR (contacts.phone_mobile = '$searchPattern') OR (contacts.phone_home = '$searchPattern') OR (contacts.phone_other = '$searchPattern'))", );
         // Original...
 		//'query' => "((contacts.phone_work LIKE '$searchPattern') OR (contacts.phone_mobile LIKE '$searchPattern') OR (contacts.phone_home LIKE '$searchPattern') OR (contacts.phone_other LIKE '$searchPattern'))"
 		// Liz Version: Only works on mysql
 		'query' => "contacts.phone_home REGEXP '$regje' OR contacts.phone_mobile REGEXP '$regje' OR contacts.phone_work REGEXP '$regje' OR contacts.phone_other REGEXP '$regje' OR contacts.phone_fax REGEXP '$regje'",
-
     );
 
     // print "--- SOAP get_entry_list() ----- ARGS ----------------------------------------\n";
@@ -1271,14 +1337,21 @@ function findSugarObjectByPhoneNumber($aPhoneNumber)
 
     if( !isSoapResultAnError($soapResult))
     {
-        $resultDecoded = decode_name_value_list($soapResult['entry_list'][0]['name_value_list']);
+        // TODO implement a working array_unique
+        //$uniqueEntryList = array_unique($soapResult['entry_list'] );
+        $uniqueEntryList = $soapResult['entry_list'];
+        $resultDecoded = decode_name_value_list($uniqueEntryList[0]['name_value_list']);
 
-        if( count($soapResult['entry_list']) > 1 ) {
+        if( count($uniqueEntryList) > 1 ) {
             $foundMultipleAccounts = FALSE;
             $account_id = $resultDecoded['account_id'];
+            //logLine(print_r($resultDecoded,true));
             // TODO I had 43 entries returned for 2 contacts with matching number... need better distinct support.  Apparently, no way to do this via soap... probably need to create a new service endpoint.
-            for($i=1; $i<count($soapResult['entry_list']); $i++ ) {
-                $resultDecoded = decode_name_value_list($soapResult['entry_list'][$i]['name_value_list']);
+            // TODO (continued) if you have a contact with no account associated... this will not associate it with the contact b/c it thinks there are 43 unique contacts being returned.
+            // Perhaps we should just do a database call instead and use the same logic in place in callListener.
+            for($i=1; $i<count($uniqueEntryList); $i++ ) {
+                $resultDecoded = decode_name_value_list($uniqueEntryList[$i]['name_value_list']);
+               // logLine(print_r($resultDecoded,true));
                 if( $account_id != $resultDecoded['account_id'] ) {
                     $foundMultipleAccounts = TRUE;
                 }
@@ -1287,7 +1360,8 @@ function findSugarObjectByPhoneNumber($aPhoneNumber)
             {
                 $result = array();
                 $result['id'] = $account_id;
-                logLine("Found multiple contacts -- all belong to same account, associating call with account.\n");
+                // TODO there is an error case here where you could have multiple contacts with same number and none of them are assigned to ANY account.
+                logLine("Found multiple contacts (" . count($uniqueEntryList) . ") -- all belong to same account, associating call with account {$result['id']}\n");
                 return array( 'type' => 'Accounts', 'values' => $result );
             }
             else {
@@ -1410,7 +1484,7 @@ function setRelationshipBetweenCallAndBean($callRecordId,$beanType, $beanId) {
         isSoapResultAnError($soapResult);
     }
     else {
-        logLine("! Invalid Arguments passed to setRelationshipBetweenCallAndBean");
+        logLine("! Invalid Arguments passed to setRelationshipBetweenCallAndBean callRecordId=$callRecordId, beanId=$beanId, beanType=$beanType\n");
     }
 }
 
@@ -1573,6 +1647,11 @@ function mysql_checked_query($aQuery)
 function logLine($str)
 {
 	global $sugar_config;
+
+    if( !endsWith($str,"\n") ){
+        $str = $str . "\n";
+    }
+
     print($str);
 
 	// if logging is enabled.

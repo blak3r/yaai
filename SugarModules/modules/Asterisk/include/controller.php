@@ -43,8 +43,25 @@ if( $_REQUEST['action'] == "memoSave") {
 	echo ', call record id:'. $_POST["call_record"]; //assuming you defined the column "name" in vardefs.php 
 	**/
 
-	$focus = new Call(); //create your module object wich extends SugarBean 
-	$focus->retrieve( $_POST["call_record"] ); // retrieve a row by its id
+    // Workaround See Discussion here: https://github.com/blak3r/yaai/pull/20
+    if( isset( $_POST["call_record"])) {
+        $callRecord = $_POST["call_record"];
+    }
+    else {
+        $asteriskID = preg_replace('/-/','.',$_POST['id']);
+        $query = " SELECT call_record_id FROM asterisk_log WHERE asterisk_id=\"$asteriskID\"";
+        $resultSet = $current_user->db->query($query, false);
+        if($current_user->db->checkError()){
+            trigger_error("RetrieveCallRecord-Query failed: $query");
+        }
+        while($row = $current_user->db->fetchByAssoc($resultSet)){
+            $callRecord = $row['call_record_id'];
+        }
+        //log_entry("Set ID by fetching from db: " . $callRecord, "c:/debug.txt");
+    }
+
+	$focus = new Call(); //create your module object wich extends SugarBean
+    $focus->retrieve( $_POST["call_record"] ); // retrieve a row by its id
 
     // TODO there are going to be language issues in this file... replace all strings with modstring equivalents.
 
@@ -90,8 +107,15 @@ else if( $_REQUEST['action'] == "updateUIState" ) {
 	// query log
 	// Very basic santization
 	$uiState = preg_replace('/[^a-z0-9\-\. ]/i', '', $_REQUEST['ui_state']); //  mysql_real_escape_string($_REQUEST['ui_state']);
-	$callRecord = preg_replace('/[^a-z0-9\-\. ]/i', '', $_REQUEST['call_record']); //mysql_real_escape_string($_REQUEST['call_record']);
-	$query = "update asterisk_log set uistate=\"$uiState\" where call_record_id=\"$callRecord\"";  
+    $callRecord = preg_replace('/[^a-z0-9\-\. ]/i', '', $_REQUEST['call_record']); //mysql_real_escape_string($_REQUEST['call_record']);
+    $asteriskID = preg_replace('/-/','.',$_REQUEST['id']);
+    // Workaround See Discussion here: https://github.com/blak3r/yaai/pull/20
+    if (isset($_REQUEST['call_record'])){
+        $query = "update asterisk_log set uistate=\"$uiState\" where call_record_id=\"$callRecord\"";
+    }
+    else  {
+        $query = "update asterisk_log set uistate=\"$uiState\" where asterisk_id=\"$asteriskID\"";
+    }
 
 	$resultSet = $cUser->db->query($query, false);
 	if($cUser->db->checkError()) {
@@ -111,7 +135,14 @@ else if( $_REQUEST['action'] == "setContactId" ) {
     // Very basic santization
     $contactId = preg_replace('/[^a-z0-9\-\. ]/i', '', $_REQUEST['contact_id']);   // mysql_real_escape_string($_REQUEST['ui_state']);
     $callRecord = preg_replace('/[^a-z0-9\-\. ]/i', '', $_REQUEST['call_record']); // mysql_real_escape_string($_REQUEST['call_record']);
-    $query = "update asterisk_log set contact_id=\"$contactId\" where call_record_id=\"$callRecord\"";
+    $asteriskID = preg_replace('/-/','.',$_REQUEST['id']);
+    // Workaround See Discussion here: https://github.com/blak3r/yaai/pull/20
+    if (isset($_REQUEST['call_record'])){
+        $query = "update asterisk_log set contact_id=\"$contactId\" where call_record_id=\"$callRecord\"";
+    }
+    else  {
+        $query = "update asterisk_log set contact_id=\"$contactId\" where asterisk_id=\"$asteriskID\"";
+    }
 
     $resultSet = $cUser->db->query($query, false);
     if($cUser->db->checkError()) {
@@ -272,6 +303,13 @@ function ReadResponse($socket) {
 		$retVal .= $buffer;
 	}
 	return $retVal;
+}
+
+// just for debugging purposes
+function log_entry( $str, $file = "default" ) {
+    $handle = fopen($file, 'a');
+    fwrite($handle, "[" . date('Y-m-j H:i:s') . "] " . $str );
+    fclose($handle);
 }
 
 

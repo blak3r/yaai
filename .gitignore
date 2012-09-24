@@ -5,6 +5,9 @@
 *.pnps
 copyFromLiveSystem.*
 copyToLiveSystem.*
+copyToDir.*
+*wrong_16.png
+*cnamTest
 *unused_icons*
 .idea
 *.idea*

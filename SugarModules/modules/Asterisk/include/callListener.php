@@ -6,6 +6,7 @@
  * Parts of this code are (c) 2006. RustyBrick, Inc.  http://www.rustybrick.com/
  * Parts of this code are (c) 2008 vertico software GmbH
  * Parts of this code are (c) 2009 abcona e. K. Angelo Malaguarnera E-Mail admin@abcona.de
+ * Parts of this code are (c) 2012 Blake Robertson http://www.blakerobertson.com
  * http://www.sugarforge.org/projects/yaai/
  *
  * This program is free software; you can redistribute it and/or modify it under
@@ -337,16 +338,23 @@ sugar_cleanup();
 // Retrieves caller ID information using the opencnam rest service.
 function opencnam_fetch( $phoneNumber ) {
     $request_url = "https://api.opencnam.com/v1/phone/" . $phoneNumber . "?format=text";
-
+    $found = false;
     $i=0;
     do {
         $response = file_get_contents($request_url); // First call returns with 404 immediately with free api, 2nd call will succeed. See https://github.com/blak3r/yaai/issues/5
         // "Currently running a lookup for phone '7858647222'. Please check back in a few seconds."
         if( empty($response) || strpos($response, "running a lookup") !== false) {
-            usleep(50000*(i+1)); // wait 50ms
+            usleep(1000000*($i)); // wait 500ms, 1000ms, then 1500ms, etc.
+            // 2:25pm uped to 500,000 8x
         }
-    }while($i++ < 3 && empty($response) );
-
+        else {
+            $found = true;
+        }
+    } while($i++ < 7 && $found == false );
+    log_entry("Open_CNAM for $phoneNumber took: $i attempts (8max) and returned: " . $response . "\n", "c:\opencnam_log.txt"); // TODO remove in production code.
+    if( empty($response) ){
+        $response = " "; // return a space character so it doesn't keep attempting to lookup number next time callListener is called.
+    }
     return $response;
 }
 
