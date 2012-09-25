@@ -4,7 +4,7 @@
  * (c) KINAMU Business Solutions AG 2009
  *
  * Parts of this code are (c) 2006. RustyBrick, Inc.  http://www.rustybrick.com/
- * Parts of this code are (c) 2008 vertico software GmbH 
+ * Parts of this code are (c) 2008 vertico software GmbH
  * Parts of this code are (c) 2009 abcona e. K. Angelo Malaguarnera E-Mail admin@abcona.de
  * Parts of this code are (c) 2012 Blake Robertson http://www.blakerobertson.com
  * http://www.sugarforge.org/projects/yaai/
@@ -34,8 +34,11 @@
  *
  */
 
- 
+
 if(!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point');
+
+// All Sugar timestamps are UTC
+date_default_timezone_set('UTC');
 
 require_once('include/utils.php');
 require_once('include/export_utils.php');
@@ -44,7 +47,7 @@ global $sugar_config;
 global $locale;
 global $current_user;
 
-// TODO What are the chdir's for??? 
+// TODO What are the chdir's for???
 /*
 chdir("../");
 chdir("../");
@@ -59,7 +62,7 @@ require_once('modules/Contacts/Contact.php');
 #session_start();
 
 //include language
- 
+
 //$current_language = $_SESSION['authenticated_user_language'];
 if(empty($current_language)) {
 	$current_language = $sugar_config['default_language'];
@@ -92,7 +95,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 
 	$item = array();
 	$item['asterisk_id'] = $row['asterisk_id'];
-	
+
 	// All modstrings are in uppercase, so thats what toupper was added for... asterisk 1.6 returns camelcase states perhaps earlier versions didn't.
 	$item['state'] = isset($mod_strings[strtoupper($row['callstate'])]) ? $mod_strings[strtoupper($row['callstate'])] : $row['callstate'];
 	$item['is_hangup'] = $item['state'] == $mod_strings['HANGUP'];
@@ -101,14 +104,14 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 	$item['id'] = $row['id'];
 	//for opening the relevant phone record when call has been answered
 	$item['call_record_id'] = $row['call_record_id'];
-	
+
 	if($row['direction'] == 'I'){
 
 		// this call is coming in from a remote phone partner
 		$item['call_type'] = "ASTERISKLBL_COMING_IN";
 		$item['direction'] = "Inbound";
 		$callPrefix = $callinPrefix;
-			
+
 	}
 
 	if($row['direction'] == 'O'){
@@ -119,7 +122,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 		#$item['phone_number'] = $row['callerID'];
 		#$item['asterisk_name'] = $row['callerName'];
 		$callPrefix = $calloutPrefix;
-			
+
 	}
 
 	// Remove prepending dialout prefix if present
@@ -135,17 +138,17 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 	$item['asterisk_name'] = $row['callerName'];
 	$item['asterisk_id'] = $row['asterisk_id'];
 	$item['timestampCall'] = $row['timestampCall'];
-	
-	
+
+
 	if( !empty($row['timestampHangup']) ) {
 		$to_time=strtotime($row['timestampHangup']);
 	}
 	else {
 		$to_time = time();
 	}
-	
+
 	$from_time=strtotime($row['timestampCall']);
-	$duration = number_format(round(abs($to_time - $from_time) / 60,1),1);	
+	$duration = number_format(round(abs($to_time - $from_time) / 60,1),1);
 	$item['duration'] = $duration;
 
 	// prepare phone number passed in
@@ -180,7 +183,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 			        '-', '')
 			        REGEXP '%s$' = 1
 			";
-			
+
 		//$sqlReplace= "REGEXP '%s$' = 1";
 
         // TODO fix the join so that account is optional... I think just add INNER
@@ -294,18 +297,18 @@ EOT1;
 	$item['company'] = isset($found['company']) ? $found['company'] : "";
 	$item['contact_id'] = isset($found['contactId']) ? $found['contactId'] : "";
 	$item['company_id'] = isset($found['companyId']) ? $found['companyId'] : "";
-	
+
 	//$item['sqlQuery'] = $queryContact; // Uncomment if you want to debug the query.	y
 
 	$response[] = $item;
 	}
-	
+
 $responseArray = array();
 if(count($response) == 0){
 	print json_encode(array("."));
 }else{
 	foreach($response as $item){
-	
+
 		ob_start();
 		require("custom/modules/Asterisk/include/ShowCall.html");
 		$item['html'] = ob_get_contents();
@@ -313,7 +316,7 @@ if(count($response) == 0){
 		$item['html'] = str_replace("\t", "", $item['html']);
 		$item['html'] = str_replace("\r", "", $item['html']);
 		ob_clean();
-		
+
 /*
         if( $sugar_config['asterisk_gravatar_integration_enabled'] ) {
 		    if( !empty($gravEmailAddress) ) {
