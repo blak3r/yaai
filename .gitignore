@@ -14,3 +14,4 @@ copyToDir.*
 .idea/*
 .idea/
 *idea*
+*tplOut.txt

@@ -364,8 +364,8 @@ while (true) {
                         $eChannel = $channel;
                     }
 
-					$rgDetectRegex = "/^Local\/RG/i"; // TODO make this a configuration option
-					$rgCellRingRegex = "/^Local\/\d{7,10}/i";// TODO make this a configuration option.... This detects in a RG when an outside line is called (usually for a cellphone)... for some reason the cell shows up as the Channel (aka the source)... We detect this by finding a number thats at least 7-10 characters long..
+					$rgDetectRegex = "/" . $sugar_config['asterisk_rg_detect_expr'] . "/i"; // TODO make this a configuration option
+					$rgCellRingRegex = "/" . $sugar_config['asterisk_rg_cell_ring_expr'] . "/i";// TODO make this a configuration option.... This detects in a RG when an outside line is called (usually for a cellphone)... for some reason the cell shows up as the Channel (aka the source)... We detect this by finding a number thats at least 7-10 characters long..
 
 					// Check if both ends of the call are internal (then delete created (** Automatic record **) record)
 					// 2nd condition looks for Local/RG-52-4102152497

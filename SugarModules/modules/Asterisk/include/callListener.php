@@ -248,7 +248,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
         }
 
         // Check OpenCNAM if we don't already have the Company Name in Sugar.
-        if( !isset($found['company']) )
+        if( !isset($found['company']) && $sugar_config['asterisk_opencnam_enabled'] == "true"  )
         {
             //log_entry("company not set", "c:\callListenerLog.txt");
             if( $row['opencnam'] == NULL ) {
