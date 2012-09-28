@@ -38,4 +38,9 @@ $mod_strings['LBL_ASTERISK'] = 'Set the ASTERISK connection parameters';
 $mod_strings['LBL_ASTERISK_DESC'] = 'Configure the settings necessary to connect to your ASTERISK server.';
 $mod_strings['LBL_ASTERISK_TITLE'] = 'ASTERISK SugarCRM Connector';
 
+$mod_strings['LBL_ASTERISK_DONATE'] = 'Donate';
+$mod_strings['LBL_ASTERISK_DONATE_DESC'] = 'Please help support this project by making a donation.';
+$mod_strings['LBL_ASTERISK_USERMANUAL'] = 'User Manual';
+$mod_strings['LBL_ASTERISK_USERMANUAL_DESC'] = 'Links to the online documentation for this project';
+
 ?>

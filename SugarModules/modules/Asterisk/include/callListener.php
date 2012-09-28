@@ -125,7 +125,7 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 
 	}
 
-	// Remove prepending dialout prefix if present
+	// Remove dialout prefix if present
 
 	$tmpCallerID = trim($row['callerID']);
 	if ( (strlen($callPrefix) > 0)  && (strpos($tmpCallerID, $callPrefix) === 0) )
@@ -280,7 +280,7 @@ EOT1;
         $selectContactIconCode = '<a href="#" onclick=\'' . $selectContactOpenPopupJs . '\' title="Click to relate this call with a different contact"><img width="12" src="custom/modules/Asterisk/include/close_16.png"></a>';
         $selectContactTextCode = '<a class="asteriskActionsLinks" href="#" onclick=\'' . $selectContactOpenPopupJs . '\' title="Relate this call with an existing contact.">Relate To</a>';
         /*
-        if( !empty($cid) && $sugar_config['asterisk_gravatar_integration_enabled'])
+        if( !empty($cid) && $sugar_config['asterisk_gravatar_enabled'])
         {
             // TODO optimize this... can I grab this some other way? This is just to get the primary email address... might be a faster way to do this?
             $bean = new Contact();
@@ -351,7 +351,7 @@ function opencnam_fetch( $phoneNumber ) {
             $found = true;
         }
     } while($i++ < 7 && $found == false );
-    log_entry("Open_CNAM for $phoneNumber took: $i attempts (8max) and returned: " . $response . "\n", "c:\opencnam_log.txt"); // TODO remove in production code.
+    //log_entry("Open_CNAM for $phoneNumber took: $i attempts (8max) and returned: " . $response . "\n", "c:\opencnam_log.txt"); // TODO remove in production code.
     if( empty($response) ){
         $response = " "; // return a space character so it doesn't keep attempting to lookup number next time callListener is called.
     }
