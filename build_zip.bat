@@ -18,7 +18,8 @@
 @SET /p VERSION=What is version number (ex 2.0.1.3): 
 @echo TODO: update the manifest version / publish date.
 
-zip -r * yaii-%VERSION%.zip -x .git* *.zip *.bak
+php manifest_updater.php $1
+zip -r * yaii-%VERSION%.zip -x .git* *.zip *.bak *.pnps *.pnproj *.eclipse *.svn copyTo*.sh copyFrom*.sh *.bat *.idea manifest_template.php
 
 
 

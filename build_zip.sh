@@ -10,9 +10,11 @@ else
 	VERSION=$1
 fi
 
-zip -r yaii-$VERSION.zip * -x .git* *.zip *.bak *.pnps *.pnproj *.eclipse *.svn copyTo*.sh copyFrom*.sh *.bat *.idea
+
+php manifest_updater.php $1
+zip -r yaai-$VERSION.zip * -x .git* *.zip *.bak *.pnps *.pnproj *.eclipse *.svn copyTo*.sh copyFrom*.sh *.bat *.idea manifest_template.php
 
 echo ""
 echo ""
-echo "NOTE: This script doesn't update the manifest version number or publish date yet..."
+
 
