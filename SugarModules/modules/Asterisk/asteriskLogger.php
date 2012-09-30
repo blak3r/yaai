@@ -177,33 +177,40 @@ else{
     $sugarSoapCredential = bin2hex(mcrypt_cbc(MCRYPT_3DES, $ldap_enc_key, $sugar_config['asterisk_soappass'], MCRYPT_ENCRYPT, 'password'));
 }
 
+// Added this while loop to keep retrying the soap login b/c I found when I started it through daemon script...
+// despite specifying apache as a dependency... it was failing to connect...  (this will keep retrying login until it's successful).
+// Probably should have this script reload the SOAP config from config.php.  Wasn't sure how to do that since it's already been
+// included at top of file in require_once.
+$successfullyLoggedInThroughSoap = false;
+while( !$successfullyLoggedInThroughSoap ) {
+    //
+    // And finally open a SOAP connection to SugarCRM
+    //
+    logLine("! Trying SOAP login endpoint=[$sugarSoapEndpoint] user=[$sugarSoapUser] password=[$sugarSoapCredential]\n");
 
-//
-// And finally open a SOAP connection to SugarCRM
-//
-logLine("! Trying SOAP login endpoint=[$sugarSoapEndpoint] user=[$sugarSoapUser] password=[$sugarSoapCredential]\n");
+    $auth_array = array(
+        'user_auth' => array(
+            'user_name' => $sugarSoapUser,
+            'password' => $sugarSoapCredential
+        )
+    );
+    $soapClient = new SugarSoap($sugarSoapEndpoint . '?wsdl', true, $auth_array); // This method logs in also
+    $soapSessionId = $soapClient->sessionid;
+    $userGUID      = $soapClient->call('get_user_id', array(
+        $soapSessionId
+    ));
 
-$auth_array = array(
-    'user_auth' => array(
-        'user_name' => $sugarSoapUser,
-        'password' => $sugarSoapCredential
-    )
-);
-$soapClient = new SugarSoap($sugarSoapEndpoint . '?wsdl', true, $auth_array); // This method logs in also
-$soapSessionId = $soapClient->sessionid;
-$userGUID      = $soapClient->call('get_user_id', array(
-    $soapSessionId
-));
-
-
-if( empty($userGUID) || empty($soapSessionId) || $userGUID == -1 ) {
-	logLine( "! FATAL: SOAP login failed, something didnt get set by login... check your site_url:" . $soapSessionId . " user=" . $auth_array['user_auth']['user_name'] . " GUID=" . $userGUID . "\n");
-    die();
+    // TODO have better error handling here.  Print SOAP error or if it's http 500 etc.
+    if( empty($userGUID) || empty($soapSessionId) || $userGUID == -1 ) {
+        logLine( "! FATAL: SOAP login failed, something didnt get set by login... check your site_url, and make sure sugarcrm is running (especially if you're running this as a deamon):" . $soapSessionId . " user=" . $auth_array['user_auth']['user_name'] . " GUID=" . $userGUID . "\n");
+        logLine( "Sleeping for 5 seconds then retrying...");
+        sleep(5);
+    }
+    else {
+        logLine( "! Successful SOAP login id=" . $soapSessionId . " user=" . $auth_array['user_auth']['user_name'] . " GUID=" . $userGUID . "\n");
+        $successfullyLoggedInThroughSoap = true;
+    }
 }
-else {
-    logLine( "! Successful SOAP login id=" . $soapSessionId . " user=" . $auth_array['user_auth']['user_name'] . " GUID=" . $userGUID . "\n");
-}
-
 
 
 
