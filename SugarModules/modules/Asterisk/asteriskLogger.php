@@ -200,8 +200,13 @@ while( !$successfullyLoggedInThroughSoap ) {
         $soapSessionId
     ));
 
-    // TODO have better error handling here.  Print SOAP error or if it's http 500 etc.
-    if( empty($userGUID) || empty($soapSessionId) || $userGUID == -1 ) {
+    if (is_array($userGUID) && array_key_exists("error", $userGUID) && $userGUID['error']['number'] != 0) {
+        logLine("! WARNING Unable to make initial SOAP Call " . $userGUID['error']['number'] . " " . $userGUID['error']['name'] . " // " . $userGUID['error']['description'] . "\n");
+        logLine("Retrying in 5 seconds...");
+        sleep(5);
+    }
+    // This case might be obsolete at this point...
+    else if( empty($userGUID) || empty($soapSessionId) || $userGUID == -1 ) {
         logLine( "! FATAL: SOAP login failed, something didnt get set by login... check your site_url, and make sure sugarcrm is running (especially if you're running this as a deamon):" . $soapSessionId . " user=" . $auth_array['user_auth']['user_name'] . " GUID=" . $userGUID . "\n");
         logLine( "Sleeping for 5 seconds then retrying...");
         sleep(5);
@@ -356,12 +361,12 @@ while (true) {
 
 
 					if (startsWith($tmpCallerID,$calloutPrefix)) {
-						logLine ("* Stripping callout prefix: $calloutPrefix\n");
+						logLine ("  Stripping callout prefix: $calloutPrefix\n");
 						$tmpCallerID = substr($tmpCallerID, strlen($calloutPrefix));
 					}
 
 					if (startsWith($tmpCallerID,$callinPrefix)) {
-						logLine ("* Stripping callin prefix: $calloutPrefix\n");
+						logLine ("  Stripping callin prefix: $calloutPrefix\n");
 						$tmpCallerID = substr($tmpCallerID, strlen($callinPrefix));
 					}
 
@@ -466,7 +471,7 @@ while (true) {
 						echo ("* Stripping prefix: $calloutPrefix");
 						$tmpCallerID = substr($tmpCallerID, strlen($calloutPrefix));
 					}
-					logLine("* {e['UniqueId']} CallerID  Changed to: $tmpCallerID\n");
+					logLine("  {e['UniqueId']} CallerID  Changed to: $tmpCallerID\n");
 					// Fetch associated call record
 					//$callRecord = findCallByAsteriskId($id);
 					$query = "UPDATE asterisk_log SET CallerID='" . $tmpCallerID . "', callstate='Dial' WHERE asterisk_id='" . $id . "'";
