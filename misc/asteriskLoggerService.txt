@@ -1,60 +1,64 @@
-!/bin/sh
+#! /bin/sh
 
-###
-# quick and dirty start stop script
-# Parts of this code are (c) 2009 abcona e. K. Angelo Malaguarnera E-Mail admin@abcona.de
-#  http://www.sugarforge.org/projects/yaai/
-# gnu public licence
-# 
-###
-###
-# small ideas :-)
-# chmod 755 $path/asterisklogger.php
-# ln -s $path/asterisklogger.php /usr/local/sbin/rcasterisklogger
+### BEGIN INIT INFO
+# chkconfig: 2345 80 30
+# Provides:          asterisk_logger
+# Required-Start:    $local_fs $network
+# Required-Stop:     $local_fs $network
+# Should-Start:      apache2 asterisk mysql
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts asterisk logger daemon
+# Description:       starts asterisk logger using
+### END INIT INFO
 
-###
-# Please edit this for your environment
+PROC="asteriskLogger"
+DAEMON="php /var/www/crm/custom/modules/Asterisk/$PROC.php"
+LOGFILE="/tmp/$PROC.log"
+NAME=asterisk_logger
+DESC=asterisk_logger
+USER=www-data
 
-path=/var/www/html/crm/Asterisk
+set -e
 
-### finish to edit :-)
+. /lib/lsb/init-functions
 
-start() {
-        KIND="asterisklogger"
-        echo -n "Starting $KIND services: "
-        cd $path
-        php asteriskLogger.php >> /var/log/asterisklogger&
-        echo -n " done "
-        echo
-
+start_logger() {
+        sudo -u $USER $DAEMON > $LOGFILE < /dev/null &
 }
-stop() {
-        KIND="asterisklogger"
-        echo -n $"Shutting down $KIND services: "
-        killall php
-        echo -n " done "
-        echo
 
+stop_logger() {
+	for i in `ps ax | grep -v grep | grep $PROC | cut -d ' ' -f 1`
+    do
+        kill -9 $i
+    done
+    for i in `ps ax | grep -v grep | grep $PROC | cut -d ' ' -f 2`
+    do
+        kill -9 $i
+    done
 }
-restart() {
-        stop
-        start
 
-}
 case "$1" in
   start)
-        start
-        ;;
+	echo -n "Starting $DESC: "
+	start_logger
+	echo "$NAME."
+	;;
   stop)
-        stop
-        ;;
+	echo -n "Stopping $DESC: "
+	stop_logger
+	echo "$NAME."
+	;;
   restart)
-        restart
-        ;;
- *)
-        echo $"Usage: $0 {start|stop|restart}"
-        exit 2
+	echo -n "Restarting $DESC: "
+	stop_logger
+	start_logger
+	echo "$NAME."
+	;;
+     *)
+	echo "Usage: $NAME {start|stop|restart}" >&2
+	exit 1
+	;;
 esac
 
-exit $?
-
+exit 0
