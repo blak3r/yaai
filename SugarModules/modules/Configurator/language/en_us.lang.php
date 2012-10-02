@@ -68,13 +68,13 @@ $mod_strings['LBL_ASTERISK_CALL_SUBJECT_INBOUND_ABBR'] = 'Inbound Call Subject P
 $mod_strings['LBL_ASTERISK_CALL_SUBJECT_OUTBOUND_ABBR'] = 'Outbound Call Subject Prefix';
 $mod_strings['LBL_ASTERISK_CALL_SUBJECT_MAX_LENGTH'] = 'Max Subject Length';
 $mod_strings['LBL_ASTERISK_LISTENER_POLL_RATE'] = 'AJAX Req Poll Rate in MS';
-$mod_strings['LBL_ASTERISK_OPENCNAM_ENABLED'] = 'OpenCNAM Integration Enabled (USA Only)';
-$mod_strings['LBL_ASTERISK_OPENCNAM_ENABLED_DESC'] = 'OpenCNAM is a webservice that can do caller id lookups.  It is only useful in the USA at the moment.';
+$mod_strings['LBL_ASTERISK_OPENCNAM_ENABLED'] = 'OpenCNAM Integration Enabled';
+$mod_strings['LBL_ASTERISK_OPENCNAM_ENABLED_DESC'] = 'OpenCNAM is a webservice that can do caller id lookups.  If your country isnt supported by opencnam, you will want to keep this disabled.  USA works.  See www.OpenCNAM.com for more info.';
 $mod_strings['LBL_ASTERISK_OPENCNAM_USERNAME'] = 'OpenCNAM Username (Paid API)';
 $mod_strings['LBL_ASTERISK_OPENCNAM_RETRIES'] = 'OpenCNAM Retry Attempts';
-$mod_strings['LBL_ASTERISK_OPENCNAM_RETRIES'] = 'When a phone nubmer is not in the OpenCNAM database it can take up to 20 seconds for the initial lookup.  OpenCNAM returns immediately with a 404 code if it is not already cached in it the database.  This makes callListner block for about 1000ms * number of retry attempts in an attempt to try and wait for the data to come back in a reasonable time frame. As a result, the more retry attempts the longer it will take for the first call popup to appear on a users screen.  Recommended this is not raised higher then 4.';
-$mod_strings['LBL_ASTERISK_OPENCNAM_APIKEY'] = 'OpenCNAM Integration API Key (If using PAID API)';
-$mod_strings['LBL_ASTERISK_OPENCNAM_APIKEY_DESC'] = 'An API Key is not required.  If you leave it blank, itll use the free api which has a limitation of 60 lookups per hour.  The free API responses are slower.  Its fairly common for this to fail the first time someone calls.';
+$mod_strings['LBL_ASTERISK_OPENCNAM_RETRIES_DESC'] = 'When a phone number is not in the OpenCNAM database it can take up to 20 seconds for the initial lookup.  OpenCNAM returns immediately with a 404 code if it is not already cached in it the database.  This makes callListner block for about 1000ms * number of retry attempts in an attempt to try and wait for the data to come back in a reasonable time frame. As a result, the more retry attempts the longer it will take for the first call popup to appear on a users screen.  Recommended this is not raised higher then 4.';
+$mod_strings['LBL_ASTERISK_OPENCNAM_APIKEY'] = 'OpenCNAM Integration API Key (Paid API)';
+$mod_strings['LBL_ASTERISK_OPENCNAM_APIKEY_DESC'] = 'An API Key is not required.  If you leave it blank, it\'ll use the free api which has a limitation of 60 lookups per hour.  The free API responses are slower.  Its fairly common for this to fail the first time someone calls.';
 $mod_strings['LBL_ASTERISK_GRAVATAR_ENABLED'] = 'Gravatar Image On Call Popups:';
 $mod_strings['LBL_ASTERISK_GRAVATAR_ENABLED_DESC'] = 'This was an experiment we implemented.  When a call is matched to a contact, we look to see if their email address has a gravatar icon associated with it.  The image is displayed at the bottom of chat window.  In my personal experience, we found very few business emails have gravatars so we didnt build this into the UI further.';
 $mod_strings['LBL_ASTERISK_SHORT_CALL_STATUS'] = 'Short Call Status';
@@ -82,10 +82,10 @@ $mod_strings['LBL_ASTERISK_SHORT_CALL_STATUS_DESC'] = 'This defines what to do w
 $mod_strings['LBL_ASTERISK_HIDE_CALL_POPUPS_AFTER_MINS'] = 'Hide Call Popups After X Mins';
 $mod_strings['LBL_ASTERISK_HIDE_CALL_POPUPS_AFTER_MINS_DESC'] = 'Specifies how long the user has to take notes in call popups before they disappear.  Default is 60 minutes.';
 
-$mod_strings['LBL_ASTERISK_LOG_FILE'] = 'Log File Path for asteriskLogger.';
+$mod_strings['LBL_ASTERISK_LOG_FILE'] = 'Log File Path for asteriskLogger';
 
-$mod_strings['LBL_ASTERISK_RECORDINGS_ENABLE'] = "Enable Call Recording Downloads";
-$mod_strings['LBL_ASTERISK_RECORDINGS_PATH'] = 'Asterisk Call Recordings Path';
-$mod_strings['LBL_ASTERISK_RECORDINGS_PATH_DESC'] = 'This is an advanced feature which requires asterisk dialplan modifications in order to get working.  You will also need to have file system access to recordings folder.  So, if asterisk is on a different machine from your Sugar Instance you will need to map it somehow.';
+$mod_strings['LBL_ASTERISK_RECORDINGS_ENABLE'] = "Enable Call Recording Downloads (WIP)";
+$mod_strings['LBL_ASTERISK_RECORDINGS_PATH'] = 'Asterisk Call Recordings Path (WIP)';
+$mod_strings['LBL_ASTERISK_RECORDINGS_PATH_DESC'] = 'NOT YET RELEASED - This is an advanced feature which requires asterisk dialplan modifications in order to get working.  You will also need to have file system access to recordings folder.  So, if asterisk is on a different machine from your Sugar Instance you will need to map it somehow.';
 
 ?>

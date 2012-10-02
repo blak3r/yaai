@@ -1,0 +1,10 @@
+asterisk_logger is a *nix daemon startup script.  See the User Manual for how to use / install.
+
+asteriskLogger_* are old versions of asteriskLogger.  They are included for reference:
+ - v5.2 supported AMI v1.0
+ - v6.1 the author changed the script to only work with v1.1
+
+As a result, yaai still only works with AMI v1.1  doing a diff between the two should provide insight into the changes
+that were made.
+
+en_us.lang.php is a file if you want to update the dropdown for Calls so users can select minute increments.

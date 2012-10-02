@@ -50,12 +50,14 @@ date_default_timezone_set('UTC');
 // Say hello, setup include path(s)
 //
 define('sugarEntry', TRUE);
-logLine( "\n\n\n******** Asterisk Logger Starting **************\n");
+logLine( "\n\n\n******** Asterisk Logger Starting ". getTimestamp() . "**************\n",true);
+
 
 // Determine SugarCRM's root dir (we'll use this to find the config filez
 $scriptRoot = dirname(__FILE__);
 $sugarRoot  = $scriptRoot . "/../../../";
-print "# Sugar root set to [$sugarRoot]\n";
+print "[Config Settings]\n";
+print "  Sugar root set to [$sugarRoot]\n";
 //set_include_path(get_include_path() . PATH_SEPARATOR . $sugarRoot . "include");
 //print "# PHP include path set to [" . get_include_path() . "]\n";
 
@@ -65,7 +67,7 @@ if( $argc > 2 ) {
     if( !endsWith($sugarRoot,"/")){
         $sugarRoot .= "/";
     }
-	print "New sugar root is: " . $sugarRoot;
+	print "  New sugar root is: " . $sugarRoot;
 }
 
 
@@ -118,7 +120,7 @@ class SugarSoap extends nusoapclient
 require_once($sugarRoot . 'config.php');
 include_once($sugarRoot . 'config_override.php');
 
-logLine( "Logging to: " . $sugar_config['asterisk_log_file'] . "\n");
+logLine( "  Logging to: " . $sugar_config['asterisk_log_file'] . "\n");
 $asteriskServer        = $sugar_config['asterisk_host'];
 $asteriskManagerPort   = (int) $sugar_config['asterisk_port'];
 $asteriskUser          = "Username: " . $sugar_config['asterisk_user'] . "\r\n";
@@ -136,20 +138,20 @@ if( !startsWith($asteriskMatchInternal, '/' ) ) {
 
 // Fetch Asterisk dialprefix - must strip this from inbound callerIDs if set
 $calloutPrefix = isset($sugar_config['asterisk_prefix']) ? $sugar_config['asterisk_prefix'] : "";
-echo ("# Callout prefix is [$calloutPrefix]\n");
+echo ("  Callout prefix is [$calloutPrefix]\n");
 
 $callinPrefix = isset($sugar_config['asterisk_dialinPrefix']) ? $sugar_config['asterisk_dialinPrefix'] : "";
-echo ("# Callin prefix is [$callinPrefix]\n");
-echo ("asteriskMatchInternal = $asteriskMatchInternal\n");
+echo ("  Callin prefix is [$callinPrefix]\n");
+echo ("  Match Internal Regex = $asteriskMatchInternal\n");
 
 
-logLine("# (Config processed)\n");
 
 
 //
 // Connect to mySQL DB
 //
-logLine("Selecting DB Name: {$sugar_config['dbconfig']['db_name']}\n");
+logLine("[Database Connection]\n");
+logLine("  Selecting DB Name: {$sugar_config['dbconfig']['db_name']}\n");
 $sql_connection = mysql_connect($sugar_config['dbconfig']['db_host_name'], $sugar_config['dbconfig']['db_user_name'], $sugar_config['dbconfig']['db_password']);
 $sql_db         = mysql_select_db($sugar_config['dbconfig']['db_name']);
 // Prune asterisk_log
@@ -186,7 +188,8 @@ while( !$successfullyLoggedInThroughSoap ) {
     //
     // And finally open a SOAP connection to SugarCRM
     //
-    logLine("! Trying SOAP login endpoint=[$sugarSoapEndpoint] user=[$sugarSoapUser] password=[$sugarSoapCredential]\n");
+    logLine("[SOAP Connection]\n");
+    logLine("  Trying SOAP login endpoint=[$sugarSoapEndpoint] user=[$sugarSoapUser] password=[$sugarSoapCredential]\n");
 
     $auth_array = array(
         'user_auth' => array(
@@ -201,18 +204,18 @@ while( !$successfullyLoggedInThroughSoap ) {
     ));
 
     if (is_array($userGUID) && array_key_exists("error", $userGUID) && $userGUID['error']['number'] != 0) {
-        logLine("! WARNING Unable to make initial SOAP Call " . $userGUID['error']['number'] . " " . $userGUID['error']['name'] . " // " . $userGUID['error']['description'] . "\n");
-        logLine("Retrying in 5 seconds...");
+        logLine("  **WARNING Unable to make initial SOAP Call " . $userGUID['error']['number'] . " " . $userGUID['error']['name'] . " // " . $userGUID['error']['description'] . "**\n");
+        logLine("  Retrying in 5 seconds...\n\n");
         sleep(5);
     }
     // This case might be obsolete at this point...
     else if( empty($userGUID) || empty($soapSessionId) || $userGUID == -1 ) {
-        logLine( "! FATAL: SOAP login failed, something didnt get set by login... check your site_url, and make sure sugarcrm is running (especially if you're running this as a deamon):" . $soapSessionId . " user=" . $auth_array['user_auth']['user_name'] . " GUID=" . $userGUID . "\n");
-        logLine( "Sleeping for 5 seconds then retrying...");
+        logLine( "  __FATAL: SOAP login failed, something didn't get set by login... check your site_url, and make sure sugarcrm is running.  SessionID:" . $soapSessionId . " user=" . $auth_array['user_auth']['user_name'] . " GUID=" . $userGUID . "__\n");
+        logLine( "  Sleeping for 5 seconds then retrying...\n\n");
         sleep(5);
     }
     else {
-        logLine( "! Successful SOAP login id=" . $soapSessionId . " user=" . $auth_array['user_auth']['user_name'] . " GUID=" . $userGUID . "\n");
+        logLine( "  Successfully logged into Sugar via SOAP!  SessionId=" . $soapSessionId . " user=" . $auth_array['user_auth']['user_name'] . " GUID=" . $userGUID . "\n");
         $successfullyLoggedInThroughSoap = true;
     }
 }
@@ -243,30 +246,57 @@ if( $argc > 1 && $argv[1] == "test" ) {
 			print "  For $currPhone I found: ". $obj['values']['id'] . ' ' . $obj['values']['first_name'] . ' '. $obj['values']['last_name'] . "\n";
 		}
 	}
-
 	exit;
 }
 
 
 // BR: Added this while loop to keep loging in to AMI if asterisk goes down.
 while (true) {
+    logLine("[Asterisk Manager Interface (AMI) Connection]\n");
     // connect to Asterisk server
     $amiSocket = fsockopen($asteriskServer, $asteriskManagerPort, $errno, $errstr, 5);
     if (!$amiSocket) {
-        logLine( "! Error $errno connecting to Asterisk: $errstr");
+        logLine( "  __ERROR $errno connecting to Asterisk: $errstr__");
 		sleep(5); // retry connecting
 		continue;
     } else {
-        logLine( "# Successfully opened socket connection to $asteriskServer:$asteriskManagerPort\n");
+        logLine( "  Successfully opened socket connection to $asteriskServer:$asteriskManagerPort\n");
     }
 
+    // Here we extract the AMI Version Number and set a varible with it for creating special if cases for special versions of AMI in the future.
+    $result = AMI_ReadResponse($amiSocket,2000000);
+    logLine("  AMI Version Info:\n" . markdown_indent($result) ); // Prints the AMI Version
+    if( preg_match("/Call Manager\/(\d\.\d)/",$result,$ver_matches)) {
+        $managerVersion = $ver_matches[1];
+        if( !$managerVersion == "1.1" ) {
+            logLine("  **ERROR: AMI v$managerVersion is not supported by this version of asteriskLogger.  Please see issues section on github site.  Several people have gotten it working in 1.0 but changes haven't been merged yet.");
+        }
+        else {
+            logLine("  Supported AMI version: $managerVersion Detected");
+        }
+    }
+    else {
+        logLine("  __WARNING: Unable to detect the manager version.  Setting to 1.1 and hoping for the best.  But, this is probably an error__");
+        $managerVersion = "1.1";
+    }
 
+    // Perform AMI Login command
     fputs($amiSocket, "Action: Login\r\n");
     fputs($amiSocket, $asteriskUser);
     fputs($amiSocket, $asteriskSecret);
     fputs($amiSocket, "Events: call,hud\r\n\r\n"); // to monitor just call data, for Asterisk Manager 1.0 remove hud
-    $result = fgets($amiSocket, 4096);
-    logLine("! AMI Login action returned with rc=$result\n");
+    $result = AMI_ReadResponse($amiSocket);
+    logLine("  AMI Login action raw response:\n" . markdown_indent($result) );
+    if( AMI_WasCmdSuccessful($result) ) {
+        logLine("  AMI Login was a *success!*");
+        logLine("Waiting for call events...");
+    }
+    else {
+        logLine("  __ERROR: AMI Login FAILED__, Depending on your asterisk version helpful info may be above.\n  **Check Asterisk Username / Password in config, then verify AMI user has proper permissions in manager.conf**\n\n");
+        sleep(5);
+        continue;
+    }
+
     $event = '';
     $stack = 0;
 
@@ -292,7 +322,7 @@ while (true) {
 
        if( $buffer === FALSE )
 		{
-			logLine(getTimestamp() . " Timeout or Error\n"); // TODO Remove once asteriskLogger never needs restarting.
+			logLine(getTimestamp() . " Patiently Waiting...!\n");
 			$consecutiveFailures++;
 		}
 		else {
@@ -370,7 +400,7 @@ while (true) {
 						$tmpCallerID = substr($tmpCallerID, strlen($callinPrefix));
 					}
 
-					logLine("* CallerID is: $tmpCallerID\n");
+					logLine("  CallerID is: $tmpCallerID\n");
 
                     // Check to see if this Dial Event is coming off a Queue.  If so we override the channel with the one we saved previously in Join Event.
                     if (!empty($e['ConnectedLineNum'])
@@ -381,8 +411,8 @@ while (true) {
                         $eChannel = $channel;
                     }
 
-					$rgDetectRegex = "/" . $sugar_config['asterisk_rg_detect_expr'] . "/i"; // TODO make this a configuration option
-					$rgCellRingRegex = "/" . $sugar_config['asterisk_rg_cell_ring_expr'] . "/i";// TODO make this a configuration option.... This detects in a RG when an outside line is called (usually for a cellphone)... for some reason the cell shows up as the Channel (aka the source)... We detect this by finding a number thats at least 7-10 characters long..
+					$rgDetectRegex = "/" . $sugar_config['asterisk_rg_detect_expr'] . "/i";
+					$rgCellRingRegex = "/" . $sugar_config['asterisk_rg_cell_ring_expr'] . "/i";// This detects in a RG when an outside line is called (usually for a cellphone)... for some reason the cell shows up as the Channel (aka the source)... We detect this by finding a number thats at least 7-10 characters long..
 
 					// Check if both ends of the call are internal (then delete created (** Automatic record **) record)
 					// 2nd condition looks for Local/RG-52-4102152497
@@ -468,10 +498,10 @@ while (true) {
 					$tmpCallerID = trim($e['CallerIDNum']);
 					//echo ("* CallerID is: $tmpCallerID\n");
 					if ((strlen($calloutPrefix) > 0) && (strpos($tmpCallerID, $calloutPrefix) === 0)) {
-						echo ("* Stripping prefix: $calloutPrefix");
+						logLine ("* Stripping prefix: $calloutPrefix");
 						$tmpCallerID = substr($tmpCallerID, strlen($calloutPrefix));
 					}
-					logLine("  {e['UniqueId']} CallerID  Changed to: $tmpCallerID\n");
+					logLine("  {$e['UniqueId']} CallerID  Changed to: $tmpCallerID\n");
 					// Fetch associated call record
 					//$callRecord = findCallByAsteriskId($id);
 					$query = "UPDATE asterisk_log SET CallerID='" . $tmpCallerID . "', callstate='Dial' WHERE asterisk_id='" . $id . "'";
@@ -521,7 +551,7 @@ while (true) {
 						//
 						$callRecord = findCallByAsteriskId($id);
 						if ($callRecord) {
-							logLine("# [$id] FOUND outbound CALL\n");
+							logLine("### [$id] FOUND outbound CALL\n");
 							//
 							// update entry in asterisk_log...
 							//
@@ -550,7 +580,7 @@ while (true) {
 								}
 								$callStart = strtotime($rawData['timestampCall']);
 
-								logLine("# [$id] Measured call duration is $callDurationRaw seconds\n");
+								logLine("  [$id] Measured call duration is $callDurationRaw seconds\n");
 
 								// Recalculate call direction in minutes
 								$callDuration        = (int) ($callDurationRaw / 60);
@@ -627,12 +657,12 @@ while (true) {
 
 								//var_dump($parentType);
 								//var_dump($parentID);
-								echo ("! Call start was " . gmdate('Y-m-d H:i:s', $callStart) . "\n");
+								logLine ("  Call start was " . gmdate('Y-m-d H:i:s', $callStart) . "\n");
 
 								//
 								// ... on success also update entry in Calls module
 								//
-								logLine( "# [$id] (OUTBOUND) Now updating record in /Calls/ id=" . $callRecord['sweet']['id'] . "...\n");
+								logLine( "  [$id] (OUTBOUND) Now updating record in /Calls/ id=" . $callRecord['sweet']['id'] . "...\n");
 
 								//print_r($callRecord);
 								logLine("NAME: " . $callRecord['sweet']['name'] . "\n");
@@ -732,7 +762,7 @@ while (true) {
 								}
 								$callStart = strtotime($rawData['timestampCall']);
 
-								logLine ("# Measured call duration is $callDurationRaw seconds\n");
+								logLine ("  Measured call duration is $callDurationRaw seconds\n");
 
 								// Recalculate call direction in minutes
 								$callDuration        = (int) ($callDurationRaw / 60);
@@ -768,7 +798,7 @@ while (true) {
                                         $callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['CALL_DESCRIPTION_CALLER_ID'], $rawData['opencnam']);
                                     }
 
-									logLine("Adding INBOUND Failed Call, id=$id, call_id = " . $callRecord['sweet']['id'] . "\n");
+									logLine("  Adding INBOUND Failed Call, id=$id, call_id = " . $callRecord['sweet']['id'] . "\n");
 								}
 
 
@@ -816,9 +846,9 @@ while (true) {
 								//
 								// ... on success also update entry in Calls module
 								//
-								logLine( "# (INBOUND) now updating record in /Calls/ id=" . $callRecord['sweet']['id'] . "...\n");
+								logLine( "  (INBOUND) now updating record in /Calls/ id=" . $callRecord['sweet']['id'] . "...\n");
 
-								print_r($callRecord);
+								//print_r($callRecord);
 								logLine("NAME: " . $callRecord['sweet']['name'] . "\n");
 								logLine("DESCRIPTION: " . $callRecord['sweet']['description'] . "\n");
 
@@ -1006,7 +1036,7 @@ while (true) {
         // for if the connection to the sql database gives out.
         if (!mysql_ping($sql_connection)) {
             //here is the major trick, you have to close the connection (even though its not currently working) for it to recreate properly.
-            logLine("MySQL connection lost, reconnecting\n");
+            logLine("__MySQL connection lost, reconnecting__\n");
             mysql_close($sql_connection);
             $sql_connection = mysql_connect($sugar_config['dbconfig']['db_host_name'], $sugar_config['dbconfig']['db_user_name'], $sugar_config['dbconfig']['db_password']);
             $sql_db         = mysql_select_db($sugar_config['dbconfig']['db_name']);
@@ -1016,7 +1046,7 @@ while (true) {
     }
 
 
-    logLine(getTimestamp() . " # Event loop terminated, attempting to login again\n");
+    logLine(getTimestamp() . "Event loop terminated, attempting to login again\n");
     sleep(1);
 }
 
@@ -1273,7 +1303,7 @@ function findSugarAccountByPhoneNumber($aPhoneNumber)
 function findSugarObjectByPhoneNumber($aPhoneNumber)
 {
     global $soapClient, $soapSessionId;
-    logLine("# +++ find ContactByPhoneNumber($aPhoneNumber)\n");
+    logLine("### +++ find ContactByPhoneNumber($aPhoneNumber)\n");
 
     // Add if phonenumber .length == 10
     $searchPattern = $aPhoneNumber;
@@ -1411,7 +1441,7 @@ return '%' . join('%', str_split($aPhoneNumber)) . '%';
 function findAccountForContact($aContactId)
 {
     global $soapClient, $soapSessionId;
-    logLine("# +++ findAccountForContact($aContactId)\n");
+    logLine("### +++ findAccountForContact($aContactId)\n");
 
     $soapArgs = array(
         'session' => $soapSessionId,
@@ -1424,6 +1454,7 @@ function findAccountForContact($aContactId)
 
     $soapResult = $soapClient->call('get_relationships', $soapArgs);
 
+    // TODO check if error exists first to prevent Notice about index not existing in log.
     if ($soapResult['error']['number'] != '0') {
         logLine("! WARNING Soap call returned with error " . $soapResult['error']['number'] . " " . $soapResult['error']['name'] . " // " . $soapResult['error']['description'] . "\n");
         return FALSE;
@@ -1435,7 +1466,7 @@ function findAccountForContact($aContactId)
         $assocCount = count($soapResult['ids']);
 
         if ($assocCount == 0) {
-            logLine("# No associated account found\n");
+            logLine(" + No associated account found\n");
             return FALSE;
         } else {
             if ($assocCount > 1) {
@@ -1443,7 +1474,7 @@ function findAccountForContact($aContactId)
             }
 
             $assoAccountID = $soapResult['ids'][0]['id'];
-            logLine("# Associated account is $assoAccountID\n");
+            logLine(" + Associated account is $assoAccountID\n");
             return $assoAccountID;
         }
     }
@@ -1458,7 +1489,7 @@ function findAccountForContact($aContactId)
 function isSoapResultAnError($soapResult) {
     $retVal = FALSE;
     if ($soapResult['error']['number'] != 0) {
-        logLine("! Warning: SOAP error " . $soapResult['error']['number'] . " " . $soapResult['error']['string'] . "\n");
+        logLine("! ***Warning: SOAP error*** " . $soapResult['error']['number'] . " " . $soapResult['error']['string'] . "\n");
         $retVal = TRUE;
     }
     else if( $soapResult['result_count'] == 0 ) {
@@ -1488,7 +1519,7 @@ function setRelationshipBetweenCallAndBean($callRecordId,$beanType, $beanId) {
             )
         );
 
-        logLine("# Establishing relation to $beanType... Call ID: $callRecordId to Bean ID: $beanId\n");
+        logLine("  Establishing relation to $beanType... Call ID: $callRecordId to Bean ID: $beanId\n");
         if( $verbose_logging ) {
             var_dump($soapArgs);
         }
@@ -1564,7 +1595,7 @@ function extractExtensionNumberFromChannel( $channel )
 //
 function findUserByAsteriskExtension($aExtension)
 {
-    logLine("# +++ findUserByAsteriskExtension($aExtension)\n");
+    logLine("### +++ findUserByAsteriskExtension($aExtension)\n");
 
 	$qry = "select id from users join users_cstm on users.id = users_cstm.id_c where users_cstm.asterisk_ext_c=$aExtension and status='Active'";
 	$result = mysql_checked_query($qry);
@@ -1625,7 +1656,7 @@ function mysql_checked_query($aQuery)
 
 	if( $mysql_loq_queries || $mysql_log_results )
 	{
-		logLine("# +++ mysql_checked_query()\n");
+		logLine(" +++ mysql_checked_query()\n");
 	}
 
     $query = trim($aQuery);
@@ -1693,6 +1724,40 @@ function endsWith($haystack, $needle)
     $length = strlen($needle);
     $start  = $length * -1; //negative
     return (substr($haystack, $start) === $needle);
+}
+
+/**
+ * Reads all lines from the socket until timeout occurs.
+ * @param $socket
+ * @param $timeout OPTIONAL (default is 500000 == 1/2 sec)
+ * @return string
+ */
+function AMI_ReadResponse($socket,$timeout=500000) {
+    $retVal = '';
+   // Sets timeout to 1/2 a second
+    stream_set_timeout($socket,0,$timeout);
+    while (($buffer = fgets($socket, 20)) !== false) {
+        $retVal .= $buffer;
+    }
+    return $retVal;
+}
+
+function AMI_WasCmdSuccessful($response) {
+    return preg_match('/.*Success.*/s',$response);
+}
+
+
+/**
+ * formats the string in a markdown ``` code block indented by 4 spaces
+ * @param $str
+ * @param $indent - OPTIONAL by default it's "    " (4 spaces)
+ * @return string
+ */
+function markdown_indent($str,$indent="    ") {
+    $str = preg_replace("/(\r?\n)/i","$1$indent",$str);
+    $str = trim($str);
+    $str = "$indent```\n$indent$str\n$indent```";
+    return $str;
 }
 
 
