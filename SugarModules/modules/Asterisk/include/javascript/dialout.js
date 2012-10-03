@@ -38,7 +38,7 @@
 $(document).ready(function()
 {
     //.asterisk_phoneNumber is the deprecated v1.x class
-	$('.phone,#phone_work,#phone_other,#phone_mobile,.asterisk_phoneNumber').each(function()
+	$('.phone,#phone_work,#phone_other,#phone_mobile,.asterisk_phoneNumber,#phone_mobile_span').each(function()
 	{
 		var phoneNr = $(this).text().trim();
 
