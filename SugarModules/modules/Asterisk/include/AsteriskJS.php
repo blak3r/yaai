@@ -86,7 +86,7 @@ QUERY8;
 
 		    echo '<link rel="stylesheet" type="text/css" media="all" href="custom/modules/Asterisk/include/asterisk.css">';
 			if($GLOBALS['current_user']->asterisk_inbound_c == '1') {
-			    echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/dialin.js"></script>';
+			    echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/callPopups.js"></script>';
 				echo '<script type="text/javascript">AST_PollRate = ' . $pollRate . ';</script>';
 			}
 			if($GLOBALS['current_user']->asterisk_outbound_c == '1') {
