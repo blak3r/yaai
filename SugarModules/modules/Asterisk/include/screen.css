@@ -6,12 +6,6 @@
  */
 
 
-html, body {
-  //	margin:0px; /* FF hack: or we'll have double scrollbar showing on the browser */
-  //	overflow:hidden; /* hide browser's main scrollbar */
-
-}
-
 #main_container {
 	width:100%;
 	background-color:#ffffff; /* DO NOT REMOVE THIS; or you'll have issue w/ the scrollbar, when the mouse pointer is on a white space */
