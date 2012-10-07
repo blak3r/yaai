@@ -25,13 +25,10 @@ if(!defined('sugarEntry'))define('sugarEntry', true);
 require_once('modules/Calls/Call.php');
 require_once('modules/Users/User.php');
 
-// These variables in a perfect world would be asterisk configuration
 $INBOUND_CALL_ABBR = $sugar_config['asterisk_call_subject_inbound_abbr']; //"IBC"; // Inbound calls will be prefixed with this in Call Record
 $OUTBOUND_CALL_ABBR = $sugar_config['asterisk_call_subject_outbound_abbr']; //"OBC";
 $MORE_INDICATOR = "...";	// When memo notes are longer then max length it displays this at the end to indicate the user should open the record for the rest of the notes.
 $MAX_CALL_SUBJECT_LENGTH = $sugar_config['asterisk_call_subject_max_length'];; // Set this to the max length you want the subject to be.  MUST BE SMALLER THEN DATABASE COLUMN SIZE which is 50 by default
-
-
 
 if( $_REQUEST['action'] == "memoSave") {
 	
@@ -57,7 +54,7 @@ if( $_REQUEST['action'] == "memoSave") {
         while($row = $current_user->db->fetchByAssoc($resultSet)){
             $callRecord = $row['call_record_id'];
         }
-        //log_entry("Set ID by fetching from db: " . $callRecord, "c:/debug.txt");
+        //log_entry2("Set ID by fetching from db: " . $callRecord, "c:/debug.txt");
     }
 
 	$focus = new Call(); //create your module object wich extends SugarBean
@@ -131,8 +128,7 @@ else if( $_REQUEST['action'] == "setContactId" ) {
     $cUser = new User();
     $cUser->retrieve($_SESSION['authenticated_user_id']);
 
-    // query log
-    // Very basic santization
+    // Very basic sanitization
     $contactId = preg_replace('/[^a-z0-9\-\. ]/i', '', $_REQUEST['contact_id']);   // mysql_real_escape_string($_REQUEST['ui_state']);
     $callRecord = preg_replace('/[^a-z0-9\-\. ]/i', '', $_REQUEST['call_record']); // mysql_real_escape_string($_REQUEST['call_record']);
     $asteriskID = preg_replace('/-/','.',$_REQUEST['id']);
@@ -306,7 +302,7 @@ function ReadResponse($socket) {
 }
 
 // just for debugging purposes
-function log_entry( $str, $file = "default" ) {
+function log_entry2( $str, $file = "default" ) {
     $handle = fopen($file, 'a');
     fwrite($handle, "[" . date('Y-m-j H:i:s') . "] " . $str );
     fclose($handle);

@@ -285,30 +285,30 @@ function createChatBox(chatboxid, checkMinimizeCookie, chatboxtitle, chatboxcall
 	if ($("#chatbox_"+chatboxid).length > 0) {
 		if ($("#chatbox_"+chatboxid).css('display') == 'none') {
 			$("#chatbox_"+chatboxid).css('display','block');
-			restructureChatBoxes();
-		}
-		$("#chatbox_"+chatboxid+" .chatboxtextarea").focus();
-		return;
-	}
-	
-		
-	var theHtml = 	'<div class="chatboxhead" onclick="javascript:toggleChatBoxGrowth(\''+chatboxid+'\')" ><div class="chatboxtitle" >'	+
-	chatboxtitle+'</div><div class="chatboxoptions"><a href="javascript:void(0)" onclick="javascript:toggleChatBoxGrowth(\'' +
-	chatboxid+'\')">-</a> <a href="javascript:void(0)" style="font-size:110%;" onclick="javascript:closeChatBox(\''+
-	chatboxid+'\')">X</a></div><br clear="all"/></div><div class="chatboxcontent"></div><div class="chatboxinput"><textarea id="chatboxtextarea_'+
-	chatboxid+'" class="chatboxtextarea" onkeydown="javascript:return checkChatBoxInputKey(event,this,\''+chatboxid+'\');"></textarea>' +
-	'<div class="chatboxbuttons"><table width="100%"><tr><td valign="bottom"><span style="width=150px;" class="asterisk_save_status">&nbsp;</span>'+
-	'<img id="transferImg_'+
-	chatboxid + '" src="custom/modules/Asterisk/include/call_transfer-blue.png" height=19 title="Transfer Call" onclick="javascript:showTransferMenu(\'' + chatboxid + '\');"><TD align="right">'+
-	'<input style="" type="button" name="saveMemo" value="Save" onclick="javascript:saveMemo(\''+chatboxid+'\');"></table></div></div>';
+    restructureChatBoxes();
+}
+$("#chatbox_"+chatboxid+" .chatboxtextarea").focus();
+return;
+}
 
-	$(" <div />" ).attr("id","chatbox_"+chatboxid)
-	.addClass("chatbox")
-	.html(theHtml)
-	.appendTo($( "body" ));
-			   
-	
-	setChatTitle(chatboxid,chatboxtitle);
+
+var theHtml = 	'<div class="chatboxhead" onclick="javascript:toggleChatBoxGrowth(\''+chatboxid+'\')" ><div class="chatboxtitle" >'	+
+    chatboxtitle+'</div><div class="chatboxoptions"><a href="javascript:void(0)" onclick="javascript:toggleChatBoxGrowth(\'' +
+    chatboxid+'\')">-</a> <a href="javascript:void(0)" style="font-size:110%;" onclick="javascript:closeChatBox(\''+
+    chatboxid+'\')">X</a></div><br clear="all"/></div><div class="chatboxcontent"></div><div class="chatboxinput"><textarea id="chatboxtextarea_'+
+    chatboxid+'" class="chatboxtextarea" onkeydown="javascript:return checkChatBoxInputKey(event,this,\''+chatboxid+'\');"></textarea>' +
+    '<div class="chatboxbuttons"><table width="100%"><tr><td valign="bottom"><span style="width=150px;" class="asterisk_save_status">&nbsp;</span>'+
+    '<img id="transferImg_'+
+    chatboxid + '" src="custom/modules/Asterisk/include/call_transfer-blue.png" height=19 title="Transfer Call" onclick="javascript:showTransferMenu(\'' + chatboxid + '\');"><TD align="right">'+
+    '<input style="" type="button" name="saveMemo" value="Save" onclick="javascript:saveMemo(\''+chatboxid+'\');"></table></div></div>';
+
+$(" <div />" ).attr("id","chatbox_"+chatboxid)
+    .addClass("chatbox")
+    .html(theHtml)
+    .appendTo($( "body" ));
+
+
+setChatTitle(chatboxid,chatboxtitle);
 
 	chatBoxCallRecordIds[chatboxid]=chatboxcallrecordid;
     //alert( getChatCallRecordId(chatboxid) + " is == " + chatboxcallrecordid);

@@ -98,8 +98,7 @@ if(!empty($_POST['save'])){
 	//set defaults for saving
 
     foreach ($config_meta as $key => $value) {
-		// TODO I'm still unclear what the purpose of the following line is... seems like it should be != ''
-        // BR Modified so now if empty params come in they aren't required.
+	   // BR Modified so now if empty params come in they aren't required.
         if (isset($_REQUEST[$key]) && $_REQUEST[$key] == '') {
             if( isset($value['required']) && $value['required'] != "true") {
 				$_REQUEST[$key] = $value['default'];

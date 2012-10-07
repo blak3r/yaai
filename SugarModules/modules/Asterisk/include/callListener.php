@@ -122,7 +122,6 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 		#$item['phone_number'] = $row['callerID'];
 		#$item['asterisk_name'] = $row['callerName'];
 		$callPrefix = $calloutPrefix;
-
 	}
 
 	// Remove dialout prefix if present
@@ -160,6 +159,10 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 
 	$gravEmailAddress = ""; //clear address
 	$found = array();
+
+    $isMultipleContactCase = false;
+    $isNoMatchingContactCase = true;
+
 	if(strlen($phoneToFind) > 5) {
 		$sqlReplace = "
 			    replace(
@@ -239,12 +242,21 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 
             // In the only 1 matching contact case, we can set the contact_id db column to cut down on doing expensive sql queries to find matching contact.
             if( empty( $row['contact_id'] ) && !$isMultipleContactCase ) {
-                $tempContactId = preg_replace('/[^a-z0-9\-\. ]/i', '', $contactRow['contact_id']);
-                $tempCallRecordId = preg_replace('/[^a-z0-9\-\. ]/i', '', $row['call_record_id']);
-                $insertQuery = "UPDATE asterisk_log SET contact_id='$tempContactId' WHERE call_record_id='$tempCallRecordId'";
-                $current_user->db->query($insertQuery, false);
+                //$tempContactId = preg_replace('/[^a-z0-9\-\. ]/i', '', $contactRow['contact_id']);
+                //$tempCallRecordId = preg_replace('/[^a-z0-9\-\. ]/i', '', $row['call_record_id']);
+                //$insertQuery = "UPDATE asterisk_log SET contact_id='$tempContactId' WHERE call_record_id='$tempCallRecordId'";
+                //$current_user->db->query($insertQuery, false);
+
+                // This is a special case where a contact record is created after the call started.
+                // Such As... Call begins, then user clicks create new contact, call ends...
+                $_REQUEST['action'] = 'setContactId';
+                $_REQUEST['call_record'] = $row['call_record_id'];
+                $_REQUEST['contact_id'] = $contactRow['contact_id'];
+                $_REQUEST['id']= $row['asterisk_id'];
+                require_once("custom/modules/Asterisk/include/controller.php");
+                log_entry("after_setContactId.... $isNoMatchingContactCase ... $isMultipleContactCase ... '{$row['contact_id']}' \n","C:/callListener.log");
             }
-		}
+		} // End while $contactRow
 
         if( $isMultipleContactCase ) {
             $found['contactFullName'] = $mod_strings["ASTERISKLBL_MULTIPLE_MATCHES"];
@@ -301,7 +313,11 @@ EOT1;
 	//$item['sqlQuery'] = $queryContact; // Uncomment if you want to debug the query.	y
 
 	$response[] = $item;
-	}
+
+	} // end of while row
+
+
+
 
 $responseArray = array();
 if(count($response) == 0){
@@ -337,7 +353,16 @@ sugar_cleanup();
 
 // Retrieves caller ID information using the opencnam rest service.
 function opencnam_fetch( $phoneNumber ) {
-    $request_url = "https://api.opencnam.com/v1/phone/" . $phoneNumber . "?format=text";
+    global $sugar_config;
+
+
+    $request_url = "https://api.opencnam.com/v1/phone/" . $phoneNumber . "?format=pbx";
+    // If using the PAID api
+    if( !empty($sugar_config['asterisk_opencnam_apikey']) && !empty($sugar_config['asterisk_opencnam_username'])) {
+        $request_url .= "&username={$sugar_config['asterisk_opencnam_username']}&api_key={$sugar_config['asterisk_opencnam_apikey']}";
+    }
+
+    $retries = isset($sugar_config['asterisk_opencnam_retries']) ? isset($sugar_config['asterisk_opencnam_retries']) : 4;
     $found = false;
     $i=0;
     do {
@@ -350,7 +375,7 @@ function opencnam_fetch( $phoneNumber ) {
         else {
             $found = true;
         }
-    } while($i++ < 7 && $found == false );
+    } while($i++ < $retries && $found == false );
     //log_entry("Open_CNAM for $phoneNumber took: $i attempts (8max) and returned: " . $response . "\n", "c:\opencnam_log.txt"); // TODO remove in production code.
     if( empty($response) ){
         $response = " "; // return a space character so it doesn't keep attempting to lookup number next time callListener is called.

@@ -1253,7 +1253,7 @@ function findSugarAccountByPhoneNumber($aPhoneNumber)
     $searchPattern = $aPhoneNumber;
 
     $aPhoneNumber = preg_replace( '/\D/', '', $aPhoneNumber); // removes everything that isn't a digit.
-    if( preg_match('/([0-9]{7})$/',$aPhoneNumber,$matches) ){
+    if( preg_match('/([0-9]{10})$/',$aPhoneNumber,$matches) ){
         $aPhoneNumber = $matches[1];
     }
 
