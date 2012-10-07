@@ -15,3 +15,4 @@ copyToDir.*
 .idea/
 *idea*
 *tplOut.txt
+.DS_Store
