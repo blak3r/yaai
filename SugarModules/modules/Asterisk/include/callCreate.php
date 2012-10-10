@@ -51,7 +51,6 @@ require_once('include/entryPoint.php');
 require_once ('log4php/LoggerManager.php');
 
 $GLOBALS['log'] = LoggerManager::getLogger('SugarCRM');
-$GLOBALS['log']->fatal("TEST");
 
 // get the Asterisk Detail from the Configuration
 $server = $sugar_config['asterisk_host'];
@@ -70,7 +69,9 @@ $context = $sugar_config['asterisk_context'];
 //$cUser->retrieve($_SESSION['authenticated_user_id']);
 //$extension 	= $cUser->asterisk_ext_c;
 
-$extension = $current_user->asterisk_ext_c;
+// Use first extension in the list when multiple extensions linked to the account.
+$extensionsArray = preg_split('\s*,\s*', $current_user->asterisk_ext_c);
+$extension = $extensionsArray[0];
 
 //printr($current_user);
 //print $extension . "<BR><BR>";
@@ -81,7 +82,7 @@ $extension = $current_user->asterisk_ext_c;
 preg_match('/([^#]*)(#+)([^#]*)/',$sugar_config['asterisk_dialout_channel'],$matches);
 $channel = $matches[1] . $extension . $matches[3];
 
-logLine("Creating Call, channel for originate command is: $channel\n");	
+logLine("[CallCreate.php] Creating Call, channel for originate command is: $channel\n");
 												
 $socket = fsockopen($server, $port, $errno, $errstr, 20);
 	
@@ -96,7 +97,7 @@ $socket = fsockopen($server, $port, $errno, $errstr, 20);
 	fputs($socket, "\r\n");	
 	$result = fgets($socket,128);
 	echo("Login Response: " . $result);
-	logLine("[CreateCall] Login Result: $result\n");
+	logLine("[CreateCall.php] Login Result: $result\n");
 	
 	//format Phone Number
 	$number = $_REQUEST['phoneNr'];

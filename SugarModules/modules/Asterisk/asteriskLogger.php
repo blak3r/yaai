@@ -107,7 +107,6 @@ class SugarSoap extends nusoapclient
         if (is_array($result) && array_key_exists("error", $result) && $result['error']['number'] != 0) {
             $this->login();
             $result = parent::call($method, $params);
-
         }
         //print_r($result);
         return ($result);
@@ -231,8 +230,10 @@ if( $argc > 1 && $argv[1] == "test" ) {
 
 	print "Entered test mode!";
 
+
+
 	$obj = findSugarObjectByPhoneNumber("4102152497");
-	print "findUserByAsteriskExtension(52) returned: " . findUserByAsteriskExtension("52") . "\n";
+	print "findUserByAsteriskExtension(51) returned: " . findUserByAsteriskExtension("51") . "\n";
 	print "findUserByAsteriskExtension(207) returned: " . findUserByAsteriskExtension("207") . "\n";
 	print "findUserByAsteriskExtension(710) returned: " . findUserByAsteriskExtension('710') . "\n";
 	findUserByAsteriskExtension('206');
@@ -1596,11 +1597,27 @@ function extractExtensionNumberFromChannel( $channel )
 function findUserByAsteriskExtension($aExtension)
 {
     logLine("### +++ findUserByAsteriskExtension($aExtension)\n");
+    // The query below is actually pretty clever.  Recall that user extensions can be a comma seperated list.
+    // The 4 conditions are necessary 1) To match single extension case, 2) to match first extension in the list
+    // 3) to match one in the middle of list, 4) matches one at the end of a list.
+    $qry = "select id,user_name from users join users_cstm on users.id = users_cstm.id_c where ".
+           "(users_cstm.asterisk_ext_c='$aExtension' or users_cstm.asterisk_ext_c LIKE '$aExtension,%' ".
+           "OR users_cstm.asterisk_ext_c LIKE '%,$aExtension,%' OR users_cstm.asterisk_ext_c LIKE '%,$aExtension') and status='Active'";
 
-	$qry = "select id from users join users_cstm on users.id = users_cstm.id_c where users_cstm.asterisk_ext_c=$aExtension and status='Active'";
 	$result = mysql_checked_query($qry);
 	if( $result ) {
 		$row = mysql_fetch_array($result);
+
+        // All this if statement does is detect if multiple users were returned and if so display warning.
+        if( mysql_num_rows($result) > 1 ) {
+            $firstUser = $row['user_name'];
+            $usernames = $row['user_name'];
+            while( $row2 = mysql_fetch_array($result) ) {
+                $usernames .= ", " . $row2['user_name'];
+            }
+            logLine("### __WARNING__ Extension $aExtension matches the following users: $usernames!  Call will be assigned to: $firstUser!");
+        }
+
 		return $row['id'];
 	}
 

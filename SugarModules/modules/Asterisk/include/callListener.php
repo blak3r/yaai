@@ -83,8 +83,20 @@ $callinPrefix = $sugar_config['asterisk_dialinPrefix'];
 
 // NeedID is the default call state for outbound calls, an entry in asterisk_log is created before a call record is created.  See GITHUB issue #
 $lastHour = date('Y-m-d H:i:s',time() - 1*60*60);
-$query = " SELECT * FROM asterisk_log WHERE \"$lastHour\" < timestampCall AND (uistate IS NULL OR uistate != \"Closed\") AND (callstate != 'NeedID') AND (channel LIKE 'SIP/{$current_user->asterisk_ext_c}%' OR channel LIKE 'Local%{$current_user->asterisk_ext_c}%')";
+$availableExtensionsArray = preg_split('/\s*,\s*/', $current_user->asterisk_ext_c);
 
+$query = " SELECT * FROM asterisk_log WHERE \"$lastHour\" < timestampCall AND (uistate IS NULL OR uistate != \"Closed\") AND (callstate != 'NeedID') AND (";
+if (count($availableExtensionsArray) == 1) {
+    $query .= " channel LIKE 'SIP/{$current_user->asterisk_ext_c}%' OR channel LIKE 'Local%{$current_user->asterisk_ext_c}%'";
+}
+else {
+    $queryExtensionsArray = array();
+    foreach ($availableExtensionsArray as $singleExtension) {
+        array_push($queryExtensionsArray, " channel LIKE 'SIP/{$singleExtension}%' OR channel LIKE 'Local%{$singleExtension}%'");
+    }
+    $query .= implode(' OR ', $queryExtensionsArray);
+}
+$query .=")";
 $resultSet = $current_user->db->query($query, false);
 if($current_user->db->checkError()){
 	trigger_error("checkForNewStates-Query failed: $query");
@@ -111,7 +123,6 @@ while($row = $current_user->db->fetchByAssoc($resultSet)){
 		$item['call_type'] = "ASTERISKLBL_COMING_IN";
 		$item['direction'] = "Inbound";
 		$callPrefix = $callinPrefix;
-
 	}
 
 	if($row['direction'] == 'O'){
