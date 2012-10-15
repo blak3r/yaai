@@ -70,7 +70,7 @@ $context = $sugar_config['asterisk_context'];
 //$extension 	= $cUser->asterisk_ext_c;
 
 // Use first extension in the list when multiple extensions linked to the account.
-$extensionsArray = preg_split('\s*,\s*', $current_user->asterisk_ext_c);
+$extensionsArray = explode(',', $current_user->asterisk_ext_c);
 $extension = $extensionsArray[0];
 
 //printr($current_user);
@@ -87,7 +87,7 @@ logLine("[CallCreate.php] Creating Call, channel for originate command is: $chan
 $socket = fsockopen($server, $port, $errno, $errstr, 20);
 	
 	if (!$socket) {
-		echo "errstr ($errno) <br>\n";
+		echo "Unable to open socket connection to initiate call.  Error #$errno: $errstr <br>\n";
 				
 	} else { 
 	// log on to Asterisk

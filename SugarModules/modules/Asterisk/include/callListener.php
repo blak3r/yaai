@@ -83,7 +83,7 @@ $callinPrefix = $sugar_config['asterisk_dialinPrefix'];
 
 // NeedID is the default call state for outbound calls, an entry in asterisk_log is created before a call record is created.  See GITHUB issue #
 $lastHour = date('Y-m-d H:i:s',time() - 1*60*60);
-$availableExtensionsArray = preg_split('/\s*,\s*/', $current_user->asterisk_ext_c);
+$availableExtensionsArray = explode(',', $current_user->asterisk_ext_c);
 
 $query = " SELECT * FROM asterisk_log WHERE \"$lastHour\" < timestampCall AND (uistate IS NULL OR uistate != \"Closed\") AND (callstate != 'NeedID') AND (";
 if (count($availableExtensionsArray) == 1) {
