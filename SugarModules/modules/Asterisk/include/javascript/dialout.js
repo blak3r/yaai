@@ -42,26 +42,28 @@ $(document).ready(function()
 	{
 		var phoneNr = $(this).text().trim();
 
-        // Regex searches the inner html to see if a child element has phone class, this prevents a given number from having more then one click to dial icon appear.
-        if(phoneNr.length > 1 && !/(class="phone"|id="?#phone)/.test($(this).html()))
-		{
+        // Regex searches the inner html to see if a child element has phone class,
+        // this prevents a given number having more then one click to dial icon.
+        // The /EDV.show_edit/ regex allows it to work with Letrium's Edit Detail View module.
+        if(phoneNr.length > 1  && ( !/(class="phone"|id="?#phone)/.test($(this).html()) || /EDV.show_edit/.test($(this).html()) ) )
+        {
 			var contactId = $('input[name="record"]', document.forms['DetailView']).attr('value');
 			if (!contactId)
 			{
 				contactId = $('input[name="mass[]"]', $(this).parents('tr:first')).attr('value');
-			}		
-			
+			}
+
 			if( AST_UserExtention ) {
-				$(this).append('&nbsp;&nbsp;<img title="Extension Configured for Click To Dial is: ' + AST_UserExtention + '" src="custom/modules/Asterisk/include/call_active.gif" class="asterisk_placeCall" value="anrufen" style="cursor: pointer;"/>&nbsp;');	
+				$(this).append('&nbsp;&nbsp;<img title="Extension Configured for Click To Dial is: ' + AST_UserExtention + '" src="custom/modules/Asterisk/include/call_active.gif" class="asterisk_placeCall" value="anrufen" style="cursor: pointer;"/>&nbsp;');
 			}
 			else {
-				$(this).append('&nbsp;&nbsp;<img title="No extension configured!  Go to user preferences to set your extension" src="custom/modules/Asterisk/include/call_noextset.gif" class="asterisk_placeCall" value="anrufen" style="cursor: pointer;"/>&nbsp;');	
+				$(this).append('&nbsp;&nbsp;<img title="No extension configured!  Go to user preferences to set your extension" src="custom/modules/Asterisk/include/call_noextset.gif" class="asterisk_placeCall" value="anrufen" style="cursor: pointer;"/>&nbsp;');
 			}
-			
+
 			$('.asterisk_placeCall', this).click(function()
 			{
 				// alert("phoneNr : "+phoneNr+" , contactId: "+contactId);
-				var call = $.get('index.php?entryPoint=AsteriskCallCreate', 
+				var call = $.get('index.php?entryPoint=AsteriskCallCreate',
 					{phoneNr : phoneNr, contactId: contactId},
 					function(data){
 					  call = null;
