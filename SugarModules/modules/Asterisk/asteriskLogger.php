@@ -286,7 +286,7 @@ while (true) {
     fputs($amiSocket, $asteriskUser);
     fputs($amiSocket, $asteriskSecret);
     fputs($amiSocket, "Events: call,hud\r\n\r\n"); // to monitor just call data, for Asterisk Manager 1.0 remove hud
-    $result = AMI_ReadResponse($amiSocket);
+    $result = AMI_ReadResponse($amiSocket,2000000);
     logLine("  AMI Login action raw response:\n" . markdown_indent($result) );
     if( AMI_WasCmdSuccessful($result) ) {
         logLine("  AMI Login was a *success!*");
