@@ -390,6 +390,10 @@ while (true) {
 
 					$tmpCallerID = trim($e['CallerIDNum']); //Asterisk Manager 1.0 $e['CallerID']
 
+                    // Fix for issue on some asterisk 1.8 boxes where CallerId on click to dial is not set.  See https://github.com/blak3r/yaai/issues/75
+                    if ($tmpCallerID == '<unknown>' && !empty($e['ConnectedLineNum'])) {
+                        $tmpCallerID = trim($e['ConnectedLineNum']);
+                    }
 
 					if (startsWith($tmpCallerID,$calloutPrefix)) {
 						logLine ("  Stripping callout prefix: $calloutPrefix\n");
