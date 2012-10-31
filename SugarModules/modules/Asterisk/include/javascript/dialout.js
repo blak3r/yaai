@@ -44,8 +44,9 @@ $(document).ready(function()
 
         // Regex searches the inner html to see if a child element has phone class,
         // this prevents a given number having more then one click to dial icon.
+        // ? after the " is required for IE compatibility.  IE strips the " around the class names apparently.
         // The /EDV.show_edit/ regex allows it to work with Letrium's Edit Detail View module.
-        if(phoneNr.length > 1  && ( !/(class="phone"|id="?#phone)/.test($(this).html()) || /EDV.show_edit/.test($(this).html()) ) )
+        if(phoneNr.length > 1  && ( !/(class="?phone"?|id="?#phone)/.test($(this).html()) || /EDV.show_edit/.test($(this).html()) ) )
         {
 			var contactId = $('input[name="record"]', document.forms['DetailView']).attr('value');
 			if (!contactId)
