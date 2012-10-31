@@ -12,19 +12,30 @@
 # Description:       starts asterisk logger using
 ### END INIT INFO
 
+# EDIT the USER and SUGAR_ROOT Variables below and read note in start_logger() below
+# USER isn't used unless you use the more secure version in start_logger
+USER=apache
+SUGAR_ROOT=/var/www/html/sugarcrm
+
+# Shouldn't need to edit any of these...
 PROC="asteriskLogger"
-DAEMON="php /var/www/crm/custom/modules/Asterisk/$PROC.php"
+DAEMON="php $SUGAR_ROOT/custom/modules/Asterisk/$PROC.php"
 LOGFILE="/tmp/$PROC.log"
 NAME=asterisk_logger
 DESC=asterisk_logger
-USER=www-data
+
 
 set -e
 
 . /lib/lsb/init-functions
 
 start_logger() {
-        sudo -u $USER $DAEMON > $LOGFILE < /dev/null &
+        # Note: the commented line starting with "sudo" is the more secure approach but I've encountered
+        # errors such as "sorry, you must have a tty to run sudo" on certain boxes. So, the default method below
+        # will work more universally. You can try commenting the first line and uncommenting the second line
+        # and hope it works. Suggestions are welcomed on ways to improve this script.
+        $DAEMON > $LOGFILE < /dev/null &
+        #sudo -u $USER $DAEMON > $LOGFILE < /dev/null &
 }
 
 stop_logger() {
