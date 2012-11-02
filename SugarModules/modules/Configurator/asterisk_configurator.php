@@ -70,7 +70,7 @@ $config_meta['asterisk_opencnam_username'] = array('default'=> '', 'section' => 
 $config_meta['asterisk_opencnam_apikey'] = array('default' => '', 'section'=>'Misc');
 $config_meta['asterisk_opencnam_retries'] = array('default'=> '4', 'section'=>'Misc');
 $config_meta['asterisk_gravatar_enabled'] = array('default' => 'false','section'=>'Misc') ;
-$config_meta['asterisk_short_call_status'] = array('default' => "Missed",'section'=>'Misc');
+$config_meta['asterisk_short_call_status'] = array('default' => "Held",'section'=>'Misc');
 $config_meta['asterisk_hide_call_popups_after_mins'] = array('default' => '60','section'=>'Misc');
 
 $config_meta['asterisk_log_file'] = array('default' => '', 'section'=>'Logging');

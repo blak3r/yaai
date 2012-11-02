@@ -49,6 +49,7 @@ function post_install() {
 
 ?>
 <br /><br />
+<img src="http://www.flickr.com/photos/88110850@N02/8143940572/" alt="YAAI Logo"><br>
 <span style="font-size: 1.6em;"><strong>Please review the documentation!  There are several additional steps that must be taken.</strong></span>
 <br /><span style="font-size: 1.3em;">The User Guide can be found on the Project website here: <a href="https://github.com/blak3r/yaai/wiki/User-Manual">https://github.com/blak3r/yaai/wiki/User-Manual</a>.  Please note the fairly comprehensive troubleshooting section at the end of the manual.</span>
 <br>
@@ -65,6 +66,8 @@ We're also in great need of some help from developers.  Please see: <a href="htt
       <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
   </form>
 </P>
+<BR/>
+<a href="/index.php?module=Configurator&action=asterisk_configurator">Click here to go to module configuration</a>
 
 <?php
   }
