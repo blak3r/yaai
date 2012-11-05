@@ -14,6 +14,7 @@ Added lots more config options.
 Ability to disable OpenCNAM integration.
 Fix IE bug where multiple click to dial icons would appear in contact list view.
 Fix for Issue #75, Outbound Caller Id not set
+Improved compatibility for POTS asterisk (ie not voip).  Outbound calls now pull outbound phone number in properly from dialstring.
 IE8 compatibility for Click to Dial
 Click-2-Dial now works when Letrium Quick Edit Detail View is installed.
 Fix for Issue #25, Calls are related to contacts created after call ends.
