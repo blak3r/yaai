@@ -503,44 +503,22 @@ while (true) {
 				//Asterisk Manager 1.1
 				if ($e['Event'] == 'NewCallerid') {
 					$id          = $e['Uniqueid'];   // <-- GRRRRRRR AMI inconsistency in every other event it's "UniqueID"
-					$tmpCallerID = trim($e['CallerIDNum']);
+					$tmpCallerID = trim($e['CallerIDNum']);   // TODO For AMI v1.0 Support, add condition to look in $e['CallerId'] instead.
 					if ((strlen($calloutPrefix) > 0) && (strpos($tmpCallerID, $calloutPrefix) === 0)) {
 						logLine ("* Stripping prefix: $calloutPrefix");
 						$tmpCallerID = substr($tmpCallerID, strlen($calloutPrefix));
 					}
 					logLine("  {$e['Uniqueid']} CallerID  Changed to: $tmpCallerID\n");
-					// Fetch associated call record
-					//$callRecord = findCallByAsteriskId($id);
 					$query = "UPDATE asterisk_log SET CallerID='" . $tmpCallerID . "', callstate='Dial' WHERE asterisk_id='" . $id . "'";
 					mysql_checked_query($query);
 				}
-				//Asterisk Manager 1.0
-
-				/* if($e['Event'] == 'NewCallerid')
-				{
-				$id = $e['Uniqueid'];
-				$tmpCallerID = trim($e['CallerID']);
-				echo("* CallerID is: $tmpCallerID\n");
-				if ( (strlen($calloutPrefix) > 0)  && (strpos($tmpCallerID, $calloutPrefix) === 0) )
-				{
-				echo("* Stripping prefix: $calloutPrefix");
-				$tmpCallerID = substr($tmpCallerID, strlen($calloutPrefix));
-				}
-				echo("* CallerID is: $tmpCallerID\n");
-				// Fetch associated call record
-				//$callRecord = findCallByAsteriskId($id);
-				$query = "UPDATE asterisk_log SET CallerID='" . $tmpCallerID . "', callstate='Dial' WHERE asterisk_id='" . $id . "'";
-				mysql_checked_query($query);
-				};*/
 
 				//
 				// Process "Hangup" events
-				// Yup, we really get TWO hangup events from Asterisk!
+				// Yup, we really get TWO hangup events from Asterisk!  (Even more with Ringgroups)
 				// Obviously, we need to take only one of them....
 				//
 				// Asterisk Manager 1.1
-				// I didn't get the correct results from inbound calling in relation to the channel that answered, this solves that.
-
 				if ($e['Event'] == 'Hangup') {
 					$id        = $e['Uniqueid'];
 					$query     = "SELECT direction,contact_id FROM asterisk_log WHERE asterisk_dest_id = '$id' OR asterisk_id = '$id'";
@@ -1022,8 +1000,6 @@ while (true) {
 
 				// Reset event buffer
 				$event = '';
-
-
 			}
         }
 
@@ -1039,17 +1015,16 @@ while (true) {
         }
 
         // for if the connection to the sql database gives out.
+        // TODO Find a better way to check the connection.  I think on Shared Hosting Servers mysql_ping might be disabled which causes this to always reconnect.
         if (!mysql_ping($sql_connection)) {
             //here is the major trick, you have to close the connection (even though its not currently working) for it to recreate properly.
             logLine("__MySQL connection lost, reconnecting__\n");
             mysql_close($sql_connection);
             $sql_connection = mysql_connect($sugar_config['dbconfig']['db_host_name'], $sugar_config['dbconfig']['db_user_name'], $sugar_config['dbconfig']['db_password']);
             $sql_db         = mysql_select_db($sugar_config['dbconfig']['db_name']);
-
         }
 
     }
-
 
     logLine(getTimestamp() . "Event loop terminated, attempting to login again\n");
     sleep(1);

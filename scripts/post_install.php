@@ -44,12 +44,14 @@ function post_install() {
   $result = @sugar_file_put_contents('custom/include/MVC/Controller/entry_point_registry.php', $the_string);
 
 
+$onClickLocation="window.location=index.php?module=Configurator&action=asterisk_configurator";
 
   if ($_REQUEST['mode'] == 'Install') {
 
 ?>
 <br /><br />
-<img src="http://www.flickr.com/photos/88110850@N02/8143940572/" alt="YAAI Logo"><br>
+
+<img src="http://www.blakerobertson.com/ext/yaai-postinstall-logo-26.png" alt="YAAI Logo" style="margin-right:-5px"><br>
 <span style="font-size: 1.6em;"><strong>Please review the documentation!  There are several additional steps that must be taken.</strong></span>
 <br /><span style="font-size: 1.3em;">The User Guide can be found on the Project website here: <a href="https://github.com/blak3r/yaai/wiki/User-Manual">https://github.com/blak3r/yaai/wiki/User-Manual</a>.  Please note the fairly comprehensive troubleshooting section at the end of the manual.</span>
 <br>
@@ -67,7 +69,10 @@ We're also in great need of some help from developers.  Please see: <a href="htt
   </form>
 </P>
 <BR/>
-<a href="/index.php?module=Configurator&action=asterisk_configurator">Click here to go to module configuration</a>
+
+  <input title="Continue" class="button primary" onclick="javascript:window.location='index.php?module=Configurator&action=asterisk_configurator';" type="button" name="button" value="    Continue on to Module Configuration -->    ">
+<br/>
+<br/>
 
 <?php
   }

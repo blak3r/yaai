@@ -34,9 +34,10 @@
  */
 
 $admin_option_defs=array();
-$admin_option_defs['Administration']['asterisk_configurator']= array($image_path . 'Calls','LBL_MANAGE_ASTERISK','LBL_ASTERISK','./index.php?module=Configurator&action=asterisk_configurator');
-$admin_option_defs['Administration']['asterisk_donate']= array($image_path . 'Calls','LBL_ASTERISK_DONATE','LBL_ASTERISK_DONATE_DESC','http://www.blakerobertson.com/yaai-donation-page');
-$admin_option_defs['Administration']['asterisk_usermanual']= array($image_path . 'Calls','LBL_ASTERISK_USERMANUAL','LBL_ASTERISK_USERMANUAL_DESC','https://github.com/blak3r/yaai/wiki/User-Manual');
+$admin_option_defs['Administration']['asterisk_configurator']= array('Administration','LBL_MANAGE_ASTERISK','LBL_ASTERISK','./index.php?module=Configurator&action=asterisk_configurator');
+$admin_option_defs['Administration']['asterisk_donate']= array('Opportunities','LBL_ASTERISK_DONATE','LBL_ASTERISK_DONATE_DESC','http://www.blakerobertson.com/yaai-donation-page');
+$admin_option_defs['Administration']['asterisk_usermanual']= array('Support','LBL_ASTERISK_USERMANUAL','LBL_ASTERISK_USERMANUAL_DESC','https://github.com/blak3r/yaai/wiki/User-Manual');
+$admin_option_defs['Administration']['asterisk_mailinglist']= array('Emails','LBL_ASTERISK_MAILINGLIST','LBL_ASTERISK_MAILINGLIST_DESC','http://eepurl.com/rmdML');
 
 $admin_group_header[]=array('LBL_ASTERISK_TITLE','',false,$admin_option_defs, 'LBL_ASTERISK_DESC');
 
