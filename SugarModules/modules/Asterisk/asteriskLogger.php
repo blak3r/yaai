@@ -392,9 +392,22 @@ while (true) {
 
 					$tmpCallerID = trim($e['CallerIDNum']); //Asterisk Manager 1.0 $e['CallerID']
 
+                    // Typically for outbound calls there are NewCallerID events which contain the phone number dialed.
+                    // This isn't the case on POTS lines.
+                    // The dialstring will be like g0/14101234567 for outbound calls and 14101234567 for inbound
+                    // Regex only matches the outbound case since in the inbound case the CallerIDNum variable is set properly.
+                    // Note: this cases also seems to happen on the INTERNAL inbound call events to Ring Groups which is harmless.
+                    if( !empty($e['Dialstring']) ) {
+                        if( preg_match("/(.*?\/)(\d+)/",$e['Dialstring'], $ds_matches) ) {
+                            $tmpCallerID = $ds_matches[2];
+                            logLine(" CallerID set from Dialstring to: " . $tmpCallerID );
+                        }
+                    }
+
                     // Fix for issue on some asterisk 1.8 boxes where CallerId on click to dial is not set.  See https://github.com/blak3r/yaai/issues/75
                     if ($tmpCallerID == '<unknown>' && !empty($e['ConnectedLineNum'])) {
                         $tmpCallerID = trim($e['ConnectedLineNum']);
+                        logLine( " CallerID set from ConnectedLineNum to $tmpCallerID");
                     }
 
 					if (startsWith($tmpCallerID,$calloutPrefix)) {

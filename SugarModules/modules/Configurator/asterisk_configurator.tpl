@@ -503,42 +503,6 @@
             <input type='textbox' name='asterisk_log_file' size="45" value='{$asterisk_log_file}'>
         </td>
 
-        <TD>&nbsp;</TD><TD>&nbsp;</TD> </tr>
-
-    <TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h3>Recordings</h3></TD></tr>
-
-
-
-    <TR>
-
-        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_RECORDINGS_ENABLED}
-        {if !empty($MOD.LBL_ASTERISK_RECORDINGS_ENABLED_DESC)}
-            [<a href="#" title="{$MOD.LBL_ASTERISK_RECORDINGS_ENABLED_DESC}">?</a>]:
-        {/if}
-        </td>
-        <td width="25%" class="dataField">
-        {if empty($config.asterisk_recordings_enabled )}
-            {assign var='asterisk_recordings_enabled' value=$asterisk_config.asterisk_recordings_enabled}
-            {else}
-            {assign var='asterisk_recordings_enabled' value=$config.asterisk_recordings_enabled}
-        {/if}
-            <input type='textbox' name='asterisk_recordings_enabled' size="45" value='{$asterisk_recordings_enabled}'>
-        </td>
-
-        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_RECORDINGS_PATH}
-        {if !empty($MOD.LBL_ASTERISK_RECORDINGS_PATH_DESC)}
-            [<a href="#" title="{$MOD.LBL_ASTERISK_RECORDINGS_PATH_DESC}">?</a>]:
-        {/if}
-        </td>
-        <td width="25%" class="dataField">
-        {if empty($config.asterisk_recordings_path )}
-            {assign var='asterisk_recordings_path' value=$asterisk_config.asterisk_recordings_path}
-            {else}
-            {assign var='asterisk_recordings_path' value=$config.asterisk_recordings_path}
-        {/if}
-            <input type='textbox' name='asterisk_recordings_path' size="45" value='{$asterisk_recordings_path}'>
-        </td>
-
         <!-- ------------------- [ PASTE OUTPUT OF CONFIGURATORGENERATORUTIL ABOVE THIS LINE ]----------------------------- -->
 
 </table>

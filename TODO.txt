@@ -14,18 +14,6 @@ https://github.com/blak3r/yaai/wiki/Project-TODO-List
 I tend to use this file to temporarily put notes when i'm not already logged into github.
 
 
-
-sqs_objects['EditView_shipping_contact_name']={
-"form":"EditView",
-"method":"get_contact_array",
-"modules":["Contacts"],
-"field_list":["salutation","first_name","last_name","id"],
-"populate_list":["shipping_contact_name","shipping_contact_id","shipping_contact_id","shipping_contact_id"],
-"required_list":["shipping_contact_id"],
-"group":"or",
-"conditions":[{"name":"first_name","op":"like_custom","end":"%","value":""},{"name":"last_name","op":"like_custom","end":"%","value":""}],
-"order":"last_name","limit":"30","no_match_text":"No Match"};
-
 Documentation:
 If you have a custom dial plan.  You must do the following.
 *There are a few regex's that must work.
@@ -42,8 +30,8 @@ If you have a custom dial plan.  You must do the following.
   So, if call windows aren't popping up this might be a good place to look.
 
 Versions Developed with:
-* Asterisk 1.6.2.22 built by root on a i686 running Linux on 2011-12-29 01:26:29 UTC (we compiled asterisk b/c DTMF wasn't working).
-* 
+  * Asterisk 1.6.2.22 built by root on a i686 running Linux on 2011-12-29 01:26:29 UTC (we compiled asterisk b/c DTMF wasn't working).
+  *
 
 
 ==[ Important ]================
