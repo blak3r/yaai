@@ -48,9 +48,7 @@ $(document).ready(function()
         // The /EDV.show_edit/ regex allows it to work with Letrium's Edit Detail View module.
         if(phoneNr.length > 1  && ( !/(class="?phone"?|id="?#phone|class="?asterisk_placeCall"?)/.test($(this).html()) || /EDV.show_edit/.test($(this).html()) ) )
         {
-            alert($(this).html());
-
-			var contactId = $('input[name="record"]', document.forms['DetailView']).attr('value');
+           	var contactId = $('input[name="record"]', document.forms['DetailView']).attr('value');
 			if (!contactId)
 			{
 				contactId = $('input[name="mass[]"]', $(this).parents('tr:first')).attr('value');
