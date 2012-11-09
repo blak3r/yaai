@@ -45,8 +45,8 @@ var YAAI = {
     pollRate: window.yaai_poll_rate,
     fop2 : true,
     fop2URL : 'http://67-228-218-138.lx-vs.net',
-    fop2UserID : window.yaai_user_extension,
-    fop2Password : window.current_user_id.substring(0, 8),
+    fop2UserID : window.yaai_fop_user,
+    fop2Password : window.yaai_fop_pass,
     filteredCallStates : ['Ringing'],
     options : {
         debug: true

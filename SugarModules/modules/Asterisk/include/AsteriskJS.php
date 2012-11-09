@@ -52,12 +52,18 @@ class AsteriskJS {
             $poll_rate = !empty($GLOBALS['sugar_config']['asterisk_listener_poll_rate']) ? $GLOBALS['sugar_config']['asterisk_listener_poll_rate'] : "10000";
             $user_extension = !empty($GLOBALS['current_user']->asterisk_ext_c) ? $GLOBALS['current_user']->asterisk_ext_c : "Not Configured!";
             $current_user_id = $GLOBALS['current_user']->id;
-            
+            $fop_user = $GLOBALS['current_user']->asterisk_fop_user_c;
+            $fop_pass = $GLOBALS['current_user']->asterisk_fop_pass_c;
+            $fop_url = $sugar_config['asterisk_fop_url'];
+
             //JS Global Variables
             echo '<script type="text/javascript">window.yaai_poll_rate = ' . $poll_rate . ';</script>';
             echo '<script type="text/javascript">window.yaai_user_extension = ' . $user_extension . ';</script>';
             echo '<script type="text/javascript">window.yaai_current_user_id = ' . $current_user_id . ';</script>';
-            
+            echo '<script type="text/javascript">window.yaai_fop_user = "' . $fop_user . '";</script>';
+            echo '<script type="text/javascript">window.yaai_fop_pass = "' . $fop_pass . '";</script>';
+            echo '<script type="text/javascript">window.yaai_fop_url= "' . $fop_url . '";</script>';
+
             //JS Third-Party Libraries
 
             //echo '<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>';

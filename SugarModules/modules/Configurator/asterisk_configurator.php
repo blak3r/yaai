@@ -75,8 +75,11 @@ $config_meta['asterisk_hide_call_popups_after_mins'] = array('default' => '60','
 
 $config_meta['asterisk_log_file'] = array('default' => '', 'section'=>'Logging');
 
+$config_meta['asterisk_fop_url'] = array('default' => '', 'section'=>'Flash Operator Panel Addon');
+
 $config_meta['asterisk_recordings_enabled'] = array('default'=> 'false', 'section'=>'Recordings');
 $config_meta['asterisk_recordings_path'] = array('default' => '/var/spool/asterisk/monitor', 'section'=>'Recordings');
+
 
 
 //Need configurable Channel detection in order to assign calls to users when they answer on cell phones.

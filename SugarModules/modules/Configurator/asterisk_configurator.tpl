@@ -503,6 +503,27 @@
             <input type='textbox' name='asterisk_log_file' size="45" value='{$asterisk_log_file}'>
         </td>
 
+
+    <TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h3>Flash Operator Panel Addon</h3></TD></tr>
+
+    <TR>
+
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_FOP_URL}
+        {if !empty($MOD.LBL_ASTERISK_FOP_URL_DESC)}
+            [<a href="#" title="{$MOD.LBL_ASTERISK_FOP_URL_DESC}">?</a>]:
+        {/if}
+        </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_fop_url )}
+            {assign var='asterisk_fop_url' value=$asterisk_config.asterisk_fop_url}
+            {else}
+            {assign var='asterisk_fop_url' value=$config.asterisk_fop_url}
+        {/if}
+            <input type='textbox' name='asterisk_fop_url' size="45" value='{$asterisk_fop_url}'>
+        </td>
+
+        <TD>&nbsp;</TD><TD>&nbsp;</TD> </tr>
+
         <!-- ------------------- [ PASTE OUTPUT OF CONFIGURATORGENERATORUTIL ABOVE THIS LINE ]----------------------------- -->
 
 </table>

@@ -103,4 +103,7 @@ $mod_strings['LBL_ASTERISK_RECORDINGS_ENABLED_DESC'] = 'NOT YET RELEASED - This 
 $mod_strings['LBL_ASTERISK_RECORDINGS_PATH'] = 'Asterisk Call Recordings Path (WIP)';
 $mod_strings['LBL_ASTERISK_RECORDINGS_PATH_DESC'] = 'NOT YET RELEASED - This is an advanced feature which requires asterisk dialplan modifications in order to get working.  You will also need to have file system access to recordings folder.  So, if asterisk is on a different machine from your Sugar Instance you will need to map it somehow.';
 
+$mod_strings['LBL_ASTERISK_FOP_URL'] = 'Flash Operator Panel URL';
+$mod_strings['LBL_ASTERISK_FOP_URL_DESC'] = 'If you have the FOP2 extension installed on your asterisk box, specify the URL to use here.  Leave it blank to leave it disabled.';
+
 ?>

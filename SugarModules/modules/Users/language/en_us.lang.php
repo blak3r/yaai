@@ -41,6 +41,8 @@ $mod_strings['LBL_ASTERISK_EXT'] = 'Asterisk Extension';
 $mod_strings['LBL_ASTERISK_EXT_DESC'] = 'Asterisk extension assigned to this user (usually a two or three digit number)';
 $mod_strings['LBL_ASTERISK_INBOUND'] = 'Call notification';
 $mod_strings['LBL_ASTERISK_OUTBOUND'] = 'Magic dial buttons';
+$mod_strings['LBL_ASTERISK_FOP_USER'] = 'Flash Operator Panel Username';
+$mod_strings['LBL_ASTERISK_FOP_PASS'] = 'Flash Operator Panel Password';
 $mod_strings['LBL_ASTERISK_INBOUND_DESC'] = 'If selected the users extension will be added to the listener and the user will be notified if a new call is coming in and also see calls going out';
 $mod_strings['LBL_ASTERISK_OUTBOUND_DESC'] = 'If selected the user will be enabled to dial out clicking on the phone number of a contact';
 
