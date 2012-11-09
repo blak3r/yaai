@@ -103,6 +103,16 @@ function pre_install() {
     add_column_if_not_exist($db,"asterisk_log","contact_id", "VARCHAR(36) DEFAULT NULL");
     // Columns Added in v2.3
     add_column_if_not_exist($db,"asterisk_log","opencnam", "VARCHAR(16) DEFAULT NULL");
+    add_column_if_not_exist($db,"asterisk_log","userExtension", "VARCHAR(16) DEFAULT NULL"); // Added in version
+
+    add_index_if_not_exist($db,"asterisk_log","timestampCall");
+    add_index_if_not_exist($db,"asterisk_log","uistate");
+    add_index_if_not_exist($db,"asterisk_log","callstate");
+    add_index_if_not_exist($db,"asterisk_log","channel");
+    add_index_if_not_exist($db,"asterisk_log","asterisk_id");
+    add_index_if_not_exist($db,"asterisk_log","asterisk_dest_id");
+    add_index_if_not_exist($db,"asterisk_log","call_record_id");
+    add_index_if_not_exist($db,"asterisk_log","userExtension");
 }
 
 // http://www.edmondscommerce.co.uk/mysql/mysql-add-column-if-not-exists-php-function/
@@ -112,6 +122,17 @@ function add_column_if_not_exist($db, $table, $column, $column_attr = "VARCHAR( 
     if( !array_key_exists($column, $cols) ) {
         $db->query("ALTER TABLE `$table` ADD `$column`  $column_attr");
     }
+}
+
+function add_index_if_not_exist($db, $table, $index) {
+    $res = $db->query("SHOW INDEX FROM `$table` WHERE Key_name = '$index'");
+    if (empty($res)) {
+        $db->query("ALTER TABLE `$table` ADD INDEX $index($index)");
+    }
+}
+
+function modify_column($db, $table, $column, $column_attr) {
+    $db->query("ALTER TABLE `$table` MODIFY `$column` $column_attr");
 }
 
 ?>

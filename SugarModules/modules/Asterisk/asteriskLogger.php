@@ -338,7 +338,7 @@ while (true) {
 
                 if ($e['Event'] == 'Join' && !empty($e['Queue']) /*&& in_array($e['Queue'], $allowedQueueIds)*/ )
                 {
-                    $queueChannels[ $e['UniqueID'] ] = $e['Channel']; // TODO: This array will grow indefinitely... the data put into it is pretty small so probably fine for now but would be best to have a expiration policy.
+                    $queueChannels[ AMI_getUniqueIdFromEvent($e) ] = $e['Channel']; // TODO: This array will grow indefinitely... the data put into it is pretty small so probably fine for now but would be best to have a expiration policy.
                                 // Easy solution would be to test during the hangup event... IF( isset($queueChannels[ $e['UniqueID'] ] ) remove the index for $e['UniqueID']
                 }
 
@@ -411,12 +411,12 @@ while (true) {
 
                     // Check to see if this Dial Event is coming off a Queue.  If so we override the channel with the one we saved previously in Join Event.
                     if (!empty($e['ConnectedLineNum']) &&
-                       isset($queueChannels[ $e['UniqueID'] ]) )
+                       isset($queueChannels[ AMI_getUniqueIdFromEvent($e) ]) )
                     {
                         // TODO: This code needs to be verified... author didn't have queues.
                         // The idea here is to use the channel from the Queue Join event to find the true source channel.  Otherwise queue calls would get detected as internal calls.
                         logLine("Inbound From QUEUE detected, overriding: {$e['Channel']} with $channel");
-                        $eChannel = $queueChannels[ $e['UniqueID'] ];
+                        $eChannel = $queueChannels[ AMI_getUniqueIdFromEvent($e) ];
                     }
 
 					$rgDetectRegex = "/" . $sugar_config['asterisk_rg_detect_expr'] . "/i";
@@ -439,7 +439,7 @@ while (true) {
 							$callDirection = 'Outbound';
 							logLine("OUTBOUND state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
 						} else if (!preg_match($asteriskMatchInternal, $eChannel)) {
-							$query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall, asterisk_dest_id) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s')", $e['UniqueID'], $callRecordId, $eDestination, $eChannel, 'Dial', 'I', $tmpCallerID, 'FROM_UNIXTIME('.time().')', $e['DestUniqueID']);
+							$query         = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall, asterisk_dest_id) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s')", AMI_getUniqueIdFromEvent($e), $callRecordId, $eDestination, $eChannel, 'Dial', 'I', $tmpCallerID, 'FROM_UNIXTIME('.time().')', $e['DestUniqueID']);
 							$callDirection = 'Inbound';
 							logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
 						}
@@ -502,13 +502,13 @@ while (true) {
 				//
 				//Asterisk Manager 1.1
 				if ($e['Event'] == 'NewCallerid') {
-					$id          = $e['Uniqueid'];   // <-- GRRRRRRR AMI inconsistency in every other event it's "UniqueID"
+					$id          = AMI_getUniqueIdFromEvent($e);
 					$tmpCallerID = trim($e['CallerIDNum']);
 					if ((strlen($calloutPrefix) > 0) && (strpos($tmpCallerID, $calloutPrefix) === 0)) {
 						logLine ("* Stripping prefix: $calloutPrefix");
 						$tmpCallerID = substr($tmpCallerID, strlen($calloutPrefix));
 					}
-					logLine("  {$e['Uniqueid']} CallerID  Changed to: $tmpCallerID\n");
+					logLine("  CallerID  Changed to: $tmpCallerID\n");
 					// Fetch associated call record
 					//$callRecord = findCallByAsteriskId($id);
 					$query = "UPDATE asterisk_log SET CallerID='" . $tmpCallerID . "', callstate='Dial' WHERE asterisk_id='" . $id . "'";
@@ -542,7 +542,7 @@ while (true) {
 				// I didn't get the correct results from inbound calling in relation to the channel that answered, this solves that.
 
 				if ($e['Event'] == 'Hangup') {
-					$id        = $e['Uniqueid'];
+					$id        = AMI_getUniqueIdFromEvent($e);
 					$query     = "SELECT direction,contact_id FROM asterisk_log WHERE asterisk_dest_id = '$id' OR asterisk_id = '$id'";
 					$result    = mysql_checked_query($query);
 					$direction = mysql_fetch_array($result);
@@ -734,7 +734,7 @@ while (true) {
 					else {
 						//-----------------[ INBOUND HANGUP HANDLING ]----------------------
 
-						$id         = $e['Uniqueid'];
+						$id         = AMI_getUniqueIdFromEvent($e);
 						//
 						// Fetch associated call record
 						//
@@ -1776,6 +1776,24 @@ function markdown_indent($str,$indent="    ") {
     $str = trim($str);
     $str = "$indent```\n$indent$str\n$indent```";
     return $str;
+}
+
+
+/**
+ * AMI event params are not consistent.
+ * Dial Events use 'UniqueID'
+ * Join and NewCallerID events use 'Uniqueid' and for all we know it might also vary between versions of asterisk
+ * So, this method just helps get the Unique ID for the call from the event.
+ * @return string set to either $event['UniqueID'], $event['Uniqueid'] or NULL (if neither is set).
+ */
+function AMI_getUniqueIdFromEvent( $event ) {
+    if( isset( $event['UniqueID']) ) {
+        return $event['UniqueID'];
+    }
+    else if( isset( $event['Uniqueid'] )) {
+        return $event['Uniqueid'];
+    }
+    return NULL;
 }
 
 
