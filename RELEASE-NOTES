@@ -1,0 +1,83 @@
+IMPORTANT: when upgrading, please see the instructions in the User Manual <http://www.github.com/blak3r/yaai/wiki/User-Manual>
+
+##Version 2.6.0 (2012-11-03)##
+
+### NEW Features ###
+User can have multiple extensions (comma separated) Issue #22
+Calls can now be related to contacts created even after the call is hung up.
+Short Call Status allow the user to specify whether or not missed calls get their Call Status set to "Missed" or "Held".  If it's Missed, then the call will show up as an open task.  I set the default ot be Held for future installs.
+
+### Improvements / Bug Fixes ###
+Various bug fixes related to AJAX-UI
+Improved Daemon Script
+Added lots more config options.
+Ability to disable OpenCNAM integration.
+Fix IE bug where multiple click to dial icons would appear in contact list view.
+Fix for Issue #75, Outbound Caller Id not set
+Improved compatibility for POTS asterisk (ie not voip).  Outbound calls now pull outbound phone number in properly from dialstring.
+IE8 compatibility for Click to Dial
+Click-2-Dial now works when Letrium Quick Edit Detail View is installed.
+Fix for Issue #25, Calls are related to contacts created after call ends.
+Fix to work with ZenoSMS
+Better AMI Connection Diagnostics / Markdown Logging
+Retries soap login indefinitely.
+Updated time handling to fix #40.
+Fixed a minor localization bug.
+Adds support for LDAP auth (Issue #59)
+Fixed bug in Stripping Inbound / Outbound Prefixes.
+Deletes calls_cstm now also.
+Fixed open_cnam print error
+Adds Support For nested RingGroups, still has dev debugs on
+Merge pull request #20 from superles/patch-1
+Merge pull request #49 from trustmaster/master
+Fixed #44: using raw English call statuses as before localization.
+Merge branch 'master' of git://github.com/blak3r/yaai
+Merge pull request #42 from kerio-fstedronsky/patch-1
+Fix blak3r/yaai#41
+Cleaned up some PHP Notices
+Changed default search length to 10 digits.
+Fix for Issue #69 and Issue #66
+Fix for #40 timestamp handling
+LDAP Auth Supported
+Fixed Bug where Transfer didn't use context specified in the config.
+
+
+
+## Version 2.4 (2012-07-22)
+Fixes a bug where AJAX Calls prevented popups from closing.
+Adds support for sugar 6.5, fixes some bugs, adds Russian localization.
+
+
+
+## Version 2.3 (2012-05-09)
+
+### New Features
+* Added Transfer Call Support
+* Improved UI on call popups to allow for selecting which contact the call
+should be related to when multiple contacts match.
+* Added OpenCNAM.com support for Caller ID
+* Ability to manually relate a call to particular contact with a popup
+* Relates to Account instead of a contact if number matches an account
+number or if there are multiple contacts with the same phone number from
+the same account.
+* Doesn't log account to any contact if multiple contacts have the same
+phone number and they belong to two different accounts.
+
+### Changes:
+* Lots of minor bug fixes.
+* Module Loader automatically updates database
+* Improved stability of asteriskLogger
+* Performance Improvements.
+
+
+
+## Version 2.0.3 (2012-04-03)
+
+* Brand New \\\"gchat\\\" inspired UI.
+* Added more configurable options to support custom dial plans.
+* Supports multiple calls, ability to leave notes for up to an hour after
+call has hungup.
+* Improved support for Ring Groups which call an external phone number
+(like cell phones).
+* Improved stability of asterisk logger, doesn\\\'t hang as much
+* Lots of misc bug fixes.

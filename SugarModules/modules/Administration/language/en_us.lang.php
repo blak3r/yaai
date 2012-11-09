@@ -33,14 +33,15 @@
 
 if (!isset($mod_strings)) { $mod_strings = array(); }
 
-$mod_strings['LBL_MANAGE_ASTERISK'] = 'ASTERISK Configuration';
-$mod_strings['LBL_ASTERISK'] = 'Set the ASTERISK connection parameters';
-$mod_strings['LBL_ASTERISK_DESC'] = 'Configure the settings necessary to connect to your ASTERISK server.';
-$mod_strings['LBL_ASTERISK_TITLE'] = 'ASTERISK SugarCRM Connector';
+$mod_strings['LBL_MANAGE_ASTERISK'] = 'Module Configuration';
+$mod_strings['LBL_ASTERISK'] = 'Set the Asterisk connection parameters and other preferences';
+$mod_strings['LBL_ASTERISK_DESC'] = 'Set the Asterisk connection parameters and other preferences';
+$mod_strings['LBL_ASTERISK_TITLE'] = 'YAAI - Asterisk SugarCRM Integration';
 
 $mod_strings['LBL_ASTERISK_DONATE'] = 'Donate';
 $mod_strings['LBL_ASTERISK_DONATE_DESC'] = 'Please help support this project by making a donation.';
 $mod_strings['LBL_ASTERISK_USERMANUAL'] = 'User Manual';
 $mod_strings['LBL_ASTERISK_USERMANUAL_DESC'] = 'Links to the online documentation for this project';
-
+$mod_strings['LBL_ASTERISK_MAILINGLIST'] = 'Mailing List';
+$mod_strings['LBL_ASTERISK_MAILINGLIST_DESC'] = 'Sign up and be informed of updates to this module';
 ?>

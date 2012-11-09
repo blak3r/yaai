@@ -67,16 +67,16 @@ $manifest = array (
                          ,'PRO'
                           ,'ENT'
                          ),
-                   'readme'=>'README',
+                   'readme'=>'Please see the documentation at http://www.github.com/blak3r/yaai/User-Manual there are some important notes you need to read if you are installing an updated version of yaai.',
                    'key'=>'',
                    'author' => 'Blake Robertson / KINAMU Business Solutions AG / abcona active business consulting',
                    'description' => 'Integrates Asterisk telephony features into SugarCRM.',
                    'icon' => '',
                    'is_uninstallable' => true,
                    'name' => 'Asterisk SugarCRM Connector',
-                   'published_date' => '2012-Oct-30 16:10',
+                   'published_date' => '2012-Nov-05 11:11',
                    'type' => 'module',
-                   'version' => '2.5.6.0',
+                   'version' => '2.6.0b',
                    'remove_tables' => 'true',  /** This does absolutely nothing since our asterisk log table is created manually instead of as a bean **/
                    );
 

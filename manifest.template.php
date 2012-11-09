@@ -61,7 +61,7 @@ $manifest = array (
                          ,'PRO'
                           ,'ENT'
                          ),
-                   'readme'=>'README',
+                   'readme'=>'Please see the documentation at http://www.github.com/blak3r/yaai/User-Manual there are some important notes you need to read if you are installing an updated version of yaai.',
                    'key'=>'',
                    'author' => 'Blake Robertson / KINAMU Business Solutions AG / abcona active business consulting',
                    'description' => 'Integrates Asterisk telephony features into SugarCRM.',

@@ -392,9 +392,22 @@ while (true) {
 
 					$tmpCallerID = trim($e['CallerIDNum']); //Asterisk Manager 1.0 $e['CallerID']
 
+                    // Typically for outbound calls there are NewCallerID events which contain the phone number dialed.
+                    // This isn't the case on POTS lines.
+                    // The dialstring will be like g0/14101234567 for outbound calls and 14101234567 for inbound
+                    // Regex only matches the outbound case since in the inbound case the CallerIDNum variable is set properly.
+                    // Note: this cases also seems to happen on the INTERNAL inbound call events to Ring Groups which is harmless.
+                    if( !empty($e['Dialstring']) ) {
+                        if( preg_match("/(.*?\/)(\d+)/",$e['Dialstring'], $ds_matches) ) {
+                            $tmpCallerID = $ds_matches[2];
+                            logLine(" CallerID set from Dialstring to: " . $tmpCallerID );
+                        }
+                    }
+
                     // Fix for issue on some asterisk 1.8 boxes where CallerId on click to dial is not set.  See https://github.com/blak3r/yaai/issues/75
                     if ($tmpCallerID == '<unknown>' && !empty($e['ConnectedLineNum'])) {
                         $tmpCallerID = trim($e['ConnectedLineNum']);
+                        logLine( " CallerID set from ConnectedLineNum to $tmpCallerID");
                     }
 
 					if (startsWith($tmpCallerID,$calloutPrefix)) {
@@ -509,38 +522,16 @@ while (true) {
 						$tmpCallerID = substr($tmpCallerID, strlen($calloutPrefix));
 					}
 					logLine("  CallerID  Changed to: $tmpCallerID\n");
-					// Fetch associated call record
-					//$callRecord = findCallByAsteriskId($id);
 					$query = "UPDATE asterisk_log SET CallerID='" . $tmpCallerID . "', callstate='Dial' WHERE asterisk_id='" . $id . "'";
 					mysql_checked_query($query);
 				}
-				//Asterisk Manager 1.0
-
-				/* if($e['Event'] == 'NewCallerid')
-				{
-				$id = $e['Uniqueid'];
-				$tmpCallerID = trim($e['CallerID']);
-				echo("* CallerID is: $tmpCallerID\n");
-				if ( (strlen($calloutPrefix) > 0)  && (strpos($tmpCallerID, $calloutPrefix) === 0) )
-				{
-				echo("* Stripping prefix: $calloutPrefix");
-				$tmpCallerID = substr($tmpCallerID, strlen($calloutPrefix));
-				}
-				echo("* CallerID is: $tmpCallerID\n");
-				// Fetch associated call record
-				//$callRecord = findCallByAsteriskId($id);
-				$query = "UPDATE asterisk_log SET CallerID='" . $tmpCallerID . "', callstate='Dial' WHERE asterisk_id='" . $id . "'";
-				mysql_checked_query($query);
-				};*/
 
 				//
 				// Process "Hangup" events
-				// Yup, we really get TWO hangup events from Asterisk!
+				// Yup, we really get TWO hangup events from Asterisk!  (Even more with Ringgroups)
 				// Obviously, we need to take only one of them....
 				//
 				// Asterisk Manager 1.1
-				// I didn't get the correct results from inbound calling in relation to the channel that answered, this solves that.
-
 				if ($e['Event'] == 'Hangup') {
 					$id        = AMI_getUniqueIdFromEvent($e);
 					$query     = "SELECT direction,contact_id FROM asterisk_log WHERE asterisk_dest_id = '$id' OR asterisk_id = '$id'";
@@ -1022,8 +1013,6 @@ while (true) {
 
 				// Reset event buffer
 				$event = '';
-
-
 			}
         }
 
@@ -1039,17 +1028,16 @@ while (true) {
         }
 
         // for if the connection to the sql database gives out.
+        // TODO Find a better way to check the connection.  I think on Shared Hosting Servers mysql_ping might be disabled which causes this to always reconnect.
         if (!mysql_ping($sql_connection)) {
             //here is the major trick, you have to close the connection (even though its not currently working) for it to recreate properly.
             logLine("__MySQL connection lost, reconnecting__\n");
             mysql_close($sql_connection);
             $sql_connection = mysql_connect($sugar_config['dbconfig']['db_host_name'], $sugar_config['dbconfig']['db_user_name'], $sugar_config['dbconfig']['db_password']);
             $sql_db         = mysql_select_db($sugar_config['dbconfig']['db_name']);
-
         }
 
     }
-
 
     logLine(getTimestamp() . "Event loop terminated, attempting to login again\n");
     sleep(1);

@@ -84,7 +84,6 @@ $config_meta['asterisk_recordings_path'] = array('default' => '/var/spool/asteri
 //add asterisk vars to sugar config. need by Configurator class
 global $sugar_config;
 foreach ($config_meta as $key => $value) {
-
 	if (!isset($sugar_config[$key])) {
 		$sugar_config[$key] = '';
 		$GLOBALS['sugar_config'][$key] = '';
@@ -133,6 +132,14 @@ foreach ($config_meta as $key => $value) {
     $asterisk_config[$key] = $value['default'];
 }
 
+try {
+    $statResult = $GLOBALS['db']->query("select count(*) as CallsLogged from calls_cstm where calls_cstm.asterisk_caller_id_c is not NULL");
+    $statRow = $GLOBALS['db']->fetchByAssoc($statResult);
+    $callsLogged = $statRow['CallsLogged'];
+}
+catch(Exception $ex) {
+    $callsLogged = "Unknown";
+}
 
 require_once('include/Sugar_Smarty.php');
 $sugar_smarty = new Sugar_Smarty();
@@ -143,6 +150,7 @@ $sugar_smarty->assign('APP_LIST', $app_list_strings);
 
 $sugar_smarty->assign('config', $configurator->config);
 $sugar_smarty->assign('asterisk_config', $asterisk_config);
+$sugar_smarty->assign('callsLogged', $callsLogged);
 
 $sugar_smarty->assign('error', $configurator->errors);
 
