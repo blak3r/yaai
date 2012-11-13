@@ -336,18 +336,20 @@ while (true) {
 				$e             = getEvent($event);
 				dumpEvent($e); // prints to screen
 
-                if ($e['Event'] == 'Join' && !empty($e['Queue']) /*&& in_array($e['Queue'], $allowedQueueIds)*/ )
-                {
-                    $queueChannels[ AMI_getUniqueIdFromEvent($e) ] = $e['Channel']; // TODO: This array will grow indefinitely... the data put into it is pretty small so probably fine for now but would be best to have a expiration policy.
-                                // Easy solution would be to test during the hangup event... IF( isset($queueChannels[ $e['UniqueID'] ] ) remove the index for $e['UniqueID']
-                    logLine("Incoming Queue Event, channel = " . $e['Channel']);
-                }
+
+                //if ($e['Event'] == 'Join' && !empty($e['Queue']) /*&& in_array($e['Queue'], $allowedQueueIds)*/ )
+                //{
+                //    $queueChannels[ AMI_getUniqueIdFromEvent($e) ] = $e['Channel']; // TODO: This array will grow indefinitely... the data put into it is pretty small so probably fine for now but would be best to have a expiration policy.
+                //                // Easy solution would be to test during the hangup event... IF( isset($queueChannels[ $e['UniqueID'] ] ) remove the index for $e['UniqueID']
+                //    logLine("Incoming Queue Event, channel = " . $e['Channel']);
+                //}
+
 
 				//
 				// Call Event
 				//
-				if ($e['Event'] == 'Dial' && $e['SubEvent'] != 'End') //Asterisk Manager 1.1 returns 2 dial events with a begin and an end subevent, by excluding the subevent end we won't get multiple records for the same call.
-					{
+				if (($e['Event'] == 'Dial' && $e['SubEvent'] != 'End') ||
+                    ($e['Event'] == 'Join' && !empty($e['Queue'])) ) 	{
 					logLine("! Dial Event src=" . $e['Channel'] . " dest=" . $e['Destination'] . "\n"); //Asterisk Manager 1.1
 					//print "! Dial Event src=" . $e['Source'] . " dest=" . $e['Destination'] . "\n"; 	//Asterisk Manager 1.0
 
@@ -359,6 +361,12 @@ while (true) {
                     }
 
                     $eDestination = $e['Destination'];
+
+                    if( empty( $e['DestUniqueID'] ) && $e['Event'] == 'Join' ) {
+                        logLine( "DestUniqueID is empty, this must be a queue call... or logic error" );
+                        $e['DestUniqueID'] = AMI_getUniqueIdFromEvent($e); // We set destination id because Join events don't set them, and the destination id is what is used to lookup hangup events.
+                    }
+
 
 					//
 					// Before we log this Dial event, we create a corresponding object in Calls module.
@@ -424,14 +432,14 @@ while (true) {
 					logLine("  CallerID is: $tmpCallerID\n");
 
                     // Check to see if this Dial Event is coming off a Queue.  If so we override the channel with the one we saved previously in Join Event.
-                    if (!empty($e['ConnectedLineNum']) &&
-                       isset($queueChannels[ AMI_getUniqueIdFromEvent($e) ]) )
-                    {
-                        // TODO: This code needs to be verified... author didn't have queues.
-                        // The idea here is to use the channel from the Queue Join event to find the true source channel.  Otherwise queue calls would get detected as internal calls.
-                        logLine("Inbound From QUEUE detected, overriding: {$e['Channel']} with $channel");
-                        $eChannel = $queueChannels[ AMI_getUniqueIdFromEvent($e) ];
-                    }
+//                    if (!empty($e['ConnectedLineNum']) &&
+//                       isset($queueChannels[ AMI_getUniqueIdFromEvent($e) ]) )
+//                    {
+//                        // TODO: This code needs to be verified... author didn't have queues.
+//                        // The idea here is to use the channel from the Queue Join event to find the true source channel.  Otherwise queue calls would get detected as internal calls.
+//                        logLine("Inbound From QUEUE detected, overriding: {$e['Channel']} with $channel");
+//                        $eChannel = $queueChannels[ AMI_getUniqueIdFromEvent($e) ];
+//                    }
 
 					$rgDetectRegex = "/" . $sugar_config['asterisk_rg_detect_expr'] . "/i";
 					$rgCellRingRegex = "/" . $sugar_config['asterisk_rg_cell_ring_expr'] . "/i";// This detects in a RG when an outside line is called (usually for a cellphone)... for some reason the cell shows up as the Channel (aka the source)... We detect this by finding a number thats at least 7-10 characters long..
@@ -934,6 +942,7 @@ while (true) {
 				// success
 				//Asterisk Manager 1.1
 				if ($e['Event'] == 'Bridge') {
+                    logLine("DEBUG: Entered Bridge");
 					$query     = "SELECT direction FROM asterisk_log WHERE asterisk_id='" . $e['Uniqueid2'] . "' OR asterisk_dest_id='" . $e['Uniqueid2'] . "'";
 					$result    = mysql_checked_query($query);
 					$direction = mysql_fetch_array($result);
@@ -943,6 +952,7 @@ while (true) {
 						$callDirection = "Outbound";
 					}
 					if ($callDirection == "Inbound") {
+                        logLine("DEBUG: bridge inbound, updating the Link state");
 						// Inbound bridge event
 						$query  = "UPDATE asterisk_log SET callstate='Connected', timestampLink=FROM_UNIXTIME(".time().") WHERE asterisk_dest_id='" . $e['Uniqueid1'] . "' OR asterisk_dest_id='" . $e['Uniqueid2'] . "'";
 						$rc     = mysql_checked_query($query);
@@ -963,11 +973,8 @@ while (true) {
 						}
 
 					} else {
-						if ($e['Event'] == 'Bridge') //Outbound bridge event
-						{
-							$query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
-							$rc    = mysql_checked_query($query);
-						}
+                        $query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
+                        $rc    = mysql_checked_query($query);
 					}
 
                     // Here we add support for complicated Ring Groups such as x1 ---> 615  ---> 710,722,735
@@ -975,7 +982,7 @@ while (true) {
                     // Check if both channels are internal... Then, check the asterisk_log table to see if an entry exists where Channel matches one of them... if so then change it out.
                     // TBD: does answering on a cell phone and not pressing 1 to accept cause a bridge event that messes this up?
                     if( isCallInternal($e['Channel1'],$e['Channel2'] )) {
-                        logLine("Internatl Bridge Event Detected\n");
+                        logLine("Internal Bridge Event Detected\n");
                         if( preg_match('/(.*);(.*)/',$e['Channel1'],$matches) ) {
                             $chanToFind = $matches[1] . '%';
                             $query     = "SELECT id FROM asterisk_log WHERE channel like '$chanToFind' and direction='I' ";
@@ -994,10 +1001,48 @@ while (true) {
                                 logLine("UPDATE QUERY: $query\n");
                                 mysql_checked_query($query);
                             }
+                            else {
+                                logLine("DEBUG:  RG-BRIDGE ROWS found");
+                            }
                         }
                         else {
                             logLine("RG-Bridge didn't match regex.\n");
                         }
+                    }
+                    else {
+                        logLine("Bridge isn't internal to internal");
+
+                        // This could be a call queue event...
+                        //--
+                        logLine("Internal Queue Event Detected\n");
+                       // if( preg_match('/(.*);(.*)/',$e['Channel1'],$matches) ) {
+                            $chanToFind = $e['Channel1'];
+                            $query     = "SELECT id FROM asterisk_log WHERE remote_channel like '$chanToFind' and direction='I' and (channel = '' OR channel is NULL) ";
+                            logLine("Internal Queue: $query\n");
+                            $result    = mysql_checked_query($query);
+                            // TODO clean up all these logLines.
+                            if( mysql_num_rows( $result) > 1){
+                                logLine("Queue-Bridge ERROR: MULTIPLE MATCHING LINES IN ASTERISK LOG... BRIDGE LOGIC ISN'T BULLETPROOF\n");
+                            }
+                            else if( mysql_num_rows($result) == 1 ) {
+                                logLine(" Queue-Bridge Detected changing the channel to: {$e['Channel2']}\n" );
+                                $result_id = mysql_fetch_array($result);
+                                $chan2 = $e['Channel2'];
+                                $theId = $result_id['id'];
+                                $query = "UPDATE asterisk_log SET channel='$chan2' WHERE id='$theId'";
+                                logLine("Queue UPDATE QUERY: $query\n");
+                                mysql_checked_query($query);
+                            }
+                            else {
+                                logLine("DEBUG: NO Queue BRIDGE ROWS found");
+                            }
+                        //}
+                        //else {
+                       //     logLine("Queue-Bridge didn't match regex.\n");
+                        //}
+
+
+
                     }
 				}
 				//Asterisk Manager 1.0
