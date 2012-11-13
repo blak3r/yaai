@@ -266,7 +266,8 @@ var YAAI = {
     bindOpenPopupSingleMatchingContact : function(callboxid, entry){
         $('#callbox_'+callboxid).find('.singlematchingcontact .unrelate_contact').button({
             icons: {
-                primary: "ui-icon ui-icon-close"
+                primary: 'ui-icon-custom-unrelate',
+		secondary: null
             },
             text: false
         }).on("click", function(){
