@@ -340,6 +340,7 @@ while (true) {
                 {
                     $queueChannels[ AMI_getUniqueIdFromEvent($e) ] = $e['Channel']; // TODO: This array will grow indefinitely... the data put into it is pretty small so probably fine for now but would be best to have a expiration policy.
                                 // Easy solution would be to test during the hangup event... IF( isset($queueChannels[ $e['UniqueID'] ] ) remove the index for $e['UniqueID']
+                    logLine("Incoming Queue Event, channel = " . $e['Channel']);
                 }
 
 				//
