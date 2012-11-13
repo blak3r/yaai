@@ -217,6 +217,8 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
 
 .ui-button .ui-icon.ui-icon-custom-phone { background-image: url('../images/dialpad-grid.png'); }
 
+.ui-button .ui-icon.ui-icon-custom-unrelate { background-image: url('../images/unrelate-call-icon.png'); }
+
 .dropdown-menu {
 	font: 14px sans-serif;
 	position: absolute;
