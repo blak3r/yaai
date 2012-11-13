@@ -54,7 +54,7 @@ class AsteriskJS {
             $current_user_id = $GLOBALS['current_user']->id;
             $fop_user = $GLOBALS['current_user']->asterisk_fop_user_c;
             $fop_pass = $GLOBALS['current_user']->asterisk_fop_pass_c;
-            $fop_url = $sugar_config['asterisk_fop_url'];
+            $fop_url = $GLOBALS['sugar_config']['asterisk_fop_url'];
 
             //JS Global Variables
             echo '<script type="text/javascript">window.yaai_poll_rate = ' . $poll_rate . ';</script>';
