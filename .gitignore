@@ -16,3 +16,4 @@ copyToDir.*
 *idea*
 *tplOut.txt
 .DS_Store
+/nbproject/private/

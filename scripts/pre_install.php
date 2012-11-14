@@ -92,6 +92,7 @@ function pre_install() {
         $query .= "asterisk_dest_id varchar(45) default NULL,";
         $query .= "contact_id VARCHAR(36) DEFAULT NULL,"; // added in v2.0 to keep track of contact.  Helps when it matches multiple ones.
         $query .= "opencnam VARCHAR(16) DEFAULT NULL,"; // added in v2.2 to keep track of whether number had been looked up in opencnam yet.
+        $query .= "answered TINYINT(1) DEFAULT 0,";
         $query .= "PRIMARY KEY (id)";
         $query .= ")";
         $db->query($query, false, "Error creating call table: " . $query);
@@ -113,6 +114,7 @@ function pre_install() {
     add_index_if_not_exist($db,"asterisk_log","asterisk_dest_id");
     add_index_if_not_exist($db,"asterisk_log","call_record_id");
     add_index_if_not_exist($db,"asterisk_log","userExtension");
+    add_index_if_not_exist($db,"asterisk_log","answered");
 }
 
 // http://www.edmondscommerce.co.uk/mysql/mysql-add-column-if-not-exists-php-function/

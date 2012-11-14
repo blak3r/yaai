@@ -64,7 +64,7 @@ var YAAI = {
 
             if( data != ".") {
                 $.each(data, function(entryIndex, entry){    
-                    if(YAAI.callStateIsNotFiltered){
+                    if(YAAI.callStateIsNotFiltered(entry)){
                         var callboxid = YAAI.getAsteriskID(entry['asterisk_id']); 
                         callboxids.push(callboxid);            
 	    
@@ -125,6 +125,7 @@ var YAAI = {
                 context = YAAI.createCallBoxWithSingleMatchingContact(callboxid, context, entry);
                 html = template(context);
                 $('body').append(html);
+                YAAI.bindOpenPopupSingleMatchingContact(callboxid, entry);
                 $('#callbox_'+callboxid).find('.singlematchingcontact').show();
                 break;
                 
@@ -606,8 +607,6 @@ var YAAI = {
         context['company'] = entry['contacts'][0]['company'];
         context['company_id'] = entry['contacts'][0]['company_id'];
         
-        YAAI.bindOpenPopupSingleMatchingContact(callboxid, entry);
-        
         return context;
     },
     createCallBoxWithMultipleMatchingContacts : function(callboxid, context, entry){
@@ -737,7 +736,15 @@ var YAAI = {
             console.log(message);
         }
     },
-    callStateIsNotFiltered : function(){
+    callStateIsNotFiltered : function(entry){
+      //this is required to filter call states that would change to Hangup but have an answered state of 0
+      
+      if(YAAI.filteredCallStates == 'Ringing' || YAAI.filteredCallStates == 'Dial'){
+          if(entry.answered == '0'){
+              return false;
+          }
+      }
+      
       return ($.inArray(entry.state, YAAI.filteredCallStates) == -1);
     }
 
@@ -798,7 +805,7 @@ jQuery.cookie = function(name, value, options) {
 
 
 $(document).ready(function(){
-       YAAI.checkForNewStates();
+    if(typeof YAAI.phoneExtension !== "undefined"){
+        YAAI.checkForNewStates();
+    }
 });
-
-
