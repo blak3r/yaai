@@ -101,16 +101,15 @@ function updateUIState($ui_state, $call_record, $asterisk_id) {
     }
 }
 
-function setContactID($call_record, $call_record) {
+function setContactID($call_record, $contact_id) {
     //wrapped the entire action to require a call_record - if this is not being passed then there is no point for this action - PJH
     if ($call_record) {
-        // Very basic santization
+        // Very basic sanitization
         $contactId = preg_replace('/[^a-z0-9\-\. ]/i', '', $contact_id);  
         $callRecord = preg_replace('/[^a-z0-9\-\. ]/i', '', $call_record); 
         // Workaround See Discussion here: https://github.com/blak3r/yaai/pull/20
 
         $query = "update asterisk_log set contact_id=\"$contactId\" where call_record_id=\"$callRecord\"";
-
 
         $GLOBALS['current_user']->db->query($query, false);
         if ($GLOBALS['current_user']->db->checkError()) {
