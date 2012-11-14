@@ -66,8 +66,8 @@ function pre_install() {
         $db = & DBManagerFactory::getInstance();
     }
 
-    //$query = "DROP TABLE IF EXISTS asterisk_log";
-    //$db->query($query, false, "Error dropping asterisk_log table: " . $query);
+    $query = "DROP TABLE IF EXISTS asterisk_log";
+    $db->query($query, false, "Error dropping asterisk_log table: " . $query);
 
     if( !$db->tableExists("asterisk_log") ) {
         $query = "CREATE TABLE asterisk_log (";
@@ -80,9 +80,6 @@ function pre_install() {
         $query .= "callerName varchar(45) default NULL,";
         $query .= "channel varchar(30) default NULL,";
         $query .= "remote_channel varchar(30) default NULL,"; // added in v2.0, it's used for transferring.
-        // $query .= "timestamp_call varchar(30) default NULL,";
-        // $query .= "timestamp_link varchar(30) default NULL,";
-        // $query .= "timestamp_hangup varchar(30) default NULL,";
         $query .= "timestamp_call datetime default NULL,";
         $query .= "timestamp_link datetime default NULL,";
         $query .= "timestamp_hangup datetime default NULL,";

@@ -479,6 +479,10 @@ function get_call_direction($row, $mod_strings) {
     return $result;
 }
 
+function gmstrtotime($my_time_string) {
+    return(strtotime($my_time_string . " UTC"));
+}
+
 /**
 * GET the call duration
 *
