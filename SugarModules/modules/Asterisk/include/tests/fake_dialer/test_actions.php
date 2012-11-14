@@ -40,7 +40,7 @@ function action_ringing() {
     $GLOBALS['log']->fatal($phone_number);
 
     $GLOBALS['current_user']->db->query(
-            "INSERT INTO asterisk_log (call_record_id, asterisk_id, callstate, callerID, channel, remote_channel, timestampCall, direction) 
+            "INSERT INTO asterisk_log (call_record_id, asterisk_id, callstate, callerID, channel, remote_channel, timestamp_call, direction) 
             VALUES ('{$new_id}', '{$asterisk_id}', 'Ringing', '{$phone_number}', '{$extension}', 'SIP/flowroute-00000023', FROM_UNIXTIME({$time}), 'I' )"
     );
             

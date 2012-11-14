@@ -425,7 +425,7 @@ while (true) {
                     } else {
                         //Asterisk Manager 1.1 (If the call is internal, this will be skipped)
                         if (preg_match($asteriskMatchInternal, $eChannel) && !preg_match($asteriskMatchInternal, $eDestination)) {
-                            $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", $e['DestUniqueID'], $callRecordId, $eChannel, $eDestination, 'NeedID', 'O', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')');
+                            $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestamp_call) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", $e['DestUniqueID'], $callRecordId, $eChannel, $eDestination, 'NeedID', 'O', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')');
                             $callDirection = 'Outbound';
                             logLine("OUTBOUND state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
                         } else if (!preg_match($asteriskMatchInternal, $eChannel)) {
@@ -440,7 +440,7 @@ while (true) {
                             }
                             logLine("  inbound_extension = " . $inboundExtension );
 
-                            $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall, asterisk_dest_id,inbound_extension) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s','%s')", AMI_getUniqueIdFromEvent($e), $callRecordId, $eDestination, $eChannel, 'Dial', 'I', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $e['DestUniqueID'], $inboundExtension);
+                            $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestamp_call, asterisk_dest_id,inbound_extension) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s','%s')", AMI_getUniqueIdFromEvent($e), $callRecordId, $eDestination, $eChannel, 'Dial', 'I', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $e['DestUniqueID'], $inboundExtension);
                             $callDirection = 'Inbound';
                             logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
                         }
@@ -451,7 +451,7 @@ while (true) {
 
                         /* if(eregi($asteriskMatchInternal, $e['Source']))
                           {
-                          $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s',%s)",
+                          $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestamp_call) VALUES('%s','%s','%s','%s','%s','%s',%s)",
                           $e['DestUniqueID'],
                           $callRecordId,
                           $e['Source'],
@@ -463,7 +463,7 @@ while (true) {
                           $callDirection = 'Outbound';
                           }
                           else{
-                          $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s',%s)",
+                          $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestamp_call) VALUES('%s','%s','%s','%s','%s','%s',%s)",
                           $e['SrcUniqueID'],
                           $callRecordId,
                           $eDestination,
@@ -542,7 +542,7 @@ while (true) {
 // update entry in asterisk_log...
 //
                             $rawData = $callRecord['bitter']; // raw data from asterisk_log
-                            $query = sprintf("UPDATE asterisk_log SET callstate='%s', timestampHangup=%s, hangup_cause=%d, hangup_cause_txt='%s' WHERE asterisk_id='%s'", //asterisk_dest_id was asterisk_id
+                            $query = sprintf("UPDATE asterisk_log SET callstate='%s', timestamp_hangup=%s, hangup_cause=%d, hangup_cause_txt='%s' WHERE asterisk_id='%s'", //asterisk_dest_id was asterisk_id
                                     'Hangup', 'FROM_UNIXTIME(' . time() . ')', $e['Cause'], $e['Cause-txt'], $id);
                             $updateResult = mysql_checked_query($query);
                             if ($updateResult) {
@@ -556,14 +556,14 @@ while (true) {
 //
                                 $failedCall = FALSE;
                                 $hangupTime = time();
-                                $callDurationRaw = 0; // call duration in seconds, only matters if timestampLink != NULL
-                                if ($rawData['timestampLink'] != NULL) {
-                                    $callStartLink = strtotime($rawData['timestampLink']);
+                                $callDurationRaw = 0; // call duration in seconds, only matters if timestamp_link != NULL
+                                if ($rawData['timestamp_link'] != NULL) {
+                                    $callStartLink = strtotime($rawData['timestamp_link']);
                                     $callDurationRaw = $hangupTime - $callStartLink;
                                 } else {
                                     $failedCall = TRUE;
                                 }
-                                $callStart = strtotime($rawData['timestampCall']);
+                                $callStart = strtotime($rawData['timestamp_call']);
 
                                 logLine(" [$id] Measured call duration is $callDurationRaw seconds\n");
 
@@ -718,7 +718,7 @@ while (true) {
 // update entry in asterisk_log...
 //
                             $rawData = $callRecord['bitter']; // raw data from asterisk_log
-                            $query = sprintf("UPDATE asterisk_log SET callstate='%s', timestampHangup=%s, hangup_cause=%d, hangup_cause_txt='%s', answered='%s' WHERE asterisk_dest_id='%s'", //asterisk_dest_id was asterisk_id
+                            $query = sprintf("UPDATE asterisk_log SET callstate='%s', timestamp_hangup=%s, hangup_cause=%d, hangup_cause_txt='%s', answered='%s' WHERE asterisk_dest_id='%s'", //asterisk_dest_id was asterisk_id
                                     'Hangup', 'FROM_UNIXTIME(' . time() . ')', $e['Cause'], $e['Cause-txt'], was_call_answered($id), $id);
                             $updateResult = mysql_checked_query($query);
                             if ($updateResult) {
@@ -733,14 +733,14 @@ while (true) {
 //
                                 $failedCall = FALSE;
                                 $hangupTime = time();
-                                $callDurationRaw = 0; // call duration in seconds, only matters if timestampLink != NULL
-                                if ($rawData['timestampLink'] != NULL) {
-                                    $callStartLink = strtotime($rawData['timestampLink']);
+                                $callDurationRaw = 0; // call duration in seconds, only matters if timestamp_link != NULL
+                                if ($rawData['timestamp_link'] != NULL) {
+                                    $callStartLink = strtotime($rawData['timestamp_link']);
                                     $callDurationRaw = $hangupTime - $callStartLink;
                                 } else {
                                     $failedCall = TRUE;
                                 }
-                                $callStart = strtotime($rawData['timestampCall']);
+                                $callStart = strtotime($rawData['timestamp_call']);
 
                                 logLine(" Measured call duration is $callDurationRaw seconds\n");
 
@@ -919,10 +919,10 @@ while (true) {
                     if ($callDirection == "Inbound") {
                         logLine("DEBUG: bridge inbound, updating the Link state");
 // Inbound bridge event
-                        $query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=FROM_UNIXTIME(" . time() . ") WHERE asterisk_dest_id='" . $e['Uniqueid1'] . "' OR asterisk_dest_id='" . $e['Uniqueid2'] . "'";
+                        $query = "UPDATE asterisk_log SET callstate='Connected', timestamp_link=FROM_UNIXTIME(" . time() . ") WHERE asterisk_dest_id='" . $e['Uniqueid1'] . "' OR asterisk_dest_id='" . $e['Uniqueid2'] . "'";
                         $rc = mysql_checked_query($query);
 // und vice versa .. woher immer der call kam
-// $query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid2'] . "'";
+// $query = "UPDATE asterisk_log SET callstate='Connected', timestamp_link=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid2'] . "'";
 // $record = mysql_query($query);
 // to delete all the extra inbound records created by the hangup event.
                         $id1 = $e['Uniqueid1'];
@@ -937,7 +937,7 @@ while (true) {
                             deleteCall($call_rec_id['call_record_id']);
                         }
                     } else {
-                        $query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=FROM_UNIXTIME(" . time() . ") WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
+                        $query = "UPDATE asterisk_log SET callstate='Connected', timestamp_link=FROM_UNIXTIME(" . time() . ") WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
                         $rc = mysql_checked_query($query);
                     }
 
@@ -1004,11 +1004,11 @@ while (true) {
 
                 /* if($e['Event'] == 'Link')
                   {
-                  $query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
+                  $query = "UPDATE asterisk_log SET callstate='Connected', timestamp_link=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
                   $rc = mysql_checked_query($query);
 
                   // und vice versa .. woher immer der call kam
-                  // $query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid2'] . "'";
+                  // $query = "UPDATE asterisk_log SET callstate='Connected', timestamp_link=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid2'] . "'";
                   // $record = mysql_query($query);
                   }; */
 

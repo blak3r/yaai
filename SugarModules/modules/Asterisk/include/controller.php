@@ -356,7 +356,7 @@ function getMemoName($call, $direction) {
  */
 function get_calls() {
     $last_hour = date('Y-m-d H:i:s', time() - 1 * 60 * 30);
-    $query = " SELECT * FROM asterisk_log WHERE \"$last_hour\" < timestampCall AND (uistate IS NULL OR uistate != \"Closed\") AND (callstate != 'NeedID') AND (channel LIKE 'SIP/{$GLOBALS['current_user']->asterisk_ext_c}%' OR channel LIKE 'Local%{$GLOBALS['current_user']->asterisk_ext_c}%')";
+    $query = " SELECT * FROM asterisk_log WHERE \"$last_hour\" < timestamp_call AND (uistate IS NULL OR uistate != \"Closed\") AND (callstate != 'NeedID') AND (channel LIKE 'SIP/{$GLOBALS['current_user']->asterisk_ext_c}%' OR channel LIKE 'Local%{$GLOBALS['current_user']->asterisk_ext_c}%')";
     $result_set = $GLOBALS['current_user']->db->query($query, false);
     if ($GLOBALS['current_user']->db->checkError()) {
         trigger_error("checkForNewStates-Query failed: $query");
@@ -390,7 +390,6 @@ function build_item_list($result_set, $current_user, $mod_strings) {
             'call_record_id' => $row['call_record_id'],
             'phone_number' => $phone_number,
             'asterisk_name' => $row['callerName'],
-            'timestampCall' => $row['timestampCall'],
             'title' => get_title($contacts, $phone_number, $state, $mod_strings),
             'contacts' => $contacts,
             'call_type' => $call_direction['call_type'],
@@ -488,13 +487,13 @@ function get_call_direction($row, $mod_strings) {
  * @return array               Returns the whole item array
  */
 function get_duration($row) {
-    if (!empty($row['timestampHangup'])) {
-        $to_time = strtotime($row['timestampHangup']);
+    if (!empty($row['timestamp_hangup'])) {
+        $to_time = strtotime($row['timestamp_hangup']);
     } else {
         $to_time = time();
     }
 
-    $from_time = strtotime($row['timestampCall']);
+    $from_time = strtotime($row['timestamp_call']);
     $duration = number_format(round(abs($to_time - $from_time) / 60, 1), 1);
 
     return $duration;

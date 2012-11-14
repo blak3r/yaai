@@ -207,7 +207,7 @@ while (!feof($amiSocket)) {
             // TODO: Check if both ends of the call are internal (then ignore call)
             if(eregi($asteriskMatchInternal, $e['Source']))
             {
-                $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s',%s)",
+                $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestamp_call) VALUES('%s','%s','%s','%s','%s','%s',%s)",
                 $e['DestUniqueID'],
                 $callRecordId,
                 $e['Source'],
@@ -219,7 +219,7 @@ while (!feof($amiSocket)) {
                 $callDirection = 'Outbound';
             }
             else{
-                $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s',%s)",
+                $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestamp_call) VALUES('%s','%s','%s','%s','%s','%s',%s)",
                 $e['SrcUniqueID'],
                 $callRecordId,
                 $e['Destination'],
@@ -285,7 +285,7 @@ while (!feof($amiSocket)) {
                 // update entry in asterisk_log...
                 //
                 $rawData = $callRecord['bitter']; // raw data from asterisk_log
-                $query = sprintf("UPDATE asterisk_log SET callstate='%s', timestampHangup=%s, hangup_cause=%d, hangup_cause_txt='%s' WHERE asterisk_id='%s'",
+                $query = sprintf("UPDATE asterisk_log SET callstate='%s', timestamp_hangup=%s, hangup_cause=%d, hangup_cause_txt='%s' WHERE asterisk_id='%s'",
                 'Hangup',
                 'NOW()',
                 $e['Cause'],
@@ -321,13 +321,13 @@ while (!feof($amiSocket)) {
                     // Calculate call duration...
                     //
                     $hangupTime = time();
-                    $callDurationRaw = 0;    // call duration in seconds, only matters if timestampLink != NULL
-                    if ($rawData['timestampLink'] != NULL)
+                    $callDurationRaw = 0;    // call duration in seconds, only matters if timestamp_link != NULL
+                    if ($rawData['timestamp_link'] != NULL)
                     {
-                        $callStartLink = strtotime($rawData['timestampLink']);
+                        $callStartLink = strtotime($rawData['timestamp_link']);
                         $callDurationRaw = $hangupTime - $callStartLink;
                     }
-                    $callStart = strtotime($rawData['timestampCall']);
+                    $callStart = strtotime($rawData['timestamp_call']);
 
                     echo ("# Measured call duration is $callDurationRaw seconds\n");
 
@@ -425,11 +425,11 @@ while (!feof($amiSocket)) {
         // success
         if($e['Event'] == 'Link')
         {
-            $query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=NOW() WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
+            $query = "UPDATE asterisk_log SET callstate='Connected', timestamp_link=NOW() WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
             $rc = mysql_checked_query($query);
 
             // und vice versa .. woher immer der call kam
-            // $query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=NOW() WHERE asterisk_id='" . $e['Uniqueid2'] . "'";
+            // $query = "UPDATE asterisk_log SET callstate='Connected', timestamp_link=NOW() WHERE asterisk_id='" . $e['Uniqueid2'] . "'";
             // $record = mysql_query($query);
         };
 

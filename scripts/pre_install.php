@@ -80,12 +80,12 @@ function pre_install() {
         $query .= "callerName varchar(45) default NULL,";
         $query .= "channel varchar(30) default NULL,";
         $query .= "remote_channel varchar(30) default NULL,"; // added in v2.0, it's used for transferring.
-        // $query .= "timestampCall varchar(30) default NULL,";
-        // $query .= "timestampLink varchar(30) default NULL,";
-        // $query .= "timestampHangup varchar(30) default NULL,";
-        $query .= "timestampCall datetime default NULL,";
-        $query .= "timestampLink datetime default NULL,";
-        $query .= "timestampHangup datetime default NULL,";
+        // $query .= "timestamp_call varchar(30) default NULL,";
+        // $query .= "timestamp_link varchar(30) default NULL,";
+        // $query .= "timestamp_hangup varchar(30) default NULL,";
+        $query .= "timestamp_call datetime default NULL,";
+        $query .= "timestamp_link datetime default NULL,";
+        $query .= "timestamp_hangup datetime default NULL,";
         $query .= "direction varchar(1) default NULL,";
         $query .= "hangup_cause integer default NULL,";
         $query .= "hangup_cause_txt varchar(45) default NULL,";
@@ -110,7 +110,7 @@ function pre_install() {
     add_column_if_not_exist($db,"asterisk_log","answered", "BIT NULL DEFAULT NULL");
     add_column_if_not_exist($db,"asterisk_log","inbound_extension","VARCHAR(16) DEFAULT NULL");
 
-    add_index_if_not_exist($db,"asterisk_log","timestampCall");
+    add_index_if_not_exist($db,"asterisk_log","timestamp_call");
     add_index_if_not_exist($db,"asterisk_log","uistate");
     add_index_if_not_exist($db,"asterisk_log","callstate");
     add_index_if_not_exist($db,"asterisk_log","channel");
