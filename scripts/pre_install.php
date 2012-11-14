@@ -104,7 +104,11 @@ function pre_install() {
     add_column_if_not_exist($db,"asterisk_log","contact_id", "VARCHAR(36) DEFAULT NULL");
     // Columns Added in v2.3
     add_column_if_not_exist($db,"asterisk_log","opencnam", "VARCHAR(16) DEFAULT NULL");
-    add_column_if_not_exist($db,"asterisk_log","userExtension", "VARCHAR(16) DEFAULT NULL"); // Added in version
+
+    // Columns Added in v3.0
+    add_column_if_not_exist($db,"asterisk_log","user_extension", "VARCHAR(16) DEFAULT NULL");
+    add_column_if_not_exist($db,"asterisk_log","answered", "BIT NULL DEFAULT NULL");
+    add_column_if_not_exist($db,"asterisk_log","inbound_extension","VARCHAR(16) DEFAULT NULL");
 
     add_index_if_not_exist($db,"asterisk_log","timestampCall");
     add_index_if_not_exist($db,"asterisk_log","uistate");
@@ -113,7 +117,7 @@ function pre_install() {
     add_index_if_not_exist($db,"asterisk_log","asterisk_id");
     add_index_if_not_exist($db,"asterisk_log","asterisk_dest_id");
     add_index_if_not_exist($db,"asterisk_log","call_record_id");
-    add_index_if_not_exist($db,"asterisk_log","userExtension");
+    add_index_if_not_exist($db,"asterisk_log","user_extension");
     add_index_if_not_exist($db,"asterisk_log","answered");
 }
 
@@ -129,7 +133,7 @@ function add_column_if_not_exist($db, $table, $column, $column_attr = "VARCHAR( 
 function add_index_if_not_exist($db, $table, $index) {
     $res = $db->query("SHOW INDEX FROM `$table` WHERE Key_name = '$index'");
     if (empty($res)) {
-        $db->query("ALTER TABLE `$table` ADD INDEX $index($index)");
+        $db->query("ALTER TABLE `$table` ADD INDEX `$index` (`$index`)"); // TODO fix this, not working on my BR's dev box
     }
 }
 
