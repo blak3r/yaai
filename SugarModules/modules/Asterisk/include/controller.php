@@ -487,13 +487,28 @@ function get_call_direction($row, $mod_strings) {
  * @return array               Returns the whole item array
  */
 function get_duration($row) {
+<<<<<<< HEAD
     if (!empty($row['timestamp_hangup'])) {
         $to_time = strtotime($row['timestamp_hangup']);
+=======
+    if (!empty($row['timestampHangup'])) {
+        $to_time = gmstrtotime($row['timestampHangup']);
+>>>>>>> e87d009bc018f435b31e87b526e77d2b0ad3e52b
     } else {
         $to_time = time();
     }
 
+<<<<<<< HEAD
     $from_time = strtotime($row['timestamp_call']);
+=======
+    if( !empty($row['timestampLink'])) {
+        $from_time = gmstrtotime($row['timestampLink']);
+    }
+    else {
+        $from_time = gmstrtotime($row['timestampCall']);
+    }
+
+>>>>>>> e87d009bc018f435b31e87b526e77d2b0ad3e52b
     $duration = number_format(round(abs($to_time - $from_time) / 60, 1), 1);
 
     return $duration;
