@@ -489,12 +489,18 @@ function get_call_direction($row, $mod_strings) {
  */
 function get_duration($row) {
     if (!empty($row['timestampHangup'])) {
-        $to_time = strtotime($row['timestampHangup']);
+        $to_time = gmstrtotime($row['timestampHangup']);
     } else {
         $to_time = time();
     }
 
-    $from_time = strtotime($row['timestampCall']);
+    if( !empty($row['timestampLink'])) {
+        $from_time = gmstrtotime($row['timestampLink']);
+    }
+    else {
+        $from_time = gmstrtotime($row['timestampCall']);
+    }
+
     $duration = number_format(round(abs($to_time - $from_time) / 60, 1), 1);
 
     return $duration;
