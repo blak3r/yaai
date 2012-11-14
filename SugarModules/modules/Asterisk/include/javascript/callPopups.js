@@ -44,7 +44,7 @@ var YAAI = {
     phoneExtension : window.yaai_user_extension,
     pollRate: window.yaai_poll_rate,
     fop2 : true,
-    fop2URL : 'http://67-228-218-138.lx-vs.net',
+    fop2URL : window.yaai_fop_url,
     fop2UserID : window.yaai_fop_user,
     fop2Password : window.yaai_fop_pass,
     filteredCallStates : ['Ringing'],
