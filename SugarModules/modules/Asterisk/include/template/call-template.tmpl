@@ -42,7 +42,7 @@ function program1(depth0,data) {
   foundHelper = helpers.callbox_id;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{}}); }
   else { stack1 = depth0.callbox_id; stack1 = typeof stack1 === functionType ? stack1() : stack1; }
-  buffer += escapeExpression(stack1) + "\"></button>\n    </div>\n    <div class=\"callboxcontent\">  \n        <div class=\"asterisk_info\">\n            <h4 class=\"call_type\">";
+  buffer += escapeExpression(stack1) + "\"></button>\n        <input type=\"checkbox\" class=\"log_time\" /><label for=\"log_time\">Log Time</label>\n    </div>\n    <div class=\"callboxcontent\">  \n        <div class=\"asterisk_info\">\n            <h4 class=\"call_type\">";
   foundHelper = helpers.call_type;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{}}); }
   else { stack1 = depth0.call_type; stack1 = typeof stack1 === functionType ? stack1() : stack1; }
@@ -102,7 +102,7 @@ function program1(depth0,data) {
   foundHelper = helpers.duration;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{}}); }
   else { stack1 = depth0.duration; stack1 = typeof stack1 === functionType ? stack1() : stack1; }
-  buffer += escapeExpression(stack1) + "</span>\n                        </td>\n                    </tr>\n                </table>\n            </div>\n        </div>\n    </div>\n    <div class=\"callboxinput\">\n        <textarea rows=\"4\" cols=\"30\" class=\"callboxtextarea callboxtextareaselected\">\n        </textarea>\n        <div class=\"callboxbuttons\">\n            <table width=\"100%\">\n                <tbody>\n                    <tr>\n                        <td valign=\"bottom\">\n                            <button class=\"save_memo\">Save Memo</button>\n                        </td>\n                    </tr>\n                </tbody>\n            </table>\n        </div>\n    </div>\n    <form class=\"call_record_id\" name=\"";
+  buffer += escapeExpression(stack1) + "</span>\n                        </td>\n                    </tr>\n                </table>\n            </div>\n        </div>\n    </div>\n    <div class=\"callboxinput\">\n        <textarea rows=\"4\" cols=\"30\" class=\"callboxtextarea callboxtextareaselected\"></textarea>\n        <div class=\"callboxbuttons\">\n            <table width=\"100%\">\n                <tbody>\n                    <tr>\n                        <td valign=\"bottom\">\n                            <button class=\"save_memo\">Save Memo</button>\n                        </td>\n                    </tr>\n                </tbody>\n            </table>\n        </div>\n    </div>\n    <form class=\"call_record_id\" name=\"";
   foundHelper = helpers.call_record_id;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{}}); }
   else { stack1 = depth0.call_record_id; stack1 = typeof stack1 === functionType ? stack1() : stack1; }
