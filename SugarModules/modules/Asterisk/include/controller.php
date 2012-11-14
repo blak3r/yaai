@@ -1,14 +1,14 @@
 <?php
 
 /* * *
- * Author: Blake Robertson
- * 
- * Author: Patrick Hogan
- *
- * Controller class for various AJAX things such as saving the UI state and saving the call details. 
- *
- * TODO: createCall should be refactored into this php file and then called by specifying an appropriate action for them.
- */
+* Author: Blake Robertson
+*
+* Author: Patrick Hogan
+*
+* Controller class for various AJAX things such as saving the UI state and saving the call details.
+*
+* TODO: createCall should be refactored into this php file and then called by specifying an appropriate action for them.
+*/
 
 
 
@@ -85,7 +85,7 @@ function updateUIState($ui_state, $call_record, $asterisk_id) {
 
     // query log
     // Very basic santization
-    $uiState = preg_replace('/[^a-z0-9\-\. ]/i', '', $ui_state); //  mysql_real_escape_string($_REQUEST['ui_state']);
+    $uiState = preg_replace('/[^a-z0-9\-\. ]/i', '', $ui_state); // mysql_real_escape_string($_REQUEST['ui_state']);
     $callRecord = preg_replace('/[^a-z0-9\-\. ]/i', '', $call_record); //mysql_real_escape_string($_REQUEST['call_record']);
     $asteriskID = preg_replace('/-/', '.', $asterisk_id);
     // Workaround See Discussion here: https://github.com/blak3r/yaai/pull/20
@@ -105,8 +105,8 @@ function setContactID($call_record, $call_record) {
     //wrapped the entire action to require a call_record - if this is not being passed then there is no point for this action - PJH
     if ($call_record) {
         // Very basic santization
-        $contactId = preg_replace('/[^a-z0-9\-\. ]/i', '', $contact_id);  
-        $callRecord = preg_replace('/[^a-z0-9\-\. ]/i', '', $call_record); 
+        $contactId = preg_replace('/[^a-z0-9\-\. ]/i', '', $contact_id);
+        $callRecord = preg_replace('/[^a-z0-9\-\. ]/i', '', $call_record);
         // Workaround See Discussion here: https://github.com/blak3r/yaai/pull/20
 
         $query = "update asterisk_log set contact_id=\"$contactId\" where call_record_id=\"$callRecord\"";
@@ -117,7 +117,7 @@ function setContactID($call_record, $call_record) {
             trigger_error("Update setContactId-Query failed: $query");
         }
 
-        // Adds the new relationship!  (This must be done here in case the call has already been hungup as that's when asteriskLogger sets relations)
+        // Adds the new relationship! (This must be done here in case the call has already been hungup as that's when asteriskLogger sets relations)
         $focus = new Call();
         $focus->retrieve($callRecord);
         $focus->load_relationship('contacts');
@@ -136,42 +136,42 @@ function setContactID($call_record, $call_record) {
 
 function callCreate() {
     // TODO: For some reason this code isn't working... I think it's getting the extension.
-// For the time being, callCreate is still being used.	
+// For the time being, callCreate is still being used.
 
     /*
-      $cUser = new User();
-      $cUser->retrieve($_SESSION['authenticated_user_id']);
-      $extension = $cUser->asterisk_ext_c;
+$cUser = new User();
+$cUser->retrieve($_SESSION['authenticated_user_id']);
+$extension = $cUser->asterisk_ext_c;
 
-      //$extension = $current_user->asterisk_ext_c;
-      $context = $GLOBALS['sugar_config']['asterisk_context'];
+//$extension = $current_user->asterisk_ext_c;
+$context = $GLOBALS['sugar_config']['asterisk_context'];
 
-      // Take the user supplied pattern, we find the part with the #'s (which are the ext)... then we get something like
-      // asterisk_dialout_channel == "SIP/###"   --> $matches[1] == SIP/, $matches[2] == "###", $matches[3] is "".
-      // asterisk_dialout_channel == "Local/###@sugarsip/n"   --> $matches[1] == Local/, $matches[2] == "###", $matches[3] is "@sugarsip/n".
-      preg_match('/([^#]*)(#+)([^#]*)/',$GLOBALS['sugar_config']['asterisk_dialout_channel'],$matches);
-      $channel = $matches[1] . $extension . $matches[3];
+// Take the user supplied pattern, we find the part with the #'s (which are the ext)... then we get something like
+// asterisk_dialout_channel == "SIP/###" --> $matches[1] == SIP/, $matches[2] == "###", $matches[3] is "".
+// asterisk_dialout_channel == "Local/###@sugarsip/n" --> $matches[1] == Local/, $matches[2] == "###", $matches[3] is "@sugarsip/n".
+preg_match('/([^#]*)(#+)([^#]*)/',$GLOBALS['sugar_config']['asterisk_dialout_channel'],$matches);
+$channel = $matches[1] . $extension . $matches[3];
 
-      //format Phone Number
-      $number = $_REQUEST['phoneNr'];
-      $prefix = $GLOBALS['sugar_config']['asterisk_prefix'];
-      $number = str_replace("+", "00", $number);
-      $number = str_replace(array("(", ")", " ", "-", "/", "."), "", $number);
-      $number = $prefix.$number;
+//format Phone Number
+$number = $_REQUEST['phoneNr'];
+$prefix = $GLOBALS['sugar_config']['asterisk_prefix'];
+$number = str_replace("+", "00", $number);
+$number = str_replace(array("(", ")", " ", "-", "/", "."), "", $number);
+$number = $prefix.$number;
 
 
-      // dial number
-      $cmd = "";
-      $cmd .=  "Action: originate\r\n";
-      $cmd .=  "Channel: ". $channel ."\r\n";
-      $cmd .=  "Context: ". $context ."\r\n";
-      $cmd .=  "Exten: " . $number . "\r\n";
-      $cmd .=  "Priority: 1\r\n";
-      $cmd .=  "Callerid:" . $_REQUEST['phoneNr'] ."\r\n";
-      $cmd .=  "Variable: CALLERID(number)=" . $extension . "\r\n\r\n";
+// dial number
+$cmd = "";
+$cmd .= "Action: originate\r\n";
+$cmd .= "Channel: ". $channel ."\r\n";
+$cmd .= "Context: ". $context ."\r\n";
+$cmd .= "Exten: " . $number . "\r\n";
+$cmd .= "Priority: 1\r\n";
+$cmd .= "Callerid:" . $_REQUEST['phoneNr'] ."\r\n";
+$cmd .= "Variable: CALLERID(number)=" . $extension . "\r\n\r\n";
 
-      SendAMICommand($cmd);
-     */
+SendAMICommand($cmd);
+*/
 }
 
 function transferCall($extension, $call_record) {
@@ -216,7 +216,7 @@ function blockNumber($number, $description) {
 function getCalls($mod_strings) {
     $result_set = get_calls();
     $response = build_item_list($result_set, $GLOBALS['current_user'], $mod_strings);
-    // print out json 
+    // print out json
     $response_array = array();
     if (count($response) == 0) {
         print json_encode(array("."));
@@ -233,14 +233,14 @@ function getCalls($mod_strings) {
 // HELPER FUNCTIONS
 
 /**
- * Logs in, Sends the AMI Command Payload passed as a parameter, then logs out.
- * results of the command are "echo"ed and show up in ajax response for debugging.
- * 
- * @param string $response    AMI Command
- *
- * @param string $status      
- *  
- */
+* Logs in, Sends the AMI Command Payload passed as a parameter, then logs out.
+* results of the command are "echo"ed and show up in ajax response for debugging.
+*
+* @param string $response AMI Command
+*
+* @param string $status
+*
+*/
 function SendAMICommand($amiCmd, &$status = true) {
     $server = $GLOBALS['sugar_config']['asterisk_host'];
     $port = (int) $GLOBALS['sugar_config']['asterisk_port'];
@@ -277,7 +277,7 @@ function SendAMICommand($amiCmd, &$status = true) {
             echo "\nLogout Response: \n";
             echo $response;
             // Don't really care if logoff was successful;
-            //$status = $status && WasAmiCmdSuccessful( $response );			
+            //$status = $status && WasAmiCmdSuccessful( $response );
         }
         sleep(1);
         fclose($socket);
@@ -285,23 +285,23 @@ function SendAMICommand($amiCmd, &$status = true) {
 }
 
 /**
- * Check if AMI Command Was Successful
- *
- * @param object $response    AMI Response
- *
- * @return string                  Success resonse
- */
+* Check if AMI Command Was Successful
+*
+* @param object $response AMI Response
+*
+* @return string Success resonse
+*/
 function WasAmiCmdSuccessful($response) {
     return preg_match('/.*Success.*/s', $response);
 }
 
 /**
- * Read the socket response
- *
- * @param object $socket    Socket
- *
- * @return array                  Array of socket responses
- */
+* Read the socket response
+*
+* @param object $socket Socket
+*
+* @return array Array of socket responses
+*/
 function ReadResponse($socket) {
     $retVal = '';
 
@@ -314,12 +314,12 @@ function ReadResponse($socket) {
 }
 
 /**
- * GET the description to save to the memo box
- *
- * @param object $socket    Socket
- *
- * @return array                  Array of socket responses
- */
+* GET the description to save to the memo box
+*
+* @param object $socket Socket
+*
+* @return array Array of socket responses
+*/
 function getMemoName($call, $direction) {
 
     //set the proper abbreviation
@@ -348,12 +348,12 @@ function getMemoName($call, $direction) {
 }
 
 /**
- * GET list of calls from the database
- *
- * @param object $current_user    SugarCRM current_user object allows DB access
- *
- * @return array                  Array of calls from database
- */
+* GET list of calls from the database
+*
+* @param object $current_user SugarCRM current_user object allows DB access
+*
+* @return array Array of calls from database
+*/
 function get_calls() {
     $last_hour = date('Y-m-d H:i:s', time() - 1 * 60 * 30);
     $query = " SELECT * FROM asterisk_log WHERE \"$last_hour\" < timestamp_call AND (uistate IS NULL OR uistate != \"Closed\") AND (callstate != 'NeedID') AND (channel LIKE 'SIP/{$GLOBALS['current_user']->asterisk_ext_c}%' OR channel LIKE 'Local%{$GLOBALS['current_user']->asterisk_ext_c}%')";
@@ -365,13 +365,13 @@ function get_calls() {
 }
 
 /**
- * Build the item list
- *
- * @param array  $result_set           Array of calls from database
- * @param object $current_user         SugarCRM current_user object allows DB access
- * @param array  $mod_strings          SugarCRM module strings 
- *
- */
+* Build the item list
+*
+* @param array $result_set Array of calls from database
+* @param object $current_user SugarCRM current_user object allows DB access
+* @param array $mod_strings SugarCRM module strings
+*
+*/
 function build_item_list($result_set, $current_user, $mod_strings) {
 
     $response = array();
@@ -390,6 +390,7 @@ function build_item_list($result_set, $current_user, $mod_strings) {
             'call_record_id' => $row['call_record_id'],
             'phone_number' => $phone_number,
             'asterisk_name' => $row['callerName'],
+            'timestamp_call' => $row['timestamp_call'],
             'title' => get_title($contacts, $phone_number, $state, $mod_strings),
             'contacts' => $contacts,
             'call_type' => $call_direction['call_type'],
@@ -405,12 +406,12 @@ function build_item_list($result_set, $current_user, $mod_strings) {
 }
 
 /**
- * GET the call state
- *
- * @param array  $row          Results from database call in build_item_list
- *
- * @return string                     state of call
- */
+* GET the call state
+*
+* @param array $row Results from database call in build_item_list
+*
+* @return string state of call
+*/
 function get_call_state($row, $mod_strings) {
     $state = isset($mod_strings[strtoupper($row['callstate'])]) ? $mod_strings[strtoupper($row['callstate'])] : $row['callstate'];
 
@@ -418,12 +419,12 @@ function get_call_state($row, $mod_strings) {
 }
 
 /**
- * GET the callerid
- * 
- * @param array  $row          Results from database call in build_item_list
- *
- * @return array               Returns the whole item array
- */
+* GET the callerid
+*
+* @param array $row Results from database call in build_item_list
+*
+* @return array Returns the whole item array
+*/
 function get_callerid($row) {
     $callPrefix = get_call_prefix($row);
 
@@ -436,12 +437,12 @@ function get_callerid($row) {
 }
 
 /**
- * GET the prefix of the call
- * 
- * @param array  $row          Results from database call in build_item_list
- *
- * @return array               Returns the call prefix
- */
+* GET the prefix of the call
+*
+* @param array $row Results from database call in build_item_list
+*
+* @return array Returns the call prefix
+*/
 function get_call_prefix($row) {
     $calloutPrefix = $GLOBALS['sugar_config']['asterisk_prefix'];
     $callinPrefix = $GLOBALS['sugar_config']['asterisk_dialinPrefix'];
@@ -457,12 +458,12 @@ function get_call_prefix($row) {
 }
 
 /**
- * GET the call direction
- * 
- * @param array  $row          Results from database call in build_item_list
- *
- * @return array               Returns the whole item array
- */
+* GET the call direction
+*
+* @param array $row Results from database call in build_item_list
+*
+* @return array Returns the whole item array
+*/
 function get_call_direction($row, $mod_strings) {
     $result = array();
 
@@ -480,47 +481,38 @@ function get_call_direction($row, $mod_strings) {
 }
 
 /**
- * GET the call duration
- * 
- * @param array  $row          Results from database call in build_item_list
- *
- * @return array               Returns the whole item array
- */
+* GET the call duration
+*
+* @param array $row Results from database call in build_item_list
+*
+* @return array Returns the whole item array
+*/
 function get_duration($row) {
-<<<<<<< HEAD
     if (!empty($row['timestamp_hangup'])) {
-        $to_time = strtotime($row['timestamp_hangup']);
-=======
-    if (!empty($row['timestampHangup'])) {
-        $to_time = gmstrtotime($row['timestampHangup']);
->>>>>>> e87d009bc018f435b31e87b526e77d2b0ad3e52b
+        $to_time = gmstrtotime($row['timestamp_hangup']);
     } else {
         $to_time = time();
     }
 
-<<<<<<< HEAD
-    $from_time = strtotime($row['timestamp_call']);
-=======
-    if( !empty($row['timestampLink'])) {
-        $from_time = gmstrtotime($row['timestampLink']);
+    if( !empty($row['timestamp_link'])) {
+        $from_time = gmstrtotime($row['timestamp_link']);
     }
     else {
-        $from_time = gmstrtotime($row['timestampCall']);
+        $from_time = gmstrtotime($row['timestamp_call']);
     }
 
->>>>>>> e87d009bc018f435b31e87b526e77d2b0ad3e52b
     $duration = number_format(round(abs($to_time - $from_time) / 60, 1), 1);
 
     return $duration;
 }
 
 /**
- * GET contacts array
- * 
- * @param array  $row          Results from database call in build_item_list
- *
- * @return array               Returns the whole item array
- */
+* GET contacts array
+*
+* @param array $row Results from database call in build_item_list
+*
+* @return array Returns the whole item array
+*/
 function get_contact_information($phone_number, $row, $current_user) {
     $innerResultSet = fetch_contacts_associated_to_phone_number($phone_number, $row, $current_user);
 
@@ -530,16 +522,16 @@ function get_contact_information($phone_number, $row, $current_user) {
 }
 
 /**
- * GET contacts from database
- * 
- * @param array  $innerResultSet  Results from function fetch_contacts_associated_to_phone_number
- * 
- * @param object  $current_user Global current_user object - allows db access
- * 
- * @param array  $row          Results from database call in build_item_list
- *
- * @return array               Returns contacts
- */
+* GET contacts from database
+*
+* @param array $innerResultSet Results from function fetch_contacts_associated_to_phone_number
+*
+* @param object $current_user Global current_user object - allows db access
+*
+* @param array $row Results from database call in build_item_list
+*
+* @return array Returns contacts
+*/
 function get_contacts($innerResultSet, $current_user, $row) {
     $contacts = array();
 
@@ -565,27 +557,27 @@ function fetch_contacts_associated_to_phone_number($phoneToFind, $row, $current_
 
     if (strlen($phoneToFind) > 5) {
         $sqlReplace = "
-			    replace(
-			    replace(
-			    replace(
-			    replace(
-			    replace(
-			    replace(
-			    replace(
-			    replace(
-			    replace(
-			      %s,
-			        ' ', ''),
-			        '+', ''),
-			        '.', ''),
-			        '/', ''),
-			        '(', ''),
-			        ')', ''),
-			        '[', ''),
-			        ']', ''),
-			        '-', '')
-			        REGEXP '%s$' = 1
-			";
+replace(
+replace(
+replace(
+replace(
+replace(
+replace(
+replace(
+replace(
+replace(
+%s,
+' ', ''),
+'+', ''),
+'.', ''),
+'/', ''),
+'(', ''),
+')', ''),
+'[', ''),
+']', ''),
+'-', '')
+REGEXP '%s$' = 1
+";
 
 
 // TODO fix the join so that account is optional... I think just add INNER
@@ -613,16 +605,16 @@ function fetch_contacts_associated_to_phone_number($phoneToFind, $row, $current_
 }
 
 /**
- * GET the opencnam callerid information
- *
- * @param array  $row          Results from database call in build_item_list
- * 
- * @param object  $current_user Global current_user object - allows db access
- * 
- * @return array $callerid    Returns the callerid information         
- *
- * @todo implement a number cleaner that always formats input into 10 digits
- */
+* GET the opencnam callerid information
+*
+* @param array $row Results from database call in build_item_list
+*
+* @param object $current_user Global current_user object - allows db access
+*
+* @return array $callerid Returns the callerid information
+*
+* @todo implement a number cleaner that always formats input into 10 digits
+*/
 function get_open_cnam_result($row, $current_user) {
 
     // Check OpenCNAM if we don't already have the Company Name in Sugar.
@@ -640,14 +632,14 @@ function get_open_cnam_result($row, $current_user) {
 }
 
 /**
- * Fetch a list of records from OpenCNAM
- *
- * @param string $phoneNumber         10 digit US telephone number
- * 
- * @return array fetch results of OpenCNAM lookup
- *
- * @todo implement a number cleaner that always formats input into 10 digits
- */
+* Fetch a list of records from OpenCNAM
+*
+* @param string $phoneNumber 10 digit US telephone number
+*
+* @return array fetch results of OpenCNAM lookup
+*
+* @todo implement a number cleaner that always formats input into 10 digits
+*/
 function opencnam_fetch($phoneNumber) {
     $request_url = "https://api.opencnam.com/v1/phone/" . $phoneNumber . "?format=text";
     $found = false;
@@ -669,16 +661,16 @@ function opencnam_fetch($phoneNumber) {
 }
 
 /**
- * GET the title of the call
- *
- * @param string $full_name         Full name of
- * 
- * @param string $phoneNumber         10 digit US telephone number
- * 
- * @return string                     title
- * 
- * title changes based on whether there are 1) multiple matches found 2) single match found 3) no matches found
- */
+* GET the title of the call
+*
+* @param string $full_name Full name of
+*
+* @param string $phoneNumber 10 digit US telephone number
+*
+* @return string title
+*
+* title changes based on whether there are 1) multiple matches found 2) single match found 3) no matches found
+*/
 function get_title($contacts, $phone_number, $state, $mod_strings) {
 
     switch (count($contacts)) {
@@ -700,10 +692,10 @@ function get_title($contacts, $phone_number, $state, $mod_strings) {
 }
 
 /**
- * Helper method for turning any number into an e164 number 
- *
- * @param string $number    The number you want to convert
- */
+* Helper method for turning any number into an e164 number
+*
+* @param string $number The number you want to convert
+*/
 function formatPhoneNumberToE164($number) {
 
     // get rid of any non (digit, + character)
@@ -731,11 +723,11 @@ function formatPhoneNumberToE164($number) {
 }
 
 /**
- * Helper method for logging 
- *
- * @param string $str    The string you want to log
- * @param string $file   The log file you want to log to
- */
+* Helper method for logging
+*
+* @param string $str The string you want to log
+* @param string $file The log file you want to log to
+*/
 function log_entry($str, $file = "default") {
     $handle = fopen($file, 'a');
     fwrite($handle, "[" . date('Y-m-j H:i:s') . "] " . $str);
@@ -743,12 +735,12 @@ function log_entry($str, $file = "default") {
 }
 
 /**
- * Helper method for converting print_r into a nicely formated string for logging
- *
- * @param string $str    The string you want to log
- *
- * @return string The string of the array data you want to print
- */
+* Helper method for converting print_r into a nicely formated string for logging
+*
+* @param string $str The string you want to log
+*
+* @return string The string of the array data you want to print
+*/
 function printrs($data) {
     $str = "";
     if ($data) {
