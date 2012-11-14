@@ -10,9 +10,8 @@ else
 	VERSION=$1
 fi
 
-
 php manifest_updater.php $1
-zip -r yaai-$VERSION.zip * -x .git* *.zip *.bak *.pnps *.pnproj *.eclipse *.svn copyTo*.sh copyFrom*.sh *.bat *.idea manifest_template.php
+zip -r yaai-$VERSION.zip * -x .git* *.zip *.bak *.pnps *.pnproj *.eclipse *.svn copyTo*.sh copyFrom*.sh *.bat *.idea manifest_template.php nbproject/*
 
 echo ""
 echo ""
