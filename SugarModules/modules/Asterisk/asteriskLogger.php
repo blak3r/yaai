@@ -249,8 +249,7 @@ if ($argc > 1 && $argv[1] == "test") {
 // BR: Added this while loop to keep loging in to AMI if asterisk goes down.
 while (true) {
     logLine("[Asterisk Manager Interface (AMI) Connection]\n");
-    // connect to Asterisk server
-    $amiSocket = fsockopen($asteriskServer, $asteriskManagerPort, $errno, $errstr, 5);
+    $amiSocket = fsockopen($asteriskServer, $asteriskManagerPort, $errno, $errstr, 5); // connect to Asterisk server
     if (!$amiSocket) {
         logLine(" __ ERROR $errno connecting to Asterisk: $errstr __");
         sleep(5); // retry connecting
@@ -303,10 +302,10 @@ while (true) {
     $queueChannels = array();
 
     // Keep a loop going to read the socket and parse the resulting commands.
-// Apparently there is no good way to detect if socket is still alive???
-// This is my hack... if we fail 60 times in a row we reconnect to manager...
+    // Apparently there is no good way to detect if socket is still alive???
+    // This is my hack... if we fail 60 times in a row we reconnect to manager...
     // I suspect that fgets will return very quickly if socket error has occurrs
-// So, it'll reach 60 very quickly and then force relogin.
+    // So, it'll reach 60 very quickly and then force relogin.
     // Otherwise, every hour it'll just relogin.
     // Perhaps you can check socket error some other way then socket_read?
     // All I know is this reconnect method has made my asteriskLogger a lot more stable.
@@ -321,7 +320,7 @@ while (true) {
             $consecutiveFailures = 0;
             if ($buffer == "\r\n") { // handle partial packets
                 $event_started = false;
-// parse the event and get the result hashtable
+                // parse the event and get the result hashtable
                 $e = getEvent($event);
                 dumpEvent($e); // prints to screen
                 //if ($e['Event'] == 'Join' && !empty($e['Queue']) /*&& in_array($e['Queue'], $allowedQueueIds)*/ )
@@ -334,7 +333,8 @@ while (true) {
 // Call Event
 //
                 if (($e['Event'] == 'Dial' && $e['SubEvent'] != 'End') ||
-                        ($e['Event'] == 'Join' && !empty($e['Queue']))) {
+                    ($e['Event'] == 'Join' && !empty($e['Queue'])))
+                {
                     logLine("! Dial Event src=" . $e['Channel'] . " dest=" . $e['Destination'] . "\n"); //Asterisk Manager 1.1
 //print "! Dial Event src=" . $e['Source'] . " dest=" . $e['Destination'] . "\n"; //Asterisk Manager 1.0
 
@@ -352,13 +352,11 @@ while (true) {
                         $e['DestUniqueID'] = AMI_getUniqueIdFromEvent($e); // We set destination id because Join events don't set them, and the destination id is what is used to lookup hangup events.
                     }
 
-
-//
-// Before we log this Dial event, we create a corresponding object in Calls module.
-// We'll need this later to record the call when finished, but create it right here
-// to get the ID
-//
-
+                    //
+                    // Before we log this Dial event, we create a corresponding object in Calls module.
+                    // We'll need this later to record the call when finished, but create it right here
+                    // to get the ID
+                    //
                     $set_entry_params = array(
                         'session' => $soapSessionId,
                         'module_name' => 'Calls',
@@ -415,33 +413,34 @@ while (true) {
 
                     logLine(" CallerID is: $tmpCallerID\n");
 
-                    // Check to see if this Dial Event is coming off a Queue. If so we override the channel with the one we saved previously in Join Event.
-// if (!empty($e['ConnectedLineNum']) &&
-// isset($queueChannels[ AMI_getUniqueIdFromEvent($e) ]) )
-// {
-// // TODO: This code needs to be verified... author didn't have queues.
-// // The idea here is to use the channel from the Queue Join event to find the true source channel. Otherwise queue calls would get detected as internal calls.
-// logLine("Inbound From QUEUE detected, overriding: {$e['Channel']} with $channel");
-// $eChannel = $queueChannels[ AMI_getUniqueIdFromEvent($e) ];
-// }
-
                     $rgDetectRegex = "/" . $sugar_config['asterisk_rg_detect_expr'] . "/i";
                     $rgCellRingRegex = "/" . $sugar_config['asterisk_rg_cell_ring_expr'] . "/i"; // This detects in a RG when an outside line is called (usually for a cellphone)... for some reason the cell shows up as the Channel (aka the source)... We detect this by finding a number thats at least 7-10 characters long..
-// Check if both ends of the call are internal (then delete created (** Automatic record **) record)
-// 2nd condition looks for Local/RG-52-4102152497
+                    // Check if both ends of the call are internal (then delete created (** Automatic record **) record)
+                    // 2nd condition looks for Local/RG-52-4102152497
                     if ((preg_match($asteriskMatchInternal, $eChannel) && preg_match($asteriskMatchInternal, $eDestination)) ||
                             preg_match($rgDetectRegex, $eDestination) ||
                             preg_match($rgCellRingRegex, $eChannel)) {
                         deleteCall($callRecordId);
                         logLine("INTERNAL call detected, Deleting Call Record $callRecordId\n");
                     } else {
-//Asterisk Manager 1.1 (If the call is internal, this will be skipped)
+                        //Asterisk Manager 1.1 (If the call is internal, this will be skipped)
                         if (preg_match($asteriskMatchInternal, $eChannel) && !preg_match($asteriskMatchInternal, $eDestination)) {
                             $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", $e['DestUniqueID'], $callRecordId, $eChannel, $eDestination, 'NeedID', 'O', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')');
                             $callDirection = 'Outbound';
                             logLine("OUTBOUND state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
                         } else if (!preg_match($asteriskMatchInternal, $eChannel)) {
-                            $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall, asterisk_dest_id) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s')", AMI_getUniqueIdFromEvent($e), $callRecordId, $eDestination, $eChannel, 'Dial', 'I', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $e['DestUniqueID']);
+
+                            $inboundExtension = NULL;
+                            if (!empty($e['Queue']) ) {
+                                $inboundExtension = $e['Queue'];
+                            }
+                            else {
+                                // Extract from eDestination
+                                $inboundExtension = extractExtensionNumberFromChannel($eDestination);
+                            }
+                            logLine("  inbound_extension = " . $inboundExtension );
+
+                            $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestampCall, asterisk_dest_id,inbound_extension) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s','%s')", AMI_getUniqueIdFromEvent($e), $callRecordId, $eDestination, $eChannel, 'Dial', 'I', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $e['DestUniqueID'], $inboundExtension);
                             $callDirection = 'Inbound';
                             logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
                         }
@@ -477,9 +476,9 @@ while (true) {
                           }
                           mysql_checked_query($query); */
 
-//
-// Update CALL record with direction...
-//
+                        //
+                        // Update CALL record with direction...
+                        //
                         $set_entry_params = array(
                             'session' => $soapSessionId,
                             'module_name' => 'Calls',
@@ -499,10 +498,10 @@ while (true) {
                     }
                 }
 
-//
-// NewCallerID for Outgoing Call
-//
-//Asterisk Manager 1.1
+                //
+                // NewCallerID for Outgoing Call
+                //
+                //Asterisk Manager 1.1
                 if ($e['Event'] == 'NewCallerid') {
                     $id = AMI_getUniqueIdFromEvent($e);
                     $tmpCallerID = trim($e['CallerIDNum']);
@@ -515,12 +514,12 @@ while (true) {
                     mysql_checked_query($query);
                 }
 
-//
-// Process "Hangup" events
-// Yup, we really get TWO hangup events from Asterisk! (Even more with Ringgroups)
-// Obviously, we need to take only one of them....
-//
-// Asterisk Manager 1.1
+                //
+                // Process "Hangup" events
+                // Yup, we really get TWO hangup events from Asterisk! (Even more with Ringgroups)
+                // Obviously, we need to take only one of them....
+                //
+                // Asterisk Manager 1.1
                 if ($e['Event'] == 'Hangup') {
                     $id = AMI_getUniqueIdFromEvent($e);
                     $query = "SELECT direction,contact_id FROM asterisk_log WHERE asterisk_dest_id = '$id' OR asterisk_id = '$id'";
