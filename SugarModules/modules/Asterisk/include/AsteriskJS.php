@@ -58,8 +58,8 @@ class AsteriskJS {
 
             //JS Global Variables
             echo '<script type="text/javascript">window.yaai_poll_rate = ' . $poll_rate . ';</script>';
-            echo '<script type="text/javascript">window.yaai_user_extension = ' . $user_extension . ';</script>';
-            echo '<script type="text/javascript">window.yaai_current_user_id = ' . $current_user_id . ';</script>';
+            echo '<script type="text/javascript">window.yaai_user_extension = ' . "'$user_extension'" . ';</script>';
+            echo '<script type="text/javascript">window.yaai_current_user_id = ' . "'$current_user_id'" . ';</script>';
             echo '<script type="text/javascript">window.yaai_fop_user = "' . $fop_user . '";</script>';
             echo '<script type="text/javascript">window.yaai_fop_pass = "' . $fop_pass . '";</script>';
             echo '<script type="text/javascript">window.yaai_fop_url= "' . $fop_url . '";</script>';
