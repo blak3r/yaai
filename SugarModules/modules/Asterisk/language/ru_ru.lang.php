@@ -33,7 +33,7 @@
  */
 if(!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point');
 
-$mod_strings = array (
+$mod_strings = array ( 'YAAI' => array(
 
    	'ASTERISKLBL_COMING_IN' 		=>	'Входящий звонок',
 	'ASTERISKLBL_GOING_OUT' 		=>	'Исходящий звонок',
@@ -72,7 +72,7 @@ $mod_strings = array (
 	'CALL_DESCRIPTION_CALLER_ID'    => 'Номер звонившего',
 	'CALL_DESCRIPTION_MISSED'       => 'Пропущенный/неудачный звонок',
 	'CALL_DESCRIPTION_PHONE_NUMBER' => 'Номер телефона'
-
+)
    );
 
 ?>
