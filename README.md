@@ -23,3 +23,4 @@ Dev versions are maintained in other branches such as "V3".
 ###Mailing List
 Subscribe to the mailing list here for news: http://eepurl.com/rmdML
 
+[![gitimg](https://gitimg.com/rs/track/blak3r/yaai/README.md/views)](http://gitimg.com)
