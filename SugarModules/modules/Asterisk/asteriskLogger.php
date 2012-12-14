@@ -425,11 +425,12 @@ while (true) {
                     } else {
                         //Asterisk Manager 1.1 (If the call is internal, this will be skipped)
                         if (preg_match($asteriskMatchInternal, $eChannel) && !preg_match($asteriskMatchInternal, $eDestination)) {
-                            $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestamp_call) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", $e['DestUniqueID'], $callRecordId, $eChannel, $eDestination, 'NeedID', 'O', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')');
+                            $userExtension = extractExtensionNumberFromChannel($eChannel);
+                            $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestamp_call,user_extension) VALUES('%s','%s','%s','%s','%s','%s','%s','%s','%s')", $e['DestUniqueID'], $callRecordId, $eChannel, $eDestination, 'NeedID', 'O', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $userExtension);
                             $callDirection = 'Outbound';
                             logLine("OUTBOUND state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
                         } else if (!preg_match($asteriskMatchInternal, $eChannel)) {
-
+                            $userExtension = extractExtensionNumberFromChannel($eDestination);
                             $inboundExtension = NULL;
                             if (!empty($e['Queue']) ) {
                                 $inboundExtension = $e['Queue'];
@@ -440,7 +441,7 @@ while (true) {
                             }
                             logLine("  inbound_extension = " . $inboundExtension );
 
-                            $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestamp_call, asterisk_dest_id,inbound_extension) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s','%s')", AMI_getUniqueIdFromEvent($e), $callRecordId, $eDestination, $eChannel, 'Dial', 'I', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $e['DestUniqueID'], $inboundExtension);
+                            $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestamp_call, asterisk_dest_id,user_extension,inbound_extension) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s','%s','%s')", AMI_getUniqueIdFromEvent($e), $callRecordId, $eDestination, $eChannel, 'Dial', 'I', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $e['DestUniqueID'], $userExtension, $inboundExtension);
                             $callDirection = 'Inbound';
                             logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
                         }
@@ -960,7 +961,8 @@ while (true) {
                                 $result_id = mysql_fetch_array($result);
                                 $chan2 = $e['Channel2'];
                                 $theId = $result_id['id'];
-                                $query = "UPDATE asterisk_log SET channel='$chan2' WHERE id='$theId'";
+                                $userExtension = extractExtensionNumberFromChannel($chan2);
+                                $query = "UPDATE asterisk_log SET channel='$chan2', user_extension='$userExtension' WHERE id='$theId'";
                                 logLine("UPDATE QUERY: $query\n");
                                 mysql_checked_query($query);
                             } else {
@@ -988,7 +990,8 @@ while (true) {
                             $result_id = mysql_fetch_array($result);
                             $chan2 = $e['Channel2'];
                             $theId = $result_id['id'];
-                            $query = "UPDATE asterisk_log SET channel='$chan2' WHERE id='$theId'";
+                            $userExtension = extractExtensionNumberFromChannel($chan2);
+                            $query = "UPDATE asterisk_log SET channel='$chan2, user_extension='$userExtension'' WHERE id='$theId'";
                             logLine("Queue UPDATE QUERY: $query\n");
                             mysql_checked_query($query);
                         } else {
