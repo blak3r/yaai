@@ -51,7 +51,7 @@ require_once('include/entryPoint.php');
 require_once ('log4php/LoggerManager.php');
 
 $GLOBALS['log'] = LoggerManager::getLogger('SugarCRM');
-$GLOBALS['log']->fatal("TEST");
+
 
 // get the Asterisk Detail from the Configuration
 $server = $sugar_config['asterisk_host'];
@@ -70,7 +70,10 @@ $context = $sugar_config['asterisk_context'];
 //$cUser->retrieve($_SESSION['authenticated_user_id']);
 //$extension 	= $cUser->asterisk_ext_c;
 
-$extension = $current_user->asterisk_ext_c;
+
+// Use first extension in the list when multiple extensions linked to the account.
+$extensionsArray = explode(',', $current_user->asterisk_ext_c);
+$extension = $extensionsArray[0];
 
 //printr($current_user);
 //print $extension . "<BR><BR>";

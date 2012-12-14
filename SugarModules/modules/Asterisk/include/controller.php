@@ -355,8 +355,22 @@ function getMemoName($call, $direction) {
 */
 function get_calls() {
     $last_hour = date('Y-m-d H:i:s', time() - 1 * 60 * 30);
-    // FIXME: This query doesn't take into account the multiple user extension fixes that were put into place.  Merge v2.6 changes.
-    $query = " SELECT * FROM asterisk_log WHERE \"$last_hour\" < timestamp_call AND (uistate IS NULL OR uistate != \"Closed\") AND (callstate != 'NeedID') AND (channel LIKE 'SIP/{$GLOBALS['current_user']->asterisk_ext_c}%' OR channel LIKE 'Local%{$GLOBALS['current_user']->asterisk_ext_c}%')";
+    $current_users_ext = $GLOBALS['current_user']->asterisk_ext_c;
+
+    $availableExtensionsArray = explode(',', $current_users_ext);
+    $query = " SELECT * FROM asterisk_log WHERE \"$last_hour\" < timestamp_call AND (uistate IS NULL OR uistate != \"Closed\") AND (callstate != 'NeedID') AND (";
+    if (count($availableExtensionsArray) == 1) {
+        $query .= " user_extension = '$current_users_ext'";
+    }
+    else {
+        $queryExtensionsArray = array();
+        foreach ($availableExtensionsArray as $singleExtension) {
+            array_push($queryExtensionsArray, " user_extension = '$singleExtension'");
+        }
+        $query .= implode(' OR ', $queryExtensionsArray);
+    }
+    $query .=")";
+
     $result_set = $GLOBALS['current_user']->db->query($query, false);
     if ($GLOBALS['current_user']->db->checkError()) {
         trigger_error("checkForNewStates-Query failed: $query");
