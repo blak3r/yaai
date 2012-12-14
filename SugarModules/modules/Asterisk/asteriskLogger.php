@@ -218,10 +218,10 @@ while (!$successfullyLoggedInThroughSoap) {
 
 
 if ($argc > 1 && $argv[1] == "test") {
-// MODIFY these variables to help diagnose misc incompatibilities between your configuration / sugarcrm edition.
+    // MODIFY these variables to help diagnose misc incompatibilities between your configuration / sugarcrm edition.
     $ext1 = 51;
     $ext2 = 52;
-//$extensions = (51,52,207);
+    //$extensions = (51,52,207);
     $phones = array('4102152497', 'sdfasdf', '(267) 222-8385', '2672228385');
 
     print "Entered test mode!";
@@ -329,14 +329,14 @@ while (true) {
                 // // Easy solution would be to test during the hangup event... IF( isset($queueChannels[ $e['UniqueID'] ] ) remove the index for $e['UniqueID']
                 // logLine("Incoming Queue Event, channel = " . $e['Channel']);
                 //}
-//
-// Call Event
-//
+                //
+                // Call Event
+                //
                 if (($e['Event'] == 'Dial' && $e['SubEvent'] != 'End') ||
                     ($e['Event'] == 'Join' && !empty($e['Queue'])))
                 {
                     logLine("! Dial Event src=" . $e['Channel'] . " dest=" . $e['Destination'] . "\n"); //Asterisk Manager 1.1
-//print "! Dial Event src=" . $e['Source'] . " dest=" . $e['Destination'] . "\n"; //Asterisk Manager 1.0
+                    //print "! Dial Event src=" . $e['Source'] . " dest=" . $e['Destination'] . "\n"; //Asterisk Manager 1.0
 
                     $eChannel = $e['Channel'];
 
@@ -448,9 +448,8 @@ while (true) {
                         mysql_checked_query($query);
 
 
-//Asterisk Manager 1.0
-
-                        /* if(eregi($asteriskMatchInternal, $e['Source']))
+                        //Asterisk Manager 1.0
+                          /* if(eregi($asteriskMatchInternal, $e['Source']))
                           {
                           $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestamp_call) VALUES('%s','%s','%s','%s','%s','%s',%s)",
                           $e['DestUniqueID'],
@@ -526,22 +525,22 @@ while (true) {
                     $query = "SELECT direction,contact_id FROM asterisk_log WHERE asterisk_dest_id = '$id' OR asterisk_id = '$id'";
                     $result = mysql_checked_query($query);
                     $direction = mysql_fetch_array($result);
-//var_dump($direction);
+                    //var_dump($direction);
                     if ($direction['direction'] == "I") {
                         $callDirection = "Inbound";
                     } else {
                         $callDirection = "Outbound";
                     }
                     if ($callDirection == "Outbound") { //Outbound callhandling
-//
-// Fetch associated call record
-//
-                        $callRecord = findCallByAsteriskId($id);
+                        //
+                        // Fetch associated call record
+                        //
+                         $callRecord = findCallByAsteriskId($id);
                         if ($callRecord) {
                             logLine("### [$id] FOUND outbound CALL\n");
-//
-// update entry in asterisk_log...
-//
+                            //
+                            // update entry in asterisk_log...
+                            //
                             $rawData = $callRecord['bitter']; // raw data from asterisk_log
                             $query = sprintf("UPDATE asterisk_log SET callstate='%s', timestamp_hangup=%s, hangup_cause=%d, hangup_cause_txt='%s' WHERE asterisk_id='%s'", //asterisk_dest_id was asterisk_id
                                     'Hangup', 'FROM_UNIXTIME(' . time() . ')', $e['Cause'], $e['Cause-txt'], $id);
@@ -549,12 +548,12 @@ while (true) {
                             if ($updateResult) {
                                 $assignedUser = findUserIdFromChannel($rawData['channel']);
 
-//
-// ... on success also update entry in Calls module
-//
-//
-// Calculate call duration...
-//
+                                //
+                                // ... on success also update entry in Calls module
+                                //
+                                //
+                                // Calculate call duration...
+                                //
                                 $failedCall = FALSE;
                                 $hangupTime = time();
                                 $callDurationRaw = 0; // call duration in seconds, only matters if timestamp_link != NULL
@@ -568,42 +567,42 @@ while (true) {
 
                                 logLine(" [$id] Measured call duration is $callDurationRaw seconds\n");
 
-// Recalculate call direction in minutes
+                                // Recalculate call direction in minutes
                                 $callDuration = (int) ($callDurationRaw / 60);
                                 $callDurationHours = (int) ($callDuration / 60);
-//$callDurationMinutes = ceil($callDuration / 60); //voor afronden naar boven.
+                                //$callDurationMinutes = ceil($callDuration / 60); //voor afronden naar boven.
                                 $callDurationMinutes = ($callDuration % 60);
 
-//
-// Calculate final call state
-//
+                                //
+                                // Calculate final call state
+                                //
                                 $callStatus = NULL;
                                 $callName = NULL;
                                 $callDescription = "";
 
-// BR: 3/16/2012 I originally had this check to make sure call was longer then 5 seconds... I don't know why. Whey you have callStatus of Missed it creates a task which is undesirable.
-// So i'm commenting it out. If it's April and I still haven't deleted this comment it's safe to delete this code.
-//if (!$failedCall) {
+                                // BR: 3/16/2012 I originally had this check to make sure call was longer then 5 seconds... I don't know why. Whey you have callStatus of Missed it creates a task which is undesirable.
+                                // So i'm commenting it out. If it's April and I still haven't deleted this comment it's safe to delete this code.
+                                //if (!$failedCall) {
                                 $callStatus = 'Held';
                                 $callName = $mod_strings['ASTERISKLBL_GOING_OUT'];
 
-// This means call description was updated through AJAX so lets not overwrite the subject/description already assigned to the call.
+                                // This means call description was updated through AJAX so lets not overwrite the subject/description already assigned to the call.
                                 if (!empty($callRecord['sweet']['description'])) {
                                     $callName = $callRecord['sweet']['name'];
                                     $callDescription = $callRecord['sweet']['description'];
                                 }
-// } else {
-// $callStatus = 'Missed';
-// $callName = $mod_strings['CALL_NAME_MISSED'];
-                                // $callDescription = "{$mod_strings['CALL_DESCRIPTION_MISSED']} ({$e['Cause-txt']}\n";
-// $callDescription .= "------------------\n";
-// $callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['CALL_DESCRIPTION_PHONE_NUMBER'], $rawData['callerID']);
-                                // if( $rawData['opencnam'] ) {
-                                // $callName .= " - " . $rawData['opencnam'];
-                                // $callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['CALL_DESCRIPTION_CALLER_ID'], $rawData['opencnam']);
+                                // } else {
+                                // $callStatus = 'Missed';
+                                // $callName = $mod_strings['CALL_NAME_MISSED'];
+                                                                // $callDescription = "{$mod_strings['CALL_DESCRIPTION_MISSED']} ({$e['Cause-txt']}\n";
+                                // $callDescription .= "------------------\n";
+                                // $callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['CALL_DESCRIPTION_PHONE_NUMBER'], $rawData['callerID']);
+                                                                // if( $rawData['opencnam'] ) {
+                                                                // $callName .= " - " . $rawData['opencnam'];
+                                                                // $callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['CALL_DESCRIPTION_CALLER_ID'], $rawData['opencnam']);
+                                                                // }
+                                // logLine("Adding OUTBOUND Failed Call, id=$id, call_id = " . $callRecord['sweet']['id'] . "\n");
                                 // }
-// logLine("Adding OUTBOUND Failed Call, id=$id, call_id = " . $callRecord['sweet']['id'] . "\n");
-// }
                                 // Establish Relationships with the Call and Contact/Account
                                 $beanID = NULL;
                                 $beanType = NULL;
@@ -637,16 +636,16 @@ while (true) {
                                     }
                                 }
 
-//var_dump($parentType);
-//var_dump($parentID);
+                                //var_dump($parentType);
+                                //var_dump($parentID);
                                 logLine(" Call start was " . gmdate('Y-m-d H:i:s', $callStart) . "\n");
 
-//
-// ... on success also update entry in Calls module
-//
+                                //
+                                // ... on success also update entry in Calls module
+                                //
                                 logLine(" [$id] (OUTBOUND) Now updating record in /Calls/ id=" . $callRecord['sweet']['id'] . "...\n");
 
-//print_r($callRecord);
+                                //print_r($callRecord);
                                 logLine("NAME: " . $callRecord['sweet']['name'] . "\n");
                                 logLine("DESCRIPTION: " . $callRecord['sweet']['description'] . "\n");
 
@@ -706,18 +705,18 @@ while (true) {
                             logLine("[$id] FAILED TO FIND A CALL (note: there are two hangups per call, so this might not be an error)\n");
                         }
                     } else {
-//-----------------[ INBOUND HANGUP HANDLING ]----------------------
+                    //-----------------[ INBOUND HANGUP HANDLING ]----------------------
 
                         $id = AMI_getUniqueIdFromEvent($e);
-//
-// Fetch associated call record
-//
+                        //
+                        // Fetch associated call record
+                        //
                         $callRecord = findCallByAsteriskDestId($id);
                         if ($callRecord) {
           
-//
-// update entry in asterisk_log...
-//
+                            //
+                            // update entry in asterisk_log...
+                            //
                             $rawData = $callRecord['bitter']; // raw data from asterisk_log
                             $query = sprintf("UPDATE asterisk_log SET callstate='%s', timestamp_hangup=%s, hangup_cause=%d, hangup_cause_txt='%s', answered='%s' WHERE asterisk_dest_id='%s'", //asterisk_dest_id was asterisk_id
                                     'Hangup', 'FROM_UNIXTIME(' . time() . ')', $e['Cause'], $e['Cause-txt'], was_call_answered($id), $id);
@@ -725,13 +724,12 @@ while (true) {
                             if ($updateResult) {
                                 $assignedUser = findUserIdFromChannel($rawData['channel']);
 
-
-//
-// ... on success also update entry in Calls module
-//
-//
-// Calculate call duration...
-//
+                                //
+                                // ... on success also update entry in Calls module
+                                //
+                                //
+                                // Calculate call duration...
+                                //
                                 $failedCall = FALSE;
                                 $hangupTime = time();
                                 $callDurationRaw = 0; // call duration in seconds, only matters if timestamp_link != NULL
@@ -745,15 +743,15 @@ while (true) {
 
                                 logLine(" Measured call duration is $callDurationRaw seconds\n");
 
-// Recalculate call direction in minutes
+                                // Recalculate call direction in minutes
                                 $callDuration = (int) ($callDurationRaw / 60);
                                 $callDurationHours = (int) ($callDuration / 60);
-//$callDurationMinutes = ceil($callDuration / 60); //voor afronden naar boven.
+                                //$callDurationMinutes = ceil($callDuration / 60); //voor afronden naar boven.
                                 $callDurationMinutes = ($callDuration % 60);
 
-//
-// Calculate final call state
-//
+                                //
+                                // Calculate final call state
+                                //
                                 $callStatus = NULL;
                                 $callName = NULL;
                                 $callDescription = "";
@@ -761,7 +759,7 @@ while (true) {
                                     $callStatus = 'Held';
                                     $callName = $mod_strings['ASTERISKLBL_COMING_IN'];
 
-// This means call description was updated through AJAX so lets not overwrite the subject/description already assigned to the call.
+                                    // This means call description was updated through AJAX so lets not overwrite the subject/description already assigned to the call.
                                     if (!empty($callRecord['sweet']['description'])) {
                                         $callName = $callRecord['sweet']['name'];
                                         $callDescription = $callRecord['sweet']['description'];
@@ -819,12 +817,12 @@ while (true) {
 
                                 echo ("! Call start was " . gmdate('Y-m-d H:i:s', $callStart) . "\n");
 
-//
-// ... on success also update entry in Calls module
-//
+                                //
+                                // ... on success also update entry in Calls module
+                                //
                                 logLine(" Updating record in /Calls/ id=" . $callRecord['sweet']['id'] . "...\n");
 
-//print_r($callRecord);
+                                //print_r($callRecord);
                                 logLine(" NAME: " . $callRecord['sweet']['name'] . "\n");
                                 logLine(" DESCRIPTION: " . $callRecord['sweet']['description'] . "\n");
 
@@ -880,7 +878,7 @@ while (true) {
                                     )
                                         ));
                             } // End Inbound Case
-// In case of multiple extensions when a call is not answered, every extensions produces a failed call record,
+                            // In case of multiple extensions when a call is not answered, every extensions produces a failed call record,
                             // this will keep the first of those records but delete the rest. (LIMIT 1,999999999999 in query returns all but first match.)
                             $query = "SELECT asterisk_id FROM asterisk_log WHERE asterisk_dest_id='$id'";
                             $result = mysql_checked_query($query);
@@ -899,14 +897,14 @@ while (true) {
                                     $query = "DELETE FROM calls_cstm WHERE id_c='{$call_record_id['call_record_id']}'";
                                     mysql_checked_query($query);
                                 }
-//$total_result = mysql_fetch_array($rq);
-//var_dump($total_result);
+                                //$total_result = mysql_fetch_array($rq);
+                                //var_dump($total_result);
                             }
                         }
                     } // End if INBOUND hangup event
                 }// End of HangupEvent.
-// success
-//Asterisk Manager 1.1
+                // success
+                //Asterisk Manager 1.1
                 if ($e['Event'] == 'Bridge') {
                     logLine("DEBUG: Entered Bridge");
                     $query = "SELECT direction FROM asterisk_log WHERE asterisk_id='" . $e['Uniqueid2'] . "' OR asterisk_dest_id='" . $e['Uniqueid2'] . "'";
@@ -919,20 +917,16 @@ while (true) {
                     }
                     if ($callDirection == "Inbound") {
                         logLine("DEBUG: bridge inbound, updating the Link state");
-// Inbound bridge event
+                        // Inbound bridge event
                         $query = "UPDATE asterisk_log SET callstate='Connected', timestamp_link=FROM_UNIXTIME(" . time() . ") WHERE asterisk_dest_id='" . $e['Uniqueid1'] . "' OR asterisk_dest_id='" . $e['Uniqueid2'] . "'";
                         $rc = mysql_checked_query($query);
-// und vice versa .. woher immer der call kam
-// $query = "UPDATE asterisk_log SET callstate='Connected', timestamp_link=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid2'] . "'";
-// $record = mysql_query($query);
-// to delete all the extra inbound records created by the hangup event.
+                        // $query = "UPDATE asterisk_log SET callstate='Connected', timestamp_link=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid2'] . "'";
+                        // $record = mysql_query($query);
+                        // to delete all the extra inbound records created by the hangup event.
                         $id1 = $e['Uniqueid1'];
                         $id2 = $e['Uniqueid2'];
                         $query = "SELECT call_record_id FROM asterisk_log WHERE asterisk_id='" . $id1 . "' AND asterisk_dest_id!='" . $id2 . "'";
                         $result = mysql_checked_query($query);
-//for error logging
-//$call_rec_id = mysql_fetch_array($result);
-//var_dump($call_rec_id);
                         while ($call_rec_id = mysql_fetch_array($result)) {
                             logLine("Deleting Call Record: " . $call_rec_id['call_record_id']);
                             deleteCall($call_rec_id['call_record_id']);
