@@ -371,6 +371,8 @@ function get_calls() {
     }
     $query .=")";
 
+    log_entry($query,"c:\get_callsdebug.txt");
+
     $result_set = $GLOBALS['current_user']->db->query($query, false);
     if ($GLOBALS['current_user']->db->checkError()) {
         trigger_error("checkForNewStates-Query failed: $query");

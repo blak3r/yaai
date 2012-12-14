@@ -426,8 +426,9 @@ while (true) {
                         //Asterisk Manager 1.1 (If the call is internal, this will be skipped)
                         if (preg_match($asteriskMatchInternal, $eChannel) && !preg_match($asteriskMatchInternal, $eDestination)) {
                             $userExtension = extractExtensionNumberFromChannel($eChannel);
-                            $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestamp_call,user_extension) VALUES('%s','%s','%s','%s','%s','%s','%s','%s','%s')", $e['DestUniqueID'], $callRecordId, $eChannel, $eDestination, 'NeedID', 'O', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $userExtension);
+                            $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestamp_call,user_extension) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s')", $e['DestUniqueID'], $callRecordId, $eChannel, $eDestination, 'NeedID', 'O', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $userExtension);
                             $callDirection = 'Outbound';
+                            logLine("Outbound insert query: " . $query );
                             logLine("OUTBOUND state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
                         } else if (!preg_match($asteriskMatchInternal, $eChannel)) {
                             $userExtension = extractExtensionNumberFromChannel($eDestination);
