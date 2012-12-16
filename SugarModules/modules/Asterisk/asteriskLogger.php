@@ -157,6 +157,7 @@ $sql_db = mysql_select_db($sugar_config['dbconfig']['db_name']);
 //mysql_query('DELETE FROM asterisk_log');
 // Set all MySQL dates to UTC
 mysql_query("SET time_zone='+00:00'");
+purgeExpiredEventsFromDb();
 
 // Get SOAP config
 $sugarSoapEndpoint = $sugar_config['site_url'] . "/soap.php"; //"/soap.php";
@@ -315,6 +316,7 @@ while (true) {
 
         if ($buffer === FALSE) {
             logLine(getTimestamp() . " Patiently Waiting...!\n");
+            purgeExpiredEventsFromDb();
             $consecutiveFailures++;
         } else {
             $consecutiveFailures = 0;
@@ -329,12 +331,15 @@ while (true) {
                 // // Easy solution would be to test during the hangup event... IF( isset($queueChannels[ $e['UniqueID'] ] ) remove the index for $e['UniqueID']
                 // logLine("Incoming Queue Event, channel = " . $e['Channel']);
                 //}
+
                 //
                 // Call Event
                 //
                 if (($e['Event'] == 'Dial' && $e['SubEvent'] != 'End') ||
                     ($e['Event'] == 'Join' && !empty($e['Queue'])))
                 {
+                    purgeExpiredEventsFromDb(); // clears out db of old events... also called when timeouts occcur
+
                     logLine("! Dial Event src=" . $e['Channel'] . " dest=" . $e['Destination'] . "\n"); //Asterisk Manager 1.1
                     //print "! Dial Event src=" . $e['Source'] . " dest=" . $e['Destination'] . "\n"; //Asterisk Manager 1.0
 
@@ -1045,6 +1050,31 @@ exit(0);
 // ******************
 // Helper functions *
 // ******************
+
+/**
+ * Removes calls from asterisk_log that have expired or closed.
+ * 1) Call Popup Closed Manually by user in sugar.
+ * 2) Call has been hungup for at least an hour
+ * 3) Call was created over 5 hours ago (this is just in case of bugs where hangup isn't set for some reason).
+ */
+function purgeExpiredEventsFromDb() {
+    global $sugar_config;
+    $popupsExpireMins = 60;
+    if( !empty( $sugar_config['asterisk_hide_call_popups_after_mins'] ) ) {
+        $popupsExpireMins = $sugar_config['asterisk_hide_call_popups_after_mins'];
+    }
+
+    $calls_expire_time = date('Y-m-d H:i:s', time() - ($popupsExpireMins * 60) );
+    $five_hours_ago = date('Y-m-d H:i:s', time() - 5 * 60 * 60);
+
+    $query = " DELETE FROM asterisk_log WHERE (uistate = 'Closed') OR ( timestamp_hangup is not NULL AND '$calls_expire_time' > timestamp_hangup ) OR ('$five_hours_ago' > timestamp_call )";
+    $delResult = mysql_checked_query($query);
+    $rowsDeleted = mysql_affected_rows();
+    //logLine("DEBUG: $query");
+    if( $rowsDeleted > 0 ) {
+        logLine("  Purged $rowsDeleted row(s) from the call log table.");
+    }
+}
 
 function isCallInternal($chan1, $chan2) {
     global $asteriskMatchInternal;

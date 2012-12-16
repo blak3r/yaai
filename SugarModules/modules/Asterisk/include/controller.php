@@ -358,7 +358,11 @@ function get_calls() {
     $current_users_ext = $GLOBALS['current_user']->asterisk_ext_c;
 
     $availableExtensionsArray = explode(',', $current_users_ext);
-    $query = " SELECT * FROM asterisk_log WHERE \"$last_hour\" < timestamp_call AND (uistate IS NULL OR uistate != \"Closed\") AND (callstate != 'NeedID') AND (";
+
+    // Old version of query, V3 optimized performance by removing everything from asterisk_log that was expired.
+    //    $query = " SELECT * FROM asterisk_log WHERE \"$last_hour\" < timestamp_call AND (uistate IS NULL OR uistate != \"Closed\") AND (callstate != 'NeedID') AND (";
+    $query = " SELECT * FROM asterisk_log WHERE (";
+
     if (count($availableExtensionsArray) == 1) {
         $query .= " user_extension = '$current_users_ext'";
     }
