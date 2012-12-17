@@ -227,8 +227,6 @@ if ($argc > 1 && $argv[1] == "test") {
 
     print "Entered test mode!";
 
-
-
     $obj = findSugarObjectByPhoneNumber("4102152497");
     print "findUserByAsteriskExtension(51) returned: " . findUserByAsteriskExtension("51") . "\n";
     print "findUserByAsteriskExtension(207) returned: " . findUserByAsteriskExtension("207") . "\n";
@@ -242,6 +240,48 @@ if ($argc > 1 && $argv[1] == "test") {
         } else {
             print " For $currPhone I found: " . $obj['values']['id'] . ' ' . $obj['values']['first_name'] . ' ' . $obj['values']['last_name'] . "\n";
         }
+    }
+
+    // Test for memory leaks...
+    $cnt = 0;
+    gc_enable();
+    $GLOBALS['_transient']['static']['nusoap_base']->globalDebugLevel = 0;
+    $lastMem = 0;
+    while( $cnt++ < 1000 ) {
+        $set_entry_params = array(
+            'session' => $soapSessionId,
+            'module_name' => 'Calls',
+            'name_value_list' => array(
+                array(
+                    'name' => 'name',
+                    'value' => $mod_strings['CALL_AUTOMATIC_RECORD']
+                ),
+                array(
+                    'name' => 'status',
+                    'value' => $mod_strings['CALL_IN_LIMBO']
+                ),
+                array(
+                    'name' => 'assigned_user_id',
+                    'value' => '1'
+                )
+            )
+        );
+        $soapResult = $soapClient->call('set_entry', $set_entry_params);
+        unset($set_entry_params);
+        unset($soapResult);
+        $currMem = memory_get_usage() ;
+
+        if( $lastMem > $currMem ) {
+            logLine("\n\nmemory usage decreased!!!  $lastMem --> $currMem\n\n");
+        }
+
+        $lastMem = $currMem;
+        if( $cnt % 10 == 0 ) {
+            logLine( "mem usage: " . memory_get_usage() . "\n");
+        }
+
+
+
     }
     exit;
 }
@@ -527,7 +567,7 @@ while (true) {
                 // Asterisk Manager 1.1
                 if ($e['Event'] == 'Hangup') {
                     $id = AMI_getUniqueIdFromEvent($e);
-                    $query = "SELECT direction,contact_id FROM asterisk_log WHERE asterisk_dest_id = '$id' OR asterisk_id = '$id'";
+                    $query = "SELECT direction,contact_id,user_extension,inbound_extension FROM asterisk_log WHERE asterisk_dest_id = '$id' OR asterisk_id = '$id'";
                     $result = mysql_checked_query($query);
                     $direction = mysql_fetch_array($result);
                     //var_dump($direction);
@@ -687,6 +727,17 @@ while (true) {
                                             'name' => 'asterisk_caller_id_c',
                                             'value' => $rawData['callerID']
                                         ),
+
+                                        array(
+                                            'name' => 'asterisk_user_extension_c',
+                                            'value' => $direction['user_extension']
+                                        ),
+
+                                        array(
+                                            'name' => 'asterisk_inbound_extension_c',
+                                            'value' => $direction['inbound_extension']
+                                        ),
+
                                         array(
                                             'name' => 'date_start',
                                             'value' => gmdate('Y-m-d H:i:s', $callStart)
@@ -863,6 +914,15 @@ while (true) {
                                         array(
                                             'name' => 'asterisk_caller_id_c',
                                             'value' => $rawData['callerID']
+                                        ),
+                                        array(
+                                            'name' => 'asterisk_user_extension_c',
+                                            'value' => $direction['user_extension']
+                                        ),
+
+                                        array(
+                                            'name' => 'asterisk_inbound_extension_c',
+                                            'value' => $direction['inbound_extension']
                                         ),
                                         array(
                                             'name' => 'date_start',
