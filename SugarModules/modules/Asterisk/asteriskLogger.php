@@ -43,6 +43,10 @@
 $mysql_loq_queries = 0;
 $mysql_log_results = 0;
 $verbose_log = 0;
+$log_memory_usage = 0;
+$memory_usage_log_file = "c:\mem_usage.csv";
+$memory_usage_log_frequency_secs = 10*60;
+$last_memory_log_entry = "";
 
 // All Sugar timestamps are UTC
 date_default_timezone_set('UTC');
@@ -279,9 +283,6 @@ if ($argc > 1 && $argv[1] == "test") {
         if( $cnt % 10 == 0 ) {
             logLine( "mem usage: " . memory_get_usage() . "\n");
         }
-
-
-
     }
     exit;
 }
@@ -353,9 +354,8 @@ while (true) {
     while ($consecutiveFailures < 60 && !safe_feof($amiSocket, $start) && (microtime(true) - $start) < $timeout) {
         $buffer = fgets($amiSocket, 4096);
         // echo("# Read " . strlen($buffer) . " " . $buffer . "\n");
-
         if ($buffer === FALSE) {
-            logLine(getTimestamp() . " Patiently Waiting...!\n");
+            logLine(getTimestamp() . " Patiently Waiting...! (mem_used: " . memory_get_usage() . ")\n");
             purgeExpiredEventsFromDb();
             $consecutiveFailures++;
         } else {
@@ -1087,6 +1087,16 @@ while (true) {
             $event_started = true;
         }
 
+
+        if($log_memory_usage)
+        {
+            $diff = time() - $last_memory_log_entry;
+            if( $diff > $memory_usage_log_frequency_secs ) {
+                logLine( getTimestamp() . "," . memory_get_usage(), $memory_usage_log_file);
+                $last_memory_log_entry = time();
+            }
+        }
+
         // for if the connection to the sql database gives out.
         // TODO Find a better way to check the connection. I think on Shared Hosting Servers mysql_ping might be disabled which causes this to always reconnect.
         if (!mysql_ping($sql_connection)) {
@@ -1745,7 +1755,7 @@ function mysql_checked_query($aQuery) {
     return $sqlResult;
 }
 
-function logLine($str) {
+function logLine($str, $logFile = "default") {
     global $sugar_config;
 
     if (!endsWith($str, "\n")) {
@@ -1756,7 +1766,12 @@ function logLine($str) {
 
 // if logging is enabled.
     if (!empty($sugar_config['asterisk_log_file'])) {
-        $myFile = $sugar_config['asterisk_log_file'];
+        if( $logFile == "default" ) {
+            $myFile = $sugar_config['asterisk_log_file'];
+        }
+        else {
+            $myFile = $logFile;
+        }
         $fh = fopen($myFile, 'a') or die("can't open file");
         fwrite($fh, $str);
         fclose($fh);
@@ -1840,8 +1855,6 @@ function was_call_answered($id) {
     }else{
         return 1;
     }
-    
-    
 }
 ?>
 
