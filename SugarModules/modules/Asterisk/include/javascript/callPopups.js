@@ -244,7 +244,7 @@ var YAAI = {
         }).on("click", function(){
         
             $.fancybox({
-                href : YAAI.fop2URL + '/fop2/?exten=' + YAAI.fop2UserID + '&pass=' + YAAI.fop2Password,
+                href : YAAI.fop2URL + '?exten=' + YAAI.fop2UserID + '&pass=' + YAAI.fop2Password,
                 type : 'iframe',
                 padding : 5,
                 showCloseButton : true,
