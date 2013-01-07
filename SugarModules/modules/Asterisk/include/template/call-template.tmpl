@@ -42,7 +42,7 @@ function program1(depth0,data) {
   foundHelper = helpers.callbox_id;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{}}); }
   else { stack1 = depth0.callbox_id; stack1 = typeof stack1 === functionType ? stack1() : stack1; }
-  buffer += escapeExpression(stack1) + "\"></button>\n        <input type=\"checkbox\" class=\"log_time\" /><label for=\"log_time\">Log Time</label>\n    </div>\n    <div class=\"callboxcontent\">  \n        <div class=\"asterisk_info\">\n            <h4 class=\"call_type\">";
+  buffer += escapeExpression(stack1) + "\"></button>\n    </div>\n    <div class=\"callboxcontent\">  \n        <div class=\"asterisk_info\">\n            <h4 class=\"call_type\">";
   foundHelper = helpers.call_type;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{}}); }
   else { stack1 = depth0.call_type; stack1 = typeof stack1 === functionType ? stack1() : stack1; }
@@ -106,7 +106,7 @@ function program1(depth0,data) {
   foundHelper = helpers.call_record_id;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{}}); }
   else { stack1 = depth0.call_record_id; stack1 = typeof stack1 === functionType ? stack1() : stack1; }
-  buffer += escapeExpression(stack1) + "\">\n        <input type='hidden' name=\"relateContactId\"/>\n        <input type='hidden' name=\"relateContactName\"/>\n    </form>\n</div>\n<div id=\"block-number-";
+  buffer += escapeExpression(stack1) + "\">\n        <input type='hidden' name=\"relateContactId\"/>\n        <input type='hidden' name=\"relateContactLastName\"/>\n        <input type='hidden' name=\"relateContactFirstName\"/>\n    </form>\n</div>\n<div id=\"block-number-";
   foundHelper = helpers.callbox_id;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{}}); }
   else { stack1 = depth0.callbox_id; stack1 = typeof stack1 === functionType ? stack1() : stack1; }

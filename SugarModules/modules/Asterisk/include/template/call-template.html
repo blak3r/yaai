@@ -8,7 +8,6 @@
     <div class="control_panel">
         <button class="operator_panel"></button> 
         <button class="callbox_action" data-dropdown="#dropdown-1_{{callbox_id}}"></button>
-        <input type="checkbox" class="log_time" /><label for="log_time">Log Time</label>
     </div>
     <div class="callboxcontent">  
         <div class="asterisk_info">
@@ -72,7 +71,8 @@
     </div>
     <form class="call_record_id" name="{{call_record_id}}">
         <input type='hidden' name="relateContactId"/>
-        <input type='hidden' name="relateContactName"/>
+        <input type='hidden' name="relateContactFirstName"/>
+        <input type='hidden' name="relateContactLastName"/>
     </form>
 </div>
 <div id="block-number-{{callbox_id}}" title="Block Caller" style="display:none;">

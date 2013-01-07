@@ -51,7 +51,7 @@ var YAAI = {
     options : {
         debug: true
     },
-    checkForNewStates : function(){
+    checkForNewStates : function(loop){
         // Note: once the user gets logged out, the ajax requests will get redirected to the login page.
         // Originally, the setTimeout method was in this method.  But, no way to detect the redirect without server side
         // changes.  See: http://stackoverflow.com/questions/199099/how-to-manage-a-redirect-request-after-a-jquery-ajax-call
@@ -60,8 +60,12 @@ var YAAI = {
         $.getJSON('index.php?entryPoint=AsteriskController&action=get_calls', function(data){
             console.log(data);
             var callboxids = [];
-            setTimeout('YAAI.checkForNewStates()', YAAI.pollRate);  
-
+            
+            //if the loop variable is true then setup the loop, if it is false then don't, because a one-time refresh was called'
+            if(loop){
+                setTimeout('YAAI.checkForNewStates(true)', YAAI.pollRate);  
+            }
+            
             if( data != ".") {
                 $.each(data, function(entryIndex, entry){    
                     if(YAAI.callStateIsNotFiltered(entry)){
@@ -132,7 +136,8 @@ var YAAI = {
             default :
                 context = YAAI.createCallBoxWithMultipleMatchingContacts(callboxid, context, entry);
                 html = template(context);
-                $('body').append(html);
+                $('body').append(html);   
+                YAAI.bindSetContactID(callboxid, entry);
                 $('#callbox_'+callboxid).find('.multiplematchingcontacts').show();
                 break;
         }
@@ -150,6 +155,7 @@ var YAAI = {
         YAAI.startVerticalEndVertical(callboxid);  //procedurally this must go after minimizeExistingCallboxesWhenNewCallComesIn
         YAAI.checkMinimizeCookie(callboxid);
         YAAI.setupCallBoxFocusAndBlurSettings(callboxid);
+        YAAI.setCallBoxHeadColor(callboxid, entry);
         
         YAAI.checkForErrors(entry);
 
@@ -160,14 +166,9 @@ var YAAI = {
     // UPDATE
     
     updateCallBox : function (callboxid, entry){
-        $(".asterisk_state", "#callbox_"+callboxid+" .callboxcontent").text(entry['state']);
+        $("#callbox_"+callboxid).find('.callboxtitle').text(entry['title']);
        
-        if( entry['is_hangup']  ) {
-            $("#callbox_"+callboxid+" .callboxhead").css("background-color", "#f99d39");
-        }
-        else {
-            $("#callbox_"+callboxid+" .callboxhead").css("background-color", "#0D5995"); // a blue color	
-        }
+        YAAI.setCallBoxHeadColor(callboxid, entry);
 				
         $(".call_duration", "#callbox_"+callboxid+" .callboxcontent").text( entry['duration'] ); // Updates duration
         
@@ -257,7 +258,7 @@ var YAAI = {
     },
 
      
-    bindCheckCallBoxInputKey : function(callboxid){
+    bindCheckCallBoxInputKey : function(callboxid, entry){
         $('#callbox_'+callboxid).find('.transfer_button').keydown(function(event){
             YAAI.checkCallBoxInputKey(event, callboxid, entry);
         }); 
@@ -317,8 +318,10 @@ var YAAI = {
             call_record: callRecordId, 
             contact_id: contactId
         } );
-        
-    //once done swapping callbox should change from multiple select to one select
+     
+        //force an out of loop request to refresh contact view
+        var loop = false;
+        YAAI.checkForNewStates(loop);
         
     },
     
@@ -349,11 +352,12 @@ var YAAI = {
     
     openPopup : function (entry){
         open_popup( "Contacts", 600, 400, "", true, true, {
-            "call_back_function":"relate_popup_callback",
+            "call_back_function":"YAAI.relate_popup_callback",
             "form_name": entry['call_record_id'],
             "field_to_name_array":{
                 "id":"relateContactId",
-                "last_name":"relateContactName"
+                "first_name":"relateContactFirstName",
+                "last_name":"relateContactLastName"
             }
         },"single",true);   
     },
@@ -419,8 +423,7 @@ var YAAI = {
  * I basically copied the set_return method and added some stuff onto the bottom.  I couldn't figure out how to add
  * change events to my form elements.  This method wouldn't be needed if I figured that out.
  */
-    relate_popup_callback : function(popup_reply_data)
-    {
+    relate_popup_callback : function(popup_reply_data){
         var from_popup_return2 = true;
         var form_name = popup_reply_data.form_name;
         var name_to_value_array = popup_reply_data.name_to_value_array;
@@ -444,6 +447,7 @@ var YAAI = {
         }
 
         // Everything above is from the default set_return method in parent_popup_helper.
+        
         var contactId = window.document.forms[form_name].elements['relateContactId'].value;
         if( contactId != null ) {
             YAAI.setContactID(form_name,contactId);
@@ -451,6 +455,7 @@ var YAAI = {
         else {
             alert("Error updating related Contact");
         }
+        
     },
 
     // DRAWING/UI FUNCTIONS
@@ -534,32 +539,51 @@ var YAAI = {
     },
     
     refreshContactView : function (callboxid, entry){
-        //see if a multiple contacts match has been selected to one contact or a no contact match has been selected to one contact
-      
-        if(entry['contacts'].length == 1 && $('#callbox_'+callboxid).find('.singlematchingcontact').is(':hidden') ){  
-            YAAI.refreshSingleMatchingContact(callboxid, entry);
         
+        var singlematchingcontact = $('#callbox_'+callboxid).find('.singlematchingcontact');
+        
+        //check if a single contacts match has had changes - must do this here because using SugarCRMs function we lose control of the callboxid that initated the callback
+        if(entry['contacts'].length == 1 && singlematchingcontact.is(':visible')){
+           
+           //check on id, because name could be duplicate
+           var old_contact_id = $('#callbox_'+callboxid).find('.contact_id').attr('href').substr(-36);
+           var new_contact_id = entry['contacts'][0]['contact_id'];
+           var old_company_id = $('#callbox_'+callboxid).find('.company_id').attr('href') == undefined ? null : $('#callbox_'+callboxid).find('.company_id').attr('href').substr(-36)
+           var new_company_id = entry['contacts'][0]['company_id'];
+
+           if(old_contact_id != new_contact_id || old_company_id != new_company_id){
+                YAAI.refreshSingleMatchingContact(callboxid, entry);
+                console.log('refreshing');
+           }
+        }
+        
+        //see if a multiple contacts match has been selected to one contact or a no contact match has been selected to one contact
+        if(entry['contacts'].length == 1 && singlematchingcontact.is(':hidden') ){  
+            YAAI.refreshSingleMatchingContact(callboxid, entry);
+            
+            //remove the dropdown menu
+            $('#callbox_'+callboxid).find('.callbox_action').hide();
+            //bind back the unrelate button
+            YAAI.bindOpenPopupSingleMatchingContact(callboxid, entry);
+            
             $('#callbox_'+callboxid).find('.nomatchingcontact').hide();
             $('#callbox_'+callboxid).find('.multiplematchingcontacts').hide()
             $('#callbox_'+callboxid).find('.singlematchingcontact').show();
-        }
-        
-        //check if a single contacts match has been changes - must do this here because using SugarCRMs function we lose control of callback
-        if(entry['contacts'].length == 1){
-            var old_contact_name = $('#callbox_'+callboxid).find('.singlematchingcontact td span.call_contacts').text();
-            var new_contact_name = entry['contacts'][0]['contact_full_name'];
-            
-            if(old_contact_name != new_contact_name){
-                YAAI.refreshSingleMatchingContact(callboxid, entry);
-            } 
         }
     },
     
     refreshSingleMatchingContact : function(callboxid, entry){
         $('#callbox_'+callboxid).find('.singlematchingcontact td a.contact_id').attr('href', 'index.php?module=Contacts&action=DetailView&record='+entry['contacts'][0]['contact_id']);
         $('#callbox_'+callboxid).find('.singlematchingcontact td span.call_contacts').text(entry['contacts'][0]['contact_full_name']); 
-        $('#callbox_'+callboxid).find('.singlematchingcontact td a.company').attr('href', 'index.php?module=Accounts&action=DetailView&record='+entry['contacts'][0]['company_id']);
-        $('#callbox_'+callboxid).find('.singlematchingcontact td a.company').text(entry['contacts'][0]['company']);    
+        
+        //check if new contact has an account
+        if(entry['contacts'][0]['company_id'] == null){
+            $('#callbox_'+callboxid).find('.singlematchingcontact td a.company').hide();
+        }else{
+            $('#callbox_'+callboxid).find('.singlematchingcontact td a.company').attr('href', 'index.php?module=Accounts&action=DetailView&record='+entry['contacts'][0]['company_id']);
+            $('#callbox_'+callboxid).find('.singlematchingcontact td a.company').text(entry['contacts'][0]['company']);
+            $('#callbox_'+callboxid).find('.singlematchingcontact td a.company').show();
+        }
     },
 
 
@@ -625,10 +649,18 @@ var YAAI = {
     
         });
     
-        YAAI.bindSetContactID(callboxid, entry);
-    
         return context;
     
+    },
+    
+    setCallBoxHeadColor : function (callboxid, entry){
+                
+        if( entry['is_hangup']  ) {
+            $("#callbox_"+callboxid+" .callboxhead").css("background-color", "#0D5995");
+        }
+        else {
+            $("#callbox_"+callboxid+" .callboxhead").css("background-color", "#f99d39"); // a blue color	
+        }
     },
 
     //UTILITY FUNCTIONS
@@ -811,8 +843,9 @@ $(document).ready(function(){
     // or if ajax isn't in url --- include
     if( !isAjaxUiEnabled || SUGAR.ajaxUI.hist_loaded ) {
         console.log('loading yaai...');
-        if(typeof YAAI.phoneExtension !== "undefined"){
-            YAAI.checkForNewStates();
+        if(YAAI.phoneExtension.length == 4){
+            var loop = true;
+            YAAI.checkForNewStates(loop);
         }
     }
 });

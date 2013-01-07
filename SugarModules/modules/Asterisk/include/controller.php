@@ -26,8 +26,6 @@ require_once("custom/modules/Asterisk/language/" . $GLOBALS['sugar_config']['def
 
 switch ($_REQUEST['action']) {
     case "memoSave" :
-        
-        $GLOBALS['log']->fatal($_REQUEST['phone_number']);
         if ($_REQUEST['call_record']) {
             memoSave($_REQUEST['call_record'], $_REQUEST['sugar_user_id'], $_REQUEST['phone_number'], $_REQUEST['description'], $_REQUEST['contact_id']);
         }
@@ -103,7 +101,7 @@ function updateUIState($ui_state, $call_record, $asterisk_id) {
 
 function setContactID($call_record, $contact_id) {
     //wrapped the entire action to require a call_record - if this is not being passed then there is no point for this action - PJH
-    if ($call_record) {
+    if (is_string($call_record) && is_string($contact_id) ) {
         // Very basic sanitization
         $contactId = preg_replace('/[^a-z0-9\-\. ]/i', '', $contact_id);  
         $callRecord = preg_replace('/[^a-z0-9\-\. ]/i', '', $call_record); 
@@ -365,15 +363,14 @@ function get_calls() {
 
     if (count($availableExtensionsArray) == 1) {
         $query .= " user_extension = '$current_users_ext'";
-    }
-    else {
+    } else {
         $queryExtensionsArray = array();
         foreach ($availableExtensionsArray as $singleExtension) {
             array_push($queryExtensionsArray, " user_extension = '$singleExtension'");
         }
         $query .= implode(' OR ', $queryExtensionsArray);
     }
-    $query .=")";
+    $query .=") AND (uistate IS NULL OR uistate != \"Closed\")";
 
     $result_set = $GLOBALS['current_user']->db->query($query, false);
     if ($GLOBALS['current_user']->db->checkError()) {
@@ -705,7 +702,7 @@ function get_title($contacts, $phone_number, $state, $mod_strings) {
             break;
 
         default:
-            $title = $mod_strings["ASTERISKLBL_MULTIPLE_MATCHES"];
+            $title = $mod_strings['YAAI']['ASTERISKLBL_MULTIPLE_MATCHES'];
             break;
     }
     $title = $title . " - " . $state;
