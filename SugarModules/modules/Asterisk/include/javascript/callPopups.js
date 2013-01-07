@@ -51,7 +51,7 @@ var YAAI = {
     options : {
         debug: true
     },
-    checkForNewStates : function(){
+    checkForNewStates : function(loop){
         // Note: once the user gets logged out, the ajax requests will get redirected to the login page.
         // Originally, the setTimeout method was in this method.  But, no way to detect the redirect without server side
         // changes.  See: http://stackoverflow.com/questions/199099/how-to-manage-a-redirect-request-after-a-jquery-ajax-call
@@ -60,8 +60,12 @@ var YAAI = {
         $.getJSON('index.php?entryPoint=AsteriskController&action=get_calls', function(data){
             console.log(data);
             var callboxids = [];
-            setTimeout('YAAI.checkForNewStates()', YAAI.pollRate);  
-
+            
+            //if the loop variable is true then setup the loop, if it is false then don't, because a one-time refresh was called'
+            if(loop){
+                setTimeout('YAAI.checkForNewStates(true)', YAAI.pollRate);  
+            }
+            
             if( data != ".") {
                 $.each(data, function(entryIndex, entry){    
                     if(YAAI.callStateIsNotFiltered(entry)){
@@ -269,13 +273,11 @@ var YAAI = {
             },
             text: false
         }).on("click", function(){
-            YAAI.openPopup(callboxid, entry);
+            YAAI.openPopup(entry);
         });  
     },
     
     bindSetContactID : function(callboxid, entry){
-        console.log(callboxid);
-        
         $('#callbox_'+callboxid).find('.multiplematchingcontacts td p').on("click", "input",  function(){
             YAAI.setContactID(entry['call_record_id'], this.value);
         })  
@@ -312,14 +314,14 @@ var YAAI = {
     },
     
     setContactID : function( callRecordId, contactId) {
-        console.log(callRecordId);
-        
         $.post("index.php?entryPoint=AsteriskController&action=setContactID", {
             call_record: callRecordId, 
             contact_id: contactId
         } );
-        
-    //once done swapping callbox should change from multiple select to one select
+     
+        //force an out of loop request to refresh contact view
+        var loop = false;
+        YAAI.checkForNewStates(loop);
         
     },
     
@@ -344,15 +346,11 @@ var YAAI = {
             });
         }
     },
-    openPopupNoMatchingContact : function(callboxid, entry){
-        YAAI.openPopup(callboxid, entry);  
+    openPopupNoMatchingContact : function(entry){
+        YAAI.openPopup(entry);  
     },
     
-    openPopup : function (callboxid, entry){
-        //this will change on the fly as more buttons are pressed.  there should never be a conflict unless someone clicks on one of the open popup buttons, then with that open
-        //goes on to open another popup.  this is simply used so we can get a refreshview right after a contact is related instead of waiting.  worst case in the rare
-        //situation described above is that a refresh window comes with the next update and that record is updated then instead of right away.
-        YAAI.callboxid_for_relate = callboxid;
+    openPopup : function (entry){
         open_popup( "Contacts", 600, 400, "", true, true, {
             "call_back_function":"YAAI.relate_popup_callback",
             "form_name": entry['call_record_id'],
@@ -457,20 +455,6 @@ var YAAI = {
         else {
             alert("Error updating related Contact");
         }
-        
-        //this allows the contact to be updated immediately - currently does not update account info & nulls out account info waiting for next refresh
-        //TODO figure out a way to capture the account info so it updates immediately as well
-        var entry = ['contacts'];
-        entry['contacts'] = [0] 
-        entry['contacts'][0] = ['contact_full_name', 'contact_id', 'company_id'];
-        entry['contacts'][0]['contact_full_name'] = window.document.forms[form_name].elements['relateContactFirstName'].value
-        entry['contacts'][0]['contact_contact_id'] = window.document.forms[form_name].elements['relateContactId'].value
-        entry['contacts'][0]['contact_company_id'] = null; 
-        
-        console.log(entry);
-        
-        
-        YAAI.refreshSingleMatchingContact(YAAI.callboxid_for_relate, entry);
         
     },
 
@@ -594,14 +578,11 @@ var YAAI = {
         
         //check if new contact has an account
         if(entry['contacts'][0]['company_id'] == null){
-            $('#callbox_'+callboxid).find('.singlematchingcontact td a.company').remove();      
-        //check if new contact has an account but the company td tag needs to be re-added
-        //}else if($('#callbox_'+callboxid).find('.singlematchingcontact td a.company').attr('href') == undefined){
-            //inserting html that was removed above
-           // $('#callbox_'+callboxid).find('.singlematchingcontact td').insertAfter("<td><a class='company' href='index.php?module=Accounts&action=DetailView&record='" + entry['contacts'][0]['company_id'] + "'>" + entry['contacts'][0]['company'] + "</a></td>");
+            $('#callbox_'+callboxid).find('.singlematchingcontact td a.company').hide();
         }else{
             $('#callbox_'+callboxid).find('.singlematchingcontact td a.company').attr('href', 'index.php?module=Accounts&action=DetailView&record='+entry['contacts'][0]['company_id']);
-            $('#callbox_'+callboxid).find('.singlematchingcontact td a.company').text(entry['contacts'][0]['company']);  
+            $('#callbox_'+callboxid).find('.singlematchingcontact td a.company').text(entry['contacts'][0]['company']);
+            $('#callbox_'+callboxid).find('.singlematchingcontact td a.company').show();
         }
     },
 
@@ -629,7 +610,7 @@ var YAAI = {
     createCallBoxWithNoMatchingContact : function(callboxid, entry){
         $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='relate_to_contact'>Relate to Contact</a></li>");
         $("#dropdown-1_callbox_"+callboxid+" ul a.relate_to_contact").on("click", entry, function() {
-            YAAI.openPopupNoMatchingContact(callboxid, entry)
+            YAAI.openPopupNoMatchingContact(entry)
         });
         $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='create_contact'>Create Contact</a></li>");
         $("#dropdown-1_callbox_"+callboxid+" ul a.create_contact").on("click", entry, function() {
@@ -863,7 +844,8 @@ $(document).ready(function(){
     if( !isAjaxUiEnabled || SUGAR.ajaxUI.hist_loaded ) {
         console.log('loading yaai...');
         if(YAAI.phoneExtension.length == 4){
-            YAAI.checkForNewStates();
+            var loop = true;
+            YAAI.checkForNewStates(loop);
         }
     }
 });
