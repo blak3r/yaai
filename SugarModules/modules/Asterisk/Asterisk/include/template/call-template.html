@@ -1,0 +1,102 @@
+<div id="{{callbox_id}}" class="callbox">
+    <div class="callboxhead">
+        <div class="callboxtitle">{{title}}</div>
+        <div class="callboxoptions">
+            <a href="#" class="callbox_close">X</a>
+        </div>
+    </div>
+    <div class="control_panel">
+        <button class="operator_panel"></button> 
+        <button class="callbox_action" data-dropdown="#dropdown-1_{{callbox_id}}"></button>
+    </div>
+    <div class="callboxcontent">  
+        <div class="asterisk_info">
+            <h4 class="call_type">{{call_type}}</h4>
+            <div class="tabForm">
+                <table class="asterisk_data">
+                    <tr class="multiplematchingcontacts">
+                        <td colspan="2">
+                            <b>{{select_contact_label}}</b>
+                            {{#each contacts}}
+                            <p class="select_contact" id="contact_{{contact_id}}">
+                                <input type="radio" name="contactSelect"  value={{contact_id}}  />
+                                <a class="multiplecontacts" title="{{contact_full_name}}" href="index.php?module=Contacts&action=DetailView&record={{contact_id}}">{{contact_full_name}}</a>
+                            </p>
+                            {{/each}}
+                        </td>
+                    </tr>
+                    <tr class="singlematchingcontact">
+                        <td>{{name_label}}</td>
+                        <td><a class="contact_id" href="index.php?module=Contacts&action=DetailView&record={{contact_id}}">
+                                <span class="call_contacts">{{full_name}}</span>
+                            </a>
+                            <button class="unrelate_contact"></button>
+                        </td>
+                    </tr>
+                    <tr class="singlematchingcontact">
+                        <td>{{company_label}}</td>
+                        <td><a class="company" href="index.php?module=Accounts&action=DetailView&record={{company_id}}">{{company}}</a></td>
+                    </tr>
+                    <tr class="caller_id_box">
+                        <td class="caller_id_label">{{caller_id_label}}:</td>
+                        <td class="caller_id">{{caller_id}}</td>
+                    </tr>
+                    <tr class="phone_number_box">
+                        <td class="phone_number_label">{{phone_number_label}}:</td>
+                        <td class="phone_number">{{phone_number}}</td>
+                    </tr>
+                    <tr class="call_duration_box">
+                        <td class="call_duration_label">{{duration_label}}:</td>
+                        <td>
+                            <span class="call_duration">{{duration}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="callboxinput">
+        <textarea rows="4" cols="30" class="callboxtextarea callboxtextareaselected"></textarea>
+        <div class="callboxbuttons">
+            <table width="100%">
+                <tbody>
+                    <tr>
+                        <td valign="bottom">
+                            <button class="save_memo">Save Memo</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <form class="call_record_id" name="{{call_record_id}}">
+        <input type='hidden' name="relateContactId"/>
+        <input type='hidden' name="relateContactFirstName"/>
+        <input type='hidden' name="relateContactLastName"/>
+    </form>
+</div>
+<div id="block-number-{{callbox_id}}" title="Block Caller" style="display:none;">
+    <form>
+        <fieldset>
+            <label for="block-phone-number">Phone Number</label>
+            <input type="text" name="block-phone-number" class="block-phone-number text ui-widget-content ui-corner-all" disabled="disabled"/>
+            <label for="block-reason">Block Reason:</label>
+            <select name="block-reason" class="block-reason">
+                <option>Marketer</option>
+                <option>Annoying</option>
+            </select>
+            <p>Please provide more details if needed:</p>
+            <textarea rows="4" cols="30" class="block-description"></textarea>
+            <p>
+                <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;">
+                </span>
+                This person will be permanently blocked from calling. Are you sure?
+            </p>        
+        </fieldset>
+    </form>
+</div>
+<div id="dropdown-1_{{callbox_id}}" class="dropdown-menu has-tip">
+    <ul>
+    </ul>
+</div>
+
