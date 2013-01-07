@@ -46,19 +46,19 @@ $mod_strings = array ( 'YAAI' => array(
 	'ASTERISKLBL_NAME' 			=>	'Name',
 	'ASTERISKLBL_COMPANY' 		=>	'Account',
 
-	'REQUESTED' 			=>	'Proceeding',
+	'REQUESTED' 			=>	'Requested',
 	'PROCEEDING' 			=>	'Proceeding',
 	'RINGBACK' 				=>	'Waiting for Answer',
-	'INCOMING' 				=>	'Ringing',
+	'INCOMING' 				=>	'Incoming',
 	'RINGING' 				=>	'Ringing',
 	'CONNECTED' 			=>	'Connected',
 	'DIAL'					=>  'Ringing',
-	'HANGUP'                =>  'Finished',
+	'HANGUP'                =>  'Hangup',
 
     // Added in v2.2
 	'ASTERISKLBL_DURATION'         => 'Duration',
 	'ASTERISKLBL_SELECTCONTACT'    => 'Select Contact',
-	'ASTERISKLBL_MULTIPLE_MATCHES' => "Multiple Matches",
+	'ASTERISKLBL_MULTIPLE_MATCHES' => 'Multiple Matches',
 	'ASTERISKLBL_CALLERID'         => 'CallerID',
     'ASTERISKLBL_USER_EXT'         => 'User Ext',
     'ASTERISKLBL_INBOUND_EXT'      => 'Inbound Ext',
