@@ -427,7 +427,7 @@ while (true) {
 
                     $call = NULL;
 
-                    $tmpCallerID = trim($e['CallerIDNum']); //Asterisk Manager 1.0 $e['CallerID']
+                    $tmpCallerID = trim(AMI_getCallerIdFromEvent($e)); //Asterisk Manager 1.0 $e['CallerID']
                     // Typically for outbound calls there are NewCallerID events which contain the phone number dialed.
                     // This isn't the case on POTS lines.
                     // The dialstring will be like g0/14101234567 for outbound calls and 14101234567 for inbound
@@ -549,7 +549,7 @@ while (true) {
                 //Asterisk Manager 1.1
                 if ($e['Event'] == 'NewCallerid') {
                     $id = AMI_getUniqueIdFromEvent($e);
-                    $tmpCallerID = trim($e['CallerIDNum']);
+                    $tmpCallerID = AMI_getCallerIdFromEvent($e);
                     if ((strlen($calloutPrefix) > 0) && (strpos($tmpCallerID, $calloutPrefix) === 0)) {
                         logLine("* Stripping prefix: $calloutPrefix");
                         $tmpCallerID = substr($tmpCallerID, strlen($calloutPrefix));
@@ -1842,6 +1842,21 @@ function AMI_getUniqueIdFromEvent($event) {
         return $event['Uniqueid'];
     }
     return NULL;
+}
+
+function AMI_getCallerIdFromEvent($event) {
+    if( isset($event['CallerIDNum'] )) {
+        return trim($event['CallerIDNum']);
+    }
+    else if( isset($event['CallerID'] ) ){
+        return trim($event['CallerID']);
+    }
+    else if( isset($event['CallerId'] ) ){
+        return trim($event['CallerId']);
+    }
+    else {
+        logLine("__ ERROR: Unable to find caller id in the event! __");
+    }
 }
 
 function was_call_answered($id) {
