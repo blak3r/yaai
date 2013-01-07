@@ -60,6 +60,8 @@ $mod_strings = array ( 'YAAI' => array(
 	'ASTERISKLBL_SELECTCONTACT'    => 'Select Contact',
 	'ASTERISKLBL_MULTIPLE_MATCHES' => "Multiple Matches",
 	'ASTERISKLBL_CALLERID'         => 'CallerID',
+    'ASTERISKLBL_USER_EXT'         => 'User Ext',
+    'ASTERISKLBL_INBOUND_EXT'      => 'Inbound Ext',
 
     // For asteriskLogger.php SOAP call entries
 	'CALL_AUTOMATIC_RECORD'         => '** Automatic record **',

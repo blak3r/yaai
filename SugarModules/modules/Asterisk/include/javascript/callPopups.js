@@ -803,9 +803,16 @@ jQuery.cookie = function(name, value, options) {
     }
 };
 
-
 $(document).ready(function(){
-    if(typeof YAAI.phoneExtension !== "undefined"){
-        YAAI.checkForNewStates();
+    var isAjaxUiEnabled=/ajaxUI/gi.test(window.location.search.substring(1));
+    console.log('ready() hist_loaded: ' + SUGAR.ajaxUI.hist_loaded + " ajaxUIEnabled = " + isAjaxUiEnabled);
+
+    // if ajaxui in url... and SUGAR.ajaxUI.hist_loaded is true. -- include
+    // or if ajax isn't in url --- include
+    if( !isAjaxUiEnabled || SUGAR.ajaxUI.hist_loaded ) {
+        console.log('loading yaai...');
+        if(typeof YAAI.phoneExtension !== "undefined"){
+            YAAI.checkForNewStates();
+        }
     }
 });
