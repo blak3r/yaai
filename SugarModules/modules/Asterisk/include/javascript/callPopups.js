@@ -567,7 +567,7 @@ var YAAI = {
             YAAI.bindOpenPopupSingleMatchingContact(callboxid, entry);
             
             $('#callbox_'+callboxid).find('.nomatchingcontact').hide();
-            $('#callbox_'+callboxid).find('.multiplematchingcontacts').hide()
+            $('#callbox_'+callboxid).find('.multiplematchingcontacts').hide();
             $('#callbox_'+callboxid).find('.singlematchingcontact').show();
         }
     },
@@ -843,9 +843,7 @@ $(document).ready(function(){
     // or if ajax isn't in url --- include
     if( !isAjaxUiEnabled || SUGAR.ajaxUI.hist_loaded ) {
         console.log('loading yaai...');
-        if(YAAI.phoneExtension.length == 4){
             var loop = true;
             YAAI.checkForNewStates(loop);
-        }
     }
 });
