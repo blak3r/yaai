@@ -656,10 +656,10 @@ var YAAI = {
     setCallBoxHeadColor : function (callboxid, entry){
                 
         if( entry['is_hangup']  ) {
-            $("#callbox_"+callboxid+" .callboxhead").css("background-color", "#0D5995");
+            $("#callbox_"+callboxid+" .callboxhead").css("background-color", "#f99d39"); // an orange color
         }
         else {
-            $("#callbox_"+callboxid+" .callboxhead").css("background-color", "#f99d39"); // a blue color	
+            $("#callbox_"+callboxid+" .callboxhead").css("background-color", "#0D5995"); // a blue color
         }
     },
 
