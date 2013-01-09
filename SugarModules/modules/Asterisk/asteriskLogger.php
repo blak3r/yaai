@@ -546,8 +546,8 @@ while (true) {
                 //
                 // NewCallerID for Outgoing Call
                 //
-                //Asterisk Manager 1.1
-                if ($e['Event'] == 'NewCallerid') {
+                // NewCallerid == 1.1, Newcallerid == 1.0
+                if ($e['Event'] == 'NewCallerid' || $e['Event'] == 'Newcallerid') {
                     $id = AMI_getUniqueIdFromEvent($e);
                     $tmpCallerID = AMI_getCallerIdFromEvent($e);
                     if ((strlen($calloutPrefix) > 0) && (strpos($tmpCallerID, $calloutPrefix) === 0)) {
@@ -1062,17 +1062,14 @@ while (true) {
                         //}
                     }
                 }
-//Asterisk Manager 1.0
 
-                /* if($e['Event'] == 'Link')
-                  {
+               //Asterisk Manager 1.0 (Only)... This is the equivalent of bridge
+               if($e['Event'] == 'Link')
+               {
                   $query = "UPDATE asterisk_log SET callstate='Connected', timestamp_link=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
                   $rc = mysql_checked_query($query);
-
-                  // und vice versa .. woher immer der call kam
-                  // $query = "UPDATE asterisk_log SET callstate='Connected', timestamp_link=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid2'] . "'";
-                  // $record = mysql_query($query);
-                  }; */
+                  // NOTE: AMI v1.0 will not support Ring Groups and Queues like AMI v1.1 does until it's ported.
+               };
 
 // Reset event buffer
                 $event = '';
