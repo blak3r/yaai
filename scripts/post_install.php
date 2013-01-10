@@ -35,6 +35,12 @@ function post_install() {
         'file' => 'custom/modules/Asterisk/include/tests/fake_dialer/test_ui.php',
         'auth' => true,
     );
+
+    $entry_point_registry['AsteriskFakeDialerActions'] = array (
+        'file' => 'custom/modules/Asterisk/include/tests/fake_dialer/test_actions.php',
+        'auth' => true,
+    );
+
 	
   // For each custom entry point, add override value
   foreach ($entry_point_registry as $key=>$value) {

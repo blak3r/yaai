@@ -33,6 +33,7 @@ if ($_REQUEST["action"] == 'create_contacts'){
 
 function action_ringing() {
     $extension = get_extension_input();
+    $extension_four_digit = get_extension_four_digit($extension);
     $new_id = get_new_call_record_id();
     $time = get_current_server_time();
     $asterisk_id = get_random_asterisk_id();
@@ -40,13 +41,13 @@ function action_ringing() {
     $GLOBALS['log']->fatal($phone_number);
 
     $GLOBALS['current_user']->db->query(
-            "INSERT INTO asterisk_log (call_record_id, asterisk_id, callstate, callerID, channel, remote_channel, timestamp_call, direction) 
-            VALUES ('{$new_id}', '{$asterisk_id}', 'Ringing', '{$phone_number}', '{$extension}', 'SIP/flowroute-00000023', FROM_UNIXTIME({$time}), 'I' )"
+            "INSERT INTO asterisk_log (call_record_id, asterisk_id, callstate, callerID, channel, remote_channel, timestamp_call, direction, user_extension, inbound_extension) 
+            VALUES ('{$new_id}', '{$asterisk_id}', 'Ringing', '{$phone_number}', '{$extension}', 'SIP/flowroute-00000023', FROM_UNIXTIME({$time}), 'I', '{$extension_four_digit}', '{$extension_four_digit}')"
     );
             
     $GLOBALS['current_user']->db->query(
             "INSERT INTO calls (id, direction, status) 
-             VALUES ('{$new_id}', '{$direction}', 'Planned')"
+             VALUES ('{$new_id}', 'I', 'Planned')"
             );
     
     $call_setup_data = array();
@@ -56,7 +57,7 @@ function action_ringing() {
 }
 
 function action_connected() {
-    $GLOBALS['log']->fatal($call_record_id);
+    $GLOBALS['log']->fatal($_REQUEST["call_record_id"]);
     $call_record_id = $_REQUEST["call_record_id"];
     $GLOBALS['current_user']->db->query("UPDATE asterisk_log SET callstate = 'Connected' WHERE call_record_id = '{$call_record_id}'");
 }
@@ -137,6 +138,14 @@ function get_random_asterisk_id() {
     $asterisk_id = rand(10000000000, 9999999999) . '.' . rand(10, 99);
 
     return $asterisk_id;
+}
+function get_extension_four_digit($extension){
+    //example = SIP/7025-0000003
+    $result = explode('/', $extension); 
+    $result = explode('-', $result[1]);
+    
+    return $result[0];
+  
 }
 
 ?>

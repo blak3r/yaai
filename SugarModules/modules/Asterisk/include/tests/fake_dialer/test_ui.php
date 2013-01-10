@@ -21,7 +21,7 @@
 <div id="clone_elements">
     <div id="call_setup" style="float:left;">
         <div id="call" class="draggable ui-widget-content">
-            <img src="/custom/modules/Asterisk/include/tests/fake_dialer/call_green.jpg" alt="Call" />
+            <img src="custom/modules/Asterisk/include/tests/fake_dialer/call_green.jpg" alt="Call" />
         </div>
  
         <div id="ringing" class="droppable ui-widget-header">

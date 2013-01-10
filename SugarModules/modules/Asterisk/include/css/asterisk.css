@@ -1,3 +1,5 @@
+/* @override http://crm.tomhoganlaw.com/custom/modules/Asterisk/include/css/asterisk.css */
+
 @charset "utf-8";
 /*
  * CSS Document
@@ -57,10 +59,6 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
     width: 20%;
 }
 
-.asterisk_info {
-    margin-top: -18px; 
-}
-
 .asterisk_data {
     padding-bottom:0px;
     margin-bottom:0px;
@@ -88,28 +86,28 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
 	padding-right: 10px;
 	color: #ffffff;
 	cursor: pointer;
-	border-right:1px solid #f99d39;
-	border-left:1px solid #f99d39;
+
 }
 
 
 .control_panel {
 	cursor: pointer;
-        color: #333333;
-        background-color: #ffffff;
+    color: #333333;
+    background-color: #ffffff;
 	border-left:1px solid #cccccc;
 	border-right:1px solid #cccccc;
-        padding: 3px;
+    padding: 3px;
 }
 
-.operator_panel {
+.operator_panel, .callbox_action {
         width: 32px;
         height: 32px;
+        left: 4px;
+        top: 3px;
 }
 
 .callbox_action {
-        width: 32px;
-        height: 32px;
+        display: none;
 }
 
 .callboxblink {
@@ -205,12 +203,8 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
     font-size:110%;
 }
 
-.select_contact {
-	padding:2px;
-}
-
 .save_memo {
-    width: 200px;
+    width: 208px;
     text-align: center;
     float: none;
 }
@@ -335,6 +329,28 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
     display: block;
 }
 
-.callbox_action {
-    display: none;
+.call_type {	
+	font-weight: bold; 
+	text-align: center;
+	padding: 2px; 
+	background:#EBEBED none repeat scroll 0 0;
+	border-style:solid none;
+	border-width:1px medium;
+	font-size:11px;
+	color: black;
+	margin-top: 0px;
 }
+	
+.asterisk_info{
+	background-color:#F6F6F6;
+	color:#000000;
+	border-bottom:1px solid;
+	border-top:2px solid;
+	border-bottom-color:#ABC3D7;
+	border-top-color:#4E8CCF;
+	font-size:12px;
+	margin-bottom:5px;
+	padding:10px 6px 12px 10px
+}
+
+
