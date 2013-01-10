@@ -52,7 +52,7 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
 }
 
 #dialpad {
-    background: url(custom/modules/Asterisk/include/images/dialpad-grid.png) no-repeat 0 2px;
+    background: url('custom/modules/Asterisk/include/images/dialpad-grid.png') no-repeat 0 2px;
 }
 
 .call_duration {
@@ -86,7 +86,6 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
 	padding-right: 10px;
 	color: #ffffff;
 	cursor: pointer;
-
 }
 
 
@@ -118,7 +117,7 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
 
 .callboxcontent {
 	font-family: arial,sans-serif;
-	font-size: 13px;
+	font-size: 12px;
 	color: #333333;
 	height:150px; /** br orig = 200 **/
 	width:209px;
