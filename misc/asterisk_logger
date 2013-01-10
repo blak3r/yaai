@@ -14,12 +14,16 @@
 
 # EDIT the USER and SUGAR_ROOT Variables below and read note in start_logger() below
 # USER isn't used unless you use the more secure version in start_logger
+# PHP_BIN - set this to the result of 'which php'.  (ex. /usr/bin/php) 
+#           This will avoid any issues where path isn't set yet before init script runs.
 USER=apache
 SUGAR_ROOT=/var/www/html/sugarcrm
+PHP_BIN=php   
+
 
 # Shouldn't need to edit any of these...
 PROC="asteriskLogger"
-DAEMON="php $SUGAR_ROOT/custom/modules/Asterisk/$PROC.php"
+DAEMON="$PHP_BIN $SUGAR_ROOT/custom/modules/Asterisk/$PROC.php"
 LOGFILE="/tmp/$PROC.log"
 NAME=asterisk_logger
 DESC=asterisk_logger
@@ -30,7 +34,8 @@ set -e
 . /lib/lsb/init-functions
 
 start_logger() {
-        # Note: the commented line starting with "sudo" is the more secure approach but I've encountered
+        # Note: the lines that are commented out below (starting with "sudo") is the more secure approach as it lets 
+        # you specify the user to start the daemon as but I've encountered
         # errors such as "sorry, you must have a tty to run sudo" on certain boxes. So, the default method below
         # will work more universally. You can try commenting the first line and uncommenting the second line
         # and hope it works. Suggestions are welcomed on ways to improve this script.
