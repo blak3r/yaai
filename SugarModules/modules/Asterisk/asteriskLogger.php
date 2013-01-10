@@ -1426,7 +1426,7 @@ function findSugarObjectByPhoneNumber($aPhoneNumber) {
     $soapArgs = array(
         'session' => $soapSessionId,
         'module_name' => 'Contacts',
-        'select_fields' => array('id', 'account_id', 'last_name'),
+        'select_fields' => array('id', 'account_id', 'first_name', 'last_name'),
         // 2nd version 'query' => "((contacts.phone_work = '$searchPattern') OR (contacts.phone_mobile = '$searchPattern') OR (contacts.phone_home = '$searchPattern') OR (contacts.phone_other = '$searchPattern'))", );
         // Original...
 //'query' => "((contacts.phone_work LIKE '$searchPattern') OR (contacts.phone_mobile LIKE '$searchPattern') OR (contacts.phone_home LIKE '$searchPattern') OR (contacts.phone_other LIKE '$searchPattern'))"
@@ -1445,37 +1445,61 @@ function findSugarObjectByPhoneNumber($aPhoneNumber) {
     //print "-----------------------------------------------------------------------------\n";
 
     if (!isSoapResultAnError($soapResult)) {
-        // TODO implement a working array_unique
-        //$uniqueEntryList = array_unique($soapResult['entry_list'] );
-        $uniqueEntryList = $soapResult['entry_list'];
-        $resultDecoded = decode_name_value_list($uniqueEntryList[0]['name_value_list']);
 
-        if (count($uniqueEntryList) > 1) {
+        // What this loop does is removes all the duplicates.
+        // There is no way to get distinct contacts back from SOAP... I've had cases where 2 contacts with a matching number returned 43 entries!
+        // -- This should resolve issues where you have contacts that aren't related to an account also..
+        $matchingContacts = array();
+        $contactIds = array();
+        $matchingContactsNamesString = '';
+        //var_dump($soapResult['entry_list']);
+        for($i=0; $i<count($soapResult['entry_list']); $i++)
+        {
+            $curr = decode_name_value_list( $soapResult['entry_list'][$i]['name_value_list']);
+            if( !in_array( $curr['id'], $contactIds ) )
+            {
+                $contactIds[] = $curr['id'];
+                $matchingContacts[] = $curr;
+                $matchingContactsNamesString = $matchingContactsNamesString . $curr['first_name'] . " " . $curr['last_name'] . " "; // used in logLines
+            }
+        }
+
+        //print "DECODED LIST:\n\n";
+        //var_dump($decodedList);
+        $resultDecoded = $matchingContacts[0];
+
+        if(count($matchingContacts) > 1) {
             $foundMultipleAccounts = FALSE;
-            $account_id = $resultDecoded['account_id']; // TODO Possible Undefined index Notice could result here...
+            $matchingAccounts = array();
             //logLine(print_r($resultDecoded,true));
-            // TODO I had 43 entries returned for 2 contacts with matching number... need better distinct support. Apparently, no way to do this via soap... probably need to create a new service endpoint.
-            // TODO (continued) if you have a contact with no account associated... this will not associate it with the contact b/c it thinks there are 43 unique contacts being returned.
-            // Perhaps we should just do a database call instead and use the same logic in place in callListener.
-            for ($i = 1; $i < count($uniqueEntryList); $i++) {
-                $resultDecoded = decode_name_value_list($uniqueEntryList[$i]['name_value_list']);
-                // logLine(print_r($resultDecoded,true));
-                if (isset($resultsDecoded['account_id']) &&
-                        $account_id != $resultDecoded['account_id']) {
-                    $foundMultipleAccounts = TRUE;
+            for ($i = 0; $i < count($matchingContacts); $i++) {
+                if( isset($matchingContacts[$i]['account_id'] ) ){
+                    if( !in_array($matchingContacts[$i]['account_id'], $matchingAccounts) ) {
+                        $matchingAccounts[] = $matchingContacts[$i]['account_id'];
+                    }
+                }
+                else {
+                    logLine("  No Account ID Set for Contact: {$matchingContacts[$i]['first_name']} {$matchingContacts[$i]['last_name']}... ignoring");
                 }
             }
-            if (!$foundMultipleAccounts) {
+
+            if( count($matchingAccounts) == 1 ) {
                 $result = array();
-                $result['id'] = $account_id;
-                // TODO there is an error case here where you could have multiple contacts with same number and none of them are assigned to ANY account.
-                logLine("Found multiple contacts (" . count($uniqueEntryList) . ") -- all belong to same account, associating call with account {$result['id']}\n");
+                $result['id'] = $matchingAccounts[0];
+                logLine("Found multiple contacts (" . count($matchingContacts) . ") -- all belong to same account (or some contacts don't have an account assigned), associating call with account {$result['id']}\n");
+                logLine("Matching contact names are: $matchingContactsNamesString" );
                 return array('type' => 'Accounts', 'values' => $result);
-            } else {
-                logLine("Multiple contacts matched multiple accounts, Not associating\n");
+            }
+            else if( count($matchingAccounts) == 0 ) {
+                logLine("__Multiple matching contacts and none of them are assigned to an account, Not associating with anyone!__");
+                return FALSE;
+            }
+            else {
+                logLine("__Multiple contacts matched multiple accounts, Not associating__");
                 return FALSE;
             }
         }
+
 
         //print "--- Decoded get_entry_list() FOR GET CONTACT --------------------------------------\n";
         //var_dump($resultDecoded);
