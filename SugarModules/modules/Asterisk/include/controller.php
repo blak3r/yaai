@@ -375,6 +375,9 @@ function get_calls() {
     }
     $query .=")";
 
+
+    log_entry("getCalls Query: " . $query . "\n\n", "c:/callListener_scott.lot");
+
     $result_set = $GLOBALS['current_user']->db->query($query, false);
     if ($GLOBALS['current_user']->db->checkError()) {
         trigger_error("checkForNewStates-Query failed: $query");

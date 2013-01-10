@@ -305,7 +305,7 @@ while (true) {
     logLine(" AMI Version Info:\n" . markdown_indent($result)); // Prints the AMI Version
     if (preg_match("/Call Manager\/(\d\.\d)/", $result, $ver_matches)) {
         $managerVersion = $ver_matches[1];
-        if (!$managerVersion == "1.1") {
+        if (!$managerVersion === "1.1") {
             logLine(" **ERROR: AMI v$managerVersion is not supported by this version of asteriskLogger. Please see issues section on github site. Several people have gotten it working in 1.0 but changes haven't been merged yet.");
         } else {
             logLine(" Supported AMI version: $managerVersion Detected");
@@ -1137,7 +1137,7 @@ function purgeExpiredEventsFromDb() {
     $query = " DELETE FROM asterisk_log WHERE (uistate = 'Closed') OR ( timestamp_hangup is not NULL AND '$calls_expire_time' > timestamp_hangup ) OR ('$five_hours_ago' > timestamp_call )";
     $delResult = mysql_checked_query($query);
     $rowsDeleted = mysql_affected_rows();
-    //logLine("DEBUG: $query");
+   // logLine("DEBUG: $query");
     if( $rowsDeleted > 0 ) {
         logLine("  Purged $rowsDeleted row(s) from the call log table.");
     }
