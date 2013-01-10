@@ -113,7 +113,8 @@ var YAAI = {
             caller_id_label: entry['mod_strings']['ASTERISKLBL_CALLERID'],
             phone_number_label: entry['mod_strings']['CALL_DESCRIPTION_PHONE_NUMBER'],
             duration_label: entry['mod_strings']['ASTERISKLBL_DURATION'],
-            block_label: entry['mod_strings']['BLOCK']
+            block_label: entry['mod_strings']['BLOCK'],
+            save_label: entry['mod_strings']['SAVE']
         };
 
         switch(entry['contacts'].length){

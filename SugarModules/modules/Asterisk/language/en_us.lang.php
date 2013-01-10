@@ -75,7 +75,8 @@ $mod_strings = array ( 'YAAI' => array(
 	'CALL_DESCRIPTION_PHONE_NUMBER' => 'Phone Number',
     'CREATE'                        => 'Create',
     'RELATE_TO'                     => 'Relate',
-    'BLOCK'                         => 'Block'
+    'BLOCK'                         => 'Block',
+    'SAVE'                          => 'Save Memo'
   )
   );
 
