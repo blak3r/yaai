@@ -34,7 +34,7 @@
 
 if(!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point');
 
-$mod_strings = array('YAAI' => array ( 
+$mod_strings = array('YAAI' => array (
 
    	'ASTERISKLBL_COMING_IN' 		=>	'Eingehender Anruf',
 	'ASTERISKLBL_GOING_OUT' 		=>	'Ausgehender Anruf',
@@ -56,7 +56,7 @@ $mod_strings = array('YAAI' => array (
 	'CONNECTED' 			=>	'Verbunden',
 	'DIAL' 					=>	'Klingelt',
 
-   );
+));
 
 
    

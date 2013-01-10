@@ -73,11 +73,10 @@ $mod_strings = array ( 'YAAI' => array(
 	'CALL_DESCRIPTION_CALLER_ID'    => 'Caller ID',
 	'CALL_DESCRIPTION_MISSED'       => 'Missed/failed call',
 	'CALL_DESCRIPTION_PHONE_NUMBER' => 'Phone Number',
-        'CREATE'                        => 'Create',
-        'RELATE_TO'                     => 'Relate',
-        'BLOCK'                         => 'Block'
-
-  ) 
+    'CREATE'                        => 'Create',
+    'RELATE_TO'                     => 'Relate',
+    'BLOCK'                         => 'Block'
+  )
   );
 
 ?>

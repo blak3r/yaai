@@ -258,11 +258,11 @@ if ($argc > 1 && $argv[1] == "test") {
             'name_value_list' => array(
                 array(
                     'name' => 'name',
-                    'value' => $mod_strings['CALL_AUTOMATIC_RECORD']
+                    'value' => $mod_strings['YAAI']['CALL_AUTOMATIC_RECORD']
                 ),
                 array(
                     'name' => 'status',
-                    'value' => $mod_strings['CALL_IN_LIMBO']
+                    'value' => $mod_strings['YAAI']['CALL_IN_LIMBO']
                 ),
                 array(
                     'name' => 'assigned_user_id',
@@ -411,11 +411,11 @@ while (true) {
                         'name_value_list' => array(
                             array(
                                 'name' => 'name',
-                                'value' => $mod_strings['CALL_AUTOMATIC_RECORD']
+                                'value' => $mod_strings['YAAI']['CALL_AUTOMATIC_RECORD']
                             ),
                             array(
                                 'name' => 'status',
-                                'value' => $mod_strings['CALL_IN_LIMBO']
+                                'value' => $mod_strings['YAAI']['CALL_IN_LIMBO']
                             ),
                             array(
                                 'name' => 'assigned_user_id',
@@ -632,7 +632,7 @@ while (true) {
                                 // So i'm commenting it out. If it's April and I still haven't deleted this comment it's safe to delete this code.
                                 //if (!$failedCall) {
                                 $callStatus = 'Held';
-                                $callName = $mod_strings['ASTERISKLBL_GOING_OUT'];
+                                $callName = $mod_strings['YAAI']['ASTERISKLBL_GOING_OUT'];
 
                                 // This means call description was updated through AJAX so lets not overwrite the subject/description already assigned to the call.
                                 if (!empty($callRecord['sweet']['description'])) {
@@ -641,13 +641,13 @@ while (true) {
                                 }
                                 // } else {
                                 // $callStatus = 'Missed';
-                                // $callName = $mod_strings['CALL_NAME_MISSED'];
-                                                                // $callDescription = "{$mod_strings['CALL_DESCRIPTION_MISSED']} ({$e['Cause-txt']}\n";
+                                // $callName = $mod_strings['YAAI']['CALL_NAME_MISSED'];
+                                                                // $callDescription = "{$mod_strings['YAAI']['CALL_DESCRIPTION_MISSED']} ({$e['Cause-txt']}\n";
                                 // $callDescription .= "------------------\n";
-                                // $callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['CALL_DESCRIPTION_PHONE_NUMBER'], $rawData['callerID']);
+                                // $callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['YAAI']['CALL_DESCRIPTION_PHONE_NUMBER'], $rawData['callerID']);
                                                                 // if( $rawData['opencnam'] ) {
                                                                 // $callName .= " - " . $rawData['opencnam'];
-                                                                // $callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['CALL_DESCRIPTION_CALLER_ID'], $rawData['opencnam']);
+                                                                // $callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['YAAI']['CALL_DESCRIPTION_CALLER_ID'], $rawData['opencnam']);
                                                                 // }
                                 // logLine("Adding OUTBOUND Failed Call, id=$id, call_id = " . $callRecord['sweet']['id'] . "\n");
                                 // }
@@ -816,7 +816,7 @@ while (true) {
                                 $callDescription = "";
                                 if (!$failedCall) {
                                     $callStatus = 'Held';
-                                    $callName = $mod_strings['ASTERISKLBL_COMING_IN'];
+                                    $callName = $mod_strings['YAAI']['ASTERISKLBL_COMING_IN'];
 
                                     // This means call description was updated through AJAX so lets not overwrite the subject/description already assigned to the call.
                                     if (!empty($callRecord['sweet']['description'])) {
@@ -825,13 +825,13 @@ while (true) {
                                     }
                                 } else {
                                     $callStatus = $sugar_config['asterisk_short_call_status']; // User gets to choose if they should be Missed or Held, if Missed then it leaves an open activity which has to be closed.
-                                    $callName = $mod_strings['CALL_NAME_MISSED'];
-                                    $callDescription = "{$mod_strings['CALL_DESCRIPTION_MISSED']} ({$e['Cause-txt']}\n";
+                                    $callName = $mod_strings['YAAI']['CALL_NAME_MISSED'];
+                                    $callDescription = "{$mod_strings['YAAI']['CALL_DESCRIPTION_MISSED']} ({$e['Cause-txt']}\n";
                                     $callDescription .= "------------------\n";
-                                    $callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['CALL_DESCRIPTION_PHONE_NUMBER'], $rawData['callerID']);
+                                    $callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['YAAI']['CALL_DESCRIPTION_PHONE_NUMBER'], $rawData['callerID']);
                                     if ($rawData['opencnam']) {
                                         $callName .= " - " . $rawData['opencnam'];
-                                        $callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['CALL_DESCRIPTION_CALLER_ID'], $rawData['opencnam']);
+                                        $callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['YAAI']['CALL_DESCRIPTION_CALLER_ID'], $rawData['opencnam']);
                                     }
 
                                     logLine(" Adding INBOUND Missed (or Failed) Call, id=$id, call_id = " . $callRecord['sweet']['id'] . "\n");
@@ -957,7 +957,7 @@ while (true) {
                             $result = mysql_checked_query($query);
 
                             while ($call_record_id = mysql_fetch_array($result)) {
-                                $query = "DELETE FROM calls WHERE id='" . $call_record_id['call_record_id'] . "' AND name LIKE '{$mod_strings['CALL_NAME_MISSED']}%'";
+                                $query = "DELETE FROM calls WHERE id='" . $call_record_id['call_record_id'] . "' AND name LIKE '{$mod_strings['YAAI']['CALL_NAME_MISSED']}%'";
                                 $rq = mysql_checked_query($query);
 
                                 if (mysql_affected_rows() > 0) {
