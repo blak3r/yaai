@@ -27,7 +27,7 @@ require_once("custom/modules/Asterisk/language/" . $GLOBALS['sugar_config']['def
 switch ($_REQUEST['action']) {
     case "memoSave" :
         if ($_REQUEST['call_record']) {
-            memoSave($_REQUEST['call_record'], $_REQUEST['sugar_user_id'], $_REQUEST['phone_number'], $_REQUEST['description'], $_REQUEST['contact_id'], $_REQUEST['direction']);
+             memoSave($_REQUEST['call_record'], $_REQUEST['sugar_user_id'], $_REQUEST['phone_number'], $_REQUEST['description'], $_REQUEST['contact_id'], $_REQUEST['direction']);
         }
         break;
     case "updateUIState" :
@@ -373,7 +373,7 @@ function get_calls() {
     $query .=") AND (uistate IS NULL OR uistate != \"Closed\")";
 
 
-    log_entry("getCalls Query: " . $query . "\n\n", "c:/callListener_scott.lot");
+   // log_entry("getCalls Query: " . $query . "\n\n", "c:/callListener.txt");
 
     $result_set = $GLOBALS['current_user']->db->query($query, false);
     if ($GLOBALS['current_user']->db->checkError()) {
@@ -399,6 +399,12 @@ function build_item_list($result_set, $current_user, $mod_strings) {
         $phone_number = get_callerid($row);
         $call_direction = get_call_direction($row, $mod_strings);
         $contacts = get_contact_information($phone_number, $row, $current_user);
+
+        // If only one contact is returned, we set db column so we don't reperform expensive phone number lookup qry anymore
+        if( empty( $row['contact_id'] ) && count($contacts) == 1 ) {
+            // log_entry("Updating db, " . $row['call_record_id'] . "  contact:" . $contacts[0]['contact_id'] . "\n", "c:/callListener.txt");
+            setContactID($row['call_record_id'], $contacts[0]['contact_id'] );
+        }
 
         $call = array(
             'id' => $row['id'],
@@ -602,17 +608,19 @@ REGEXP '%s$' = 1
 ";
 
 
-// TODO fix the join so that account is optional... I think just add INNER
+        // TODO fix the join so that account is optional... I think just add INNER
         $selectPortion = "SELECT c.id as contact_id, first_name, last_name, phone_work, phone_home, phone_mobile, phone_other, a.name as account_name, account_id "
                 . " FROM contacts c "
                 . " left join accounts_contacts ac on (c.id=ac.contact_id) and (ac.deleted='0' OR ac.deleted is null)"
                 . " left join accounts a on (ac.account_id=a.id) and (a.deleted='0' or a.deleted is null)";
 
         if ($row['contact_id']) {
+            // log_entry("Quick where query\n", "c:/callListener.txt");
             $wherePortion = " WHERE c.id='{$row['contact_id']}' and c.deleted='0'";
         }
-// We only do this expensive query if it's not already set!
+        // We only do this expensive query if it's not already set!
         else {
+            // log_entry("Performing Expensive where query\n", "c:/callListener.txt");
             $wherePortion = " WHERE (";
             $wherePortion .= sprintf($sqlReplace, "phone_work", $phoneToFind) . " OR ";
             $wherePortion .= sprintf($sqlReplace, "phone_home", $phoneToFind) . " OR ";
