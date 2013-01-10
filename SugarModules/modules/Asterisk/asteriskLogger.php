@@ -305,10 +305,13 @@ while (true) {
     logLine(" AMI Version Info:\n" . markdown_indent($result)); // Prints the AMI Version
     if (preg_match("/Call Manager\/(\d\.\d)/", $result, $ver_matches)) {
         $managerVersion = $ver_matches[1];
-        if (!$managerVersion === "1.1") {
-            logLine(" **ERROR: AMI v$managerVersion is not supported by this version of asteriskLogger. Please see issues section on github site. Several people have gotten it working in 1.0 but changes haven't been merged yet.");
-        } else {
+
+        if ($managerVersion === "1.1") {
             logLine(" Supported AMI version: $managerVersion Detected");
+        }
+        else if($managerVersion === "1.0") {
+            logLine("\n __READ!!! You have a partially supported AMI version: $managerVersion Detected__");
+            logLine(" __Some features like Ring Groups and Queues probably will not work.__\n\n ");
         }
     } else {
         logLine(" __WARNING: Unable to detect the manager version. Setting to 1.1 and hoping for the best. But, this is probably an error__");
