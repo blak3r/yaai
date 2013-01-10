@@ -167,11 +167,12 @@ var YAAI = {
     
     updateCallBox : function (callboxid, entry){
         $("#callbox_"+callboxid).find('.callboxtitle').text(entry['title']);
-       
+        $("#callbox_"+callboxid).find('.phone_number').text(entry['phone_number']); // Needed for AMI v1.0, outbound calls.
+
         YAAI.setCallBoxHeadColor(callboxid, entry);
 				
         $(".call_duration", "#callbox_"+callboxid+" .callboxcontent").text( entry['duration'] ); // Updates duration
-        
+
         YAAI.refreshContactView(callboxid, entry);
         
     },

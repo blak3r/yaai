@@ -27,7 +27,7 @@ require_once("custom/modules/Asterisk/language/" . $GLOBALS['sugar_config']['def
 switch ($_REQUEST['action']) {
     case "memoSave" :
         if ($_REQUEST['call_record']) {
-            memoSave($_REQUEST['call_record'], $_REQUEST['sugar_user_id'], $_REQUEST['phone_number'], $_REQUEST['description'], $_REQUEST['contact_id']);
+            memoSave($_REQUEST['call_record'], $_REQUEST['sugar_user_id'], $_REQUEST['phone_number'], $_REQUEST['description'], $_REQUEST['contact_id'], $_REQUEST['direction']);
         }
         break;
     case "updateUIState" :
@@ -55,7 +55,7 @@ switch ($_REQUEST['action']) {
 
 // ACTION FUNCTIONS
 
-function memoSave($call_record_id, $sugar_user_id, $phone_number, $description, $contact_id) {
+function memoSave($call_record_id, $sugar_user_id, $phone_number, $description, $contact_id, $direction) {
     $GLOBALS['log']->fatal('memoSave' . $phone_number);
     if ($call_record_id) {
         $call = new Call();
@@ -65,12 +65,11 @@ function memoSave($call_record_id, $sugar_user_id, $phone_number, $description, 
             $call->parent_type = 'Contacts';
         }
 
-
         $call->retrieve($call_record_id);
         $call->description = $description;
         //!$name ? $call->name = getMemoName($call, $direction) : $call->name = $_REQUEST["name"];
         $GLOBALS['log']->fatal('memoSave' . $phone_number);
-        $call->name = $phone_number;
+        $call->name = getMemoName($call, $direction, $phone_number);
         $call->assigned_user_id = $sugar_user_id;
         $call->save();
         $GLOBALS['log']->fatal('callid_' . $call->id);
@@ -313,11 +312,12 @@ function ReadResponse($socket) {
 /**
 * GET the description to save to the memo box
 *
-* @param object $socket Socket
+* @param call - call object
+* @param $direction - call direction (Should be either "Outbound" or "Inbound"
 *
 * @return array Array of socket responses
 */
-function getMemoName($call, $direction) {
+function getMemoName($call, $direction, $phone_number) {
 
     //set the proper abbreviation
     if ($direction == "Outbound") {
@@ -332,7 +332,7 @@ function getMemoName($call, $direction) {
     if (strlen($call->description) > 0) {
         $name = $directionAbbr . $call->description;
     } else {
-        $name = "$direction Call"; // default subject
+        $name = $directionAbbr . ": " . $phone_number; // default subject =  IBC: <Phone Number>
     }
 
     //check the length of the description
