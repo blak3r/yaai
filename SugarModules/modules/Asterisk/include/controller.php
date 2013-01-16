@@ -20,7 +20,16 @@ require_once('include/export_utils.php');
 require_once('modules/Calls/Call.php');
 require_once('modules/Users/User.php');
 //sets $mod_strings variable
-require_once("custom/modules/Asterisk/language/" . $GLOBALS['sugar_config']['default_language'] . ".lang.php");
+
+// Check to see if the language file exists, if not we load the US English one.
+// TODO should we use include_once instead of require_once?
+// Settled on using include as it's faster... then include_once
+if(is_file("custom/modules/Asterisk/language/" . $GLOBALS['sugar_config']['default_language'] . ".lang.php")) {
+    include("custom/modules/Asterisk/language/" . $GLOBALS['sugar_config']['default_language'] . ".lang.php");
+}
+else {
+    include("custom/modules/Asterisk/language/en_us.lang.php");
+}
 
 //ACTIONS
 
@@ -582,6 +591,11 @@ function get_contacts($innerResultSet, $current_user, $row) {
 function fetch_contacts_associated_to_phone_number($phoneToFind, $row, $current_user) {
     $phoneToFind = ltrim($phoneToFind, '0');
     $phoneToFind = preg_replace('/\D/', '', $phoneToFind); // Removes and non digits such as + chars.
+
+    // TODO make the '7' below a configurable parameter... some may prefer to match on 10.
+    if (preg_match('/([0-9]{7})$/', $phoneToFind, $matches)) {
+        $phoneToFind = $matches[1];
+    }
 
     if (strlen($phoneToFind) > 5) {
         $sqlReplace = "

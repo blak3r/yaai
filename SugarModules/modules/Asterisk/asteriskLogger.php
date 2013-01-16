@@ -130,8 +130,15 @@ $asteriskMatchInternal = $sugar_config['asterisk_expr'];
 
 // Load localization if available
 $locale_path = $sugarRoot . 'custom/modules/Asterisk/language/' . $sugar_config['default_language'] . '.lang.php';
-if (file_exists($locale_path))
+if (file_exists($locale_path)) {
+    logLine(" Found Language file for " . $sugar_config['default_language']  );
     include_once $locale_path;
+}
+else {
+    logLine("### WARNING: No language file exists for: " .  $sugar_config['default_language'] . ".  Defaulting to english");
+    logLine(" __See https://github.com/blak3r/yaai/wiki/How-to-Translate__ for translation instructions.");
+    include_once( $sugarRoot . 'custom/modules/Asterisk/language/en_us.lang.php' );
+}
 
 // Make regex pattern compatible with preg_match
 if (!startsWith($asteriskMatchInternal, '/')) {
@@ -290,8 +297,26 @@ if ($argc > 1 && $argv[1] == "test") {
 
 // BR: Added this while loop to keep loging in to AMI if asterisk goes down.
 while (true) {
+
+    /*
+    $cString = "tls://ast2.alertus.com:5039";
+    $context = stream_context_create();
+    //$errno = 0;
+    //$errstr = '';
+    $amiSocket = stream_socket_client(
+        $cString, $errno, $errstr,
+        5000, STREAM_CLIENT_CONNECT, $context
+    );
+    if ($sock === false) {
+        print('Error connecting to ami: ' . $errstr);
+    }
+      //  $amiSocket = fsockopen('tls://' . $asteriskServer, $asteriskManagerPort, $errno, $errstr, 5);
+  //  $asteriskManagerPort = 5038;
+    */
+
     logLine("[Asterisk Manager Interface (AMI) Connection]\n");
-    $amiSocket = fsockopen($asteriskServer, $asteriskManagerPort, $errno, $errstr, 5); // connect to Asterisk server
+
+   $amiSocket = fsockopen($asteriskServer, $asteriskManagerPort, $errno, $errstr, 5); // connect to Asterisk server
     if (!$amiSocket) {
         logLine(" __ ERROR $errno connecting to Asterisk: $errstr __");
         sleep(5); // retry connecting
