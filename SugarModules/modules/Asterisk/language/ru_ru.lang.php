@@ -46,7 +46,6 @@ $mod_strings = array ( 'YAAI' => array(
 	'ASTERISKLBL_NAME' 			=>	'Имя',
 	'ASTERISKLBL_COMPANY' 		=>	'Аккаунт',
 
-
 	'REQUESTED' 			=>	'Набор номера',
 	'PROCEEDING' 			=>	'Набор номера',
 	'RINGBACK' 				=>	'Ожидание ответа',
@@ -71,8 +70,17 @@ $mod_strings = array ( 'YAAI' => array(
 	'CALL_NAME_MISSED'              => 'Пропущенный звонок',
 	'CALL_DESCRIPTION_CALLER_ID'    => 'Номер звонившего',
 	'CALL_DESCRIPTION_MISSED'       => 'Пропущенный/неудачный звонок',
-	'CALL_DESCRIPTION_PHONE_NUMBER' => 'Номер телефона'
-)
+
+
+    // V3 Additions
+    'CALL_DESCRIPTION_PHONE_NUMBER' => 'Phone Number',
+    'CREATE'                        => 'Create',
+    'RELATE_TO'                     => 'Relate',
+    'BLOCK'                         => 'Block',
+    'SAVE'                          => 'Save Memo',
+    'ASTERISKLBL_USER_EXT'         => 'User Ext',
+    'ASTERISKLBL_INBOUND_EXT'      => 'Inbound Ext',
+   )
    );
 
 ?>

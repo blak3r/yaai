@@ -60,8 +60,6 @@ $mod_strings = array ( 'YAAI' => array(
 	'ASTERISKLBL_SELECTCONTACT'    => 'Select Contact',
 	'ASTERISKLBL_MULTIPLE_MATCHES' => 'Multiple Matches',
 	'ASTERISKLBL_CALLERID'         => 'CallerID',
-    'ASTERISKLBL_USER_EXT'         => 'User Ext',
-    'ASTERISKLBL_INBOUND_EXT'      => 'Inbound Ext',
 
     // For asteriskLogger.php SOAP call entries
 	'CALL_AUTOMATIC_RECORD'         => '** Automatic record **',
@@ -72,11 +70,15 @@ $mod_strings = array ( 'YAAI' => array(
 	'CALL_NAME_MISSED'              => 'Missed Call',
 	'CALL_DESCRIPTION_CALLER_ID'    => 'Caller ID',
 	'CALL_DESCRIPTION_MISSED'       => 'Missed/failed call',
-	'CALL_DESCRIPTION_PHONE_NUMBER' => 'Phone Number',
+
+    // V3 Additions
+    'CALL_DESCRIPTION_PHONE_NUMBER' => 'Phone Number',
     'CREATE'                        => 'Create',
     'RELATE_TO'                     => 'Relate',
     'BLOCK'                         => 'Block',
-    'SAVE'                          => 'Save Memo'
+    'SAVE'                          => 'Save Memo',
+    'ASTERISKLBL_USER_EXT'         => 'User Ext',
+    'ASTERISKLBL_INBOUND_EXT'      => 'Inbound Ext',
   )
   );
 
