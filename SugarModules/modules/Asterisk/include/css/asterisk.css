@@ -98,14 +98,11 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
     padding: 3px;
 }
 
-.operator_panel, .callbox_action {
+.operator_panel, .callbox_action, .transfer_panel {
         width: 32px;
         height: 32px;
         left: 4px;
-        top: 3px;
-}
-
-.callbox_action {
+        top: 4px;
         display: none;
 }
 
@@ -208,7 +205,9 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
     float: none;
 }
 
+.ui-button .ui-icon.ui-icon-transfer { background: url('../images/call_transfer-blue.png') no-repeat 0 0px; background-size:16px 16px; }
 .ui-button .ui-icon.ui-icon-custom-phone { background-image: url('../images/dialpad-grid.png'); }
+
 
 .ui-button .ui-icon.ui-icon-custom-unrelate { background-image: url('../images/unrelate-call-icon.png'); }
 

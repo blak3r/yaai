@@ -40,7 +40,8 @@ $(document).ready(function()
     //.asterisk_phoneNumber is the deprecated v1.x class
 	$('.phone,#phone_work,#phone_other,#phone_mobile,.asterisk_phoneNumber').each(function()
 	{
-		var phoneNr = $(this).text().trim();
+		var phoneNr = $(this).text();
+        phoneNr = $.trim(phoneNr); // IE needs trim on separate line.
 
         // Regex searches the inner html to see if a child element has phone class,
         // this prevents a given number having more then one click to dial icon.

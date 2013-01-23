@@ -5,7 +5,7 @@ templates['call-template.html'] = template(function (Handlebars,depth0,helpers,p
   var buffer = "", stack1, stack2, foundHelper, functionType="function", escapeExpression=this.escapeExpression, self=this;
 
 function program1(depth0,data) {
-  
+
   var buffer = "", stack1, foundHelper;
   buffer += "\n                            <p class=\"select_contact\" id=\"contact_";
   foundHelper = helpers.contact_id;
@@ -38,7 +38,7 @@ function program1(depth0,data) {
   foundHelper = helpers.title;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1) + "</div>\n        <div class=\"callboxoptions\">\n            <a href=\"#\" class=\"callbox_close\">X</a>\n        </div>\n    </div>\n    <div class=\"control_panel\">\n        <button class=\"operator_panel\"></button> \n        <button class=\"callbox_action\" data-dropdown=\"#dropdown-1_";
+  buffer += escapeExpression(stack1) + "</div>\n        <div class=\"callboxoptions\">\n            <a href=\"#\" class=\"callbox_close\">X</a>\n        </div>\n    </div>\n    <div class=\"control_panel\">\n        <button class=\"transfer_panel\"></button>\n        <button class=\"operator_panel\"></button> \n        <button class=\"callbox_action\" data-dropdown=\"#dropdown-1_";
   foundHelper = helpers.callbox_id;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.callbox_id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }

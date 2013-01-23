@@ -43,11 +43,12 @@ var YAAI = {
     sugarUserID : window.current_user_id,
     phoneExtension : window.yaai_user_extension,
     pollRate: window.yaai_poll_rate,
-    fop2 : true,
+    fop2 : window.yaai_fop_enabled,
     fop2URL : window.yaai_fop_url,
     fop2UserID : window.yaai_fop_user,
     fop2Password : window.yaai_fop_pass,
-    filteredCallStates : ['Ringing'],
+    showTransferButton : window.yaai_show_transfer_button,
+    filteredCallStates : [''], //['Ringing'], // TODO make this configurable
     options : {
         debug: true
     },
@@ -131,6 +132,7 @@ var YAAI = {
                 html = template(context);
                 $('body').append(html);
                 YAAI.bindOpenPopupSingleMatchingContact(callboxid, entry);
+                YAAI.bindActionDropdown(callboxid);
                 $('#callbox_'+callboxid).find('.singlematchingcontact').show();
                 break;
                 
@@ -139,13 +141,16 @@ var YAAI = {
                 html = template(context);
                 $('body').append(html);   
                 YAAI.bindSetContactID(callboxid, entry);
+                YAAI.bindActionDropdown(callboxid);
                 $('#callbox_'+callboxid).find('.multiplematchingcontacts').show();
                 break;
         }
         
         //bind user actions
         YAAI.bindCheckCallBoxInputKey(callboxid, entry['call_record_id'], entry['phone_number'], entry['direction']);
-        YAAI.fop2 ? YAAI.bindOperatorPanel(callboxid) : YAAI.bindTransferButton(callboxid, entry);
+        //YAAI.fop2 ? YAAI.bindOperatorPanel(callboxid) : YAAI.bindTransferButton(callboxid, entry);
+        if( YAAI.fop2 ) YAAI.bindOperatorPanel(callboxid);
+        // Transfer Button happens in updateCall method
         YAAI.bindCloseCallBox(callboxid, entry['call_record_id']);
         YAAI.bindToggleCallBoxGrowth(callboxid);
         YAAI.bindSaveMemo(callboxid, entry['call_record_id'], entry['phone_number'], entry['direction']);
@@ -171,6 +176,7 @@ var YAAI = {
         $("#callbox_"+callboxid).find('.phone_number').text(entry['phone_number']); // Needed for AMI v1.0, outbound calls.
 
         YAAI.setCallBoxHeadColor(callboxid, entry);
+        YAAI.setTransferButton(callboxid,entry);
 				
         $(".call_duration", "#callbox_"+callboxid+" .callboxcontent").text( entry['duration'] ); // Updates duration
 
@@ -214,18 +220,7 @@ var YAAI = {
         });
     },
 
-    bindTransferButton : function(callboxid, entry){
-        $('#callbox_'+callboxid).find('.operator_panel').button( { 
-            icons: {
-                primary: 'ui-icon-custom-phone', 
-                secondary: null
-            }
-        }).on("click", function(){
-            YAAI.showTransferMenu(entry);  
-        }); 
-    },
     bindActionDropdown : function(callboxid){
-        
          $('#callbox_'+callboxid).find('.callbox_action').button({
                 icons: {
                     primary: "ui-icon-flag",
@@ -233,10 +228,23 @@ var YAAI = {
                 },
                 text: false
             }).show();
-       
-        
     },
-    
+
+    bindTransferButton : function(callboxid, entry){
+        $('#callbox_'+callboxid).find('.transfer_panel').button( {
+            icons: {
+                primary: 'ui-icon-transfer',
+                secondary: null
+            }
+        }).on("click", function(){
+                YAAI.showTransferMenu(entry);
+            }).show();
+    },
+
+    unbindTransferButton : function(callboxid, entry) {
+        $('#callbox_'+callboxid).find('.transfer_panel').hide();
+    },
+
     bindOperatorPanel : function(callboxid){ 
         
         $('#callbox_'+callboxid).find('.operator_panel').button({
@@ -245,7 +253,6 @@ var YAAI = {
                 secondary: null
             }
         }).on("click", function(){
-        
             $.fancybox({
                 href : YAAI.fop2URL + '?exten=' + YAAI.fop2UserID + '&pass=' + YAAI.fop2Password,
                 type : 'iframe',
@@ -255,7 +262,7 @@ var YAAI = {
                     window.location.href=window.location.href
                 }
             }); 
-        });
+        }).show();
         
     },
 
@@ -482,7 +489,6 @@ var YAAI = {
         for(var x=0; x < YAAI.callBoxes.length; x++ ) {
             YAAI.minimizeCallBox( YAAI.callBoxes[x] ); // updates a cookie each time... perhaps check first.
         }
-          
     },
     
     startVerticalEndVertical : function(callboxid){
@@ -507,7 +513,6 @@ var YAAI = {
         });
     },
 
-
     maximizeCallBox : function(callboxid) {
         $('#callbox_'+callboxid+' .control_panel').css('display', 'block');
         $('#callbox_'+callboxid+' .callboxcontent').css('display','block');
@@ -520,7 +525,6 @@ var YAAI = {
 		
         YAAI.updateMinimizeCookie();
     },
-
 
     minimizeCallBox : function(callboxid) {
         $('#callbox_'+callboxid+' .control_panel').css('display', 'none');
@@ -564,7 +568,9 @@ var YAAI = {
             YAAI.refreshSingleMatchingContact(callboxid, entry);
             
             //remove the dropdown menu
-            $('#callbox_'+callboxid).find('.callbox_action').hide();
+            // TODO: BR Make this configurable...
+            //$('#callbox_'+callboxid).find('.callbox_action').hide();
+
             //bind back the unrelate button
             YAAI.bindOpenPopupSingleMatchingContact(callboxid, entry);
             
@@ -610,6 +616,7 @@ var YAAI = {
     },
     
     createCallBoxWithNoMatchingContact : function(callboxid, entry){
+        // TODO: The strings below need to be localized
         $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='relate_to_contact'>Relate to Contact</a></li>");
         $("#dropdown-1_callbox_"+callboxid+" ul a.relate_to_contact").on("click", entry, function() {
             YAAI.openPopupNoMatchingContact(entry)
@@ -662,6 +669,17 @@ var YAAI = {
         }
         else {
             $("#callbox_"+callboxid+" .callboxhead").css("background-color", "#0D5995"); // a blue color
+        }
+    },
+
+    setTransferButton : function(callboxid, entry ) {
+        if( entry['is_hangup'] ) {
+            this.unbindTransferButton(callboxid,entry);
+        }
+        else {
+            if( this.showTransferButton ) {
+                this.bindTransferButton(callboxid,entry);
+            }
         }
     },
 
