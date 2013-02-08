@@ -1,10 +1,10 @@
 <?php
 
-require_once('OAuth.php');
+require_once('OAuth.php');   
 
 class StackMob {
 
-    private $response;
+    public $response;
 
     function __construct($http_method, $uri_info_path, $body) {
         $consumer_key = "6a12313c-e7fd-4216-a781-ff202761618e";

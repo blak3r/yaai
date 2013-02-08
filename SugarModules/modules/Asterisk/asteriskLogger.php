@@ -1,5 +1,30 @@
 <?php
 
+require_once('stackmob.php');
+
+// Urban airship stuff
+require_once 'urbanairship.php';
+$cntb=0;
+
+
+$sm = new StackMob("GET","User","php_test");
+print $sm->response .   "<---";
+
+$body2 = '{ "caller_name": "Blake2" }';
+$callData = array();
+$callData['caller_name'] = "asdf2";
+$sm = new StackMob("POST","calls",$callData);
+print $sm->response .   "<---";
+
+
+//$sm = new StackMob("POST","hello_world","");
+//print "\n\n". $sm->response ;
+
+$sm = new StackMob("POST","callinize","");
+print "\n\n". $sm->response ;
+
+
+
 /**
  * Asterisk SugarCRM Integration
  * (c) KINAMU Business Solutions AG 2009
@@ -517,6 +542,8 @@ while (true) {
                             $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestamp_call, asterisk_dest_id,user_extension,inbound_extension) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s','%s','%s')", AMI_getUniqueIdFromEvent($e), $callRecordId, $eDestination, $eChannel, 'Dial', 'I', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $e['DestUniqueID'], $userExtension, $inboundExtension);
                             $callDirection = 'Inbound';
                             logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
+
+                            callinize_push($inboundExtension,$tmpCallerID, $callRecordId);
                         }
                         mysql_checked_query($query);
 
@@ -686,6 +713,7 @@ while (true) {
                                     $beanID = $direction['contact_id'];
                                     $beanType = "Contacts";
                                 } else {
+
                                     $assocAccount = findSugarAccountByPhoneNumber($rawData['callerID']);
                                     if ($assocAccount != FALSE) {
                                         logLine("Found a matching account, relating to account instead of contact\n");
@@ -1145,6 +1173,80 @@ exit(0);
 // ******************
 // Helper functions *
 // ******************
+
+function callinize_push($inboundExtension,$phone_number, $call_record_id)
+{
+    global $cntb;
+    logLine("CallenizeSTART####");
+    $assocAccount = findSugarAccountByPhoneNumber($phone_number);
+    if ($assocAccount != FALSE) {
+        logLine("Found a matching account, relating to account instead of contact\n");
+        $beanID = $assocAccount['values']['id'];
+        $beanType = $assocAccount['type'];
+        $parentType = 'Accounts';
+        $parentID = $beanID;
+    } else {
+        $assoSugarObject = findSugarObjectByPhoneNumber($phone_number);
+        $beanID = $assoSugarObject['values']['id'];
+        $beanType = $assoSugarObject['type'];
+    }
+    // FIXME doesn't handle multiple matching contacts right now.
+    logLine("here!!!!! CALLE---" . $beanID);
+    logLine("### CALLENIZE: " . $call_record_id . " " . $beanID . " " . $beanType . " " . $inboundExtension);
+
+    // GET Contact Info
+    $sql = "select contacts.*, accounts.name from contacts join accounts_contacts on contacts.id = accounts_contacts.contact_id join accounts on accounts_contacts.account_id = accounts.id where contacts.id = '$beanID'";
+    $queryResult = mysql_checked_query($sql);
+    if ($queryResult === FALSE) {
+        logLine("! Contact lookup failed");
+        return FALSE;
+    }
+    else {
+        $row = mysql_fetch_assoc($queryResult);
+    }
+
+
+   // logLine( $row['first_name'] . "other stuff from db");
+
+    $body = json_encode($row);
+    //logLine( "json" . $body);
+    $c = array();
+    $c['caller_name'] = $row['first_name'] . " " . $row['last_name'];
+    $c['caller_account'] = $row['name'];
+    $c['caller_description'] = $row['description'];
+    $c['caller_title'] = $row['title'];
+    $c['crm_id'] = $row['id'];
+    $email = $row['first_name']  . $row['last_name'] . "@" . $row['name'] . ".com"; // FIXME !!!
+    $email = strtolower($email);
+    $sm = new StackMob("POST","calls",$c);
+
+    // FIXME: hack for hackathon... mobile phone isn't recognized properly.
+    // and only want one push...
+    // Add a diff time < 5s
+
+    $now_time = time();
+    $duration = abs($cntb - $now_time);
+    logLine("Duration: " . $duration);
+    if( strlen($inboundExtension) < 4 && $duration > 30) {
+        $cntb = time();
+        if( !empty($row['first_name']) ) {
+            $pushMessage = "x$inboundExtension: {$row['first_name']} {$row['last_name']},{$row['title']}\n{$row['name']}\nLead\n{$row['description']}";
+        }
+        else {
+            $pushMessage = "x$inboundExtension: Not in DB -- OpenCNAM TODO";
+        }
+        logLine("Pushing: " . $pushMessage);
+        $APP_MASTER_SECRET = 'D9cp-gezS-uVdvyc3sc6Lg';
+        $APP_KEY = '3HRM1R0XQ3qJvwZ_eluXyg';
+        $TEST_DEVICE_TOKEN = 'BEB287468FF32A47179B69530493E1519A035708039FB089664EEA64DB25127D';
+    // Create Airship object
+        $airship = new Airship($APP_KEY, $APP_MASTER_SECRET);
+        $message = array('aps'=>array('alert'=>$pushMessage)); //,'sound'=>'default'
+        $airship->push($message, $TEST_DEVICE_TOKEN);
+
+        logLine( "StackMob Response: " . $sm->response);
+    }
+}
 
 /**
  * Removes calls from asterisk_log that have expired or closed.
