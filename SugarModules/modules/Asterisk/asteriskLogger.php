@@ -520,6 +520,15 @@ while (true) {
                             preg_match($rgCellRingRegex, $eChannel)) {
                         deleteCall($callRecordId);
                         logLine("INTERNAL call detected, Deleting Call Record $callRecordId\n");
+						
+						// HERE We detect if this is the outbound call to a cell phone... 
+						$query = "SELECT * FROM asterisk_log WHERE channel like '%" . $e['ConnectedLineNum'] . "%' AND callerID = '" . $tmpCallerID . "'";
+                        $result = mysql_checked_query($query);
+                        while ($pd = mysql_fetch_array($result)) {
+                            callinize_push("207", $tmpCallerID,$pd['call_record_id']); // FIXME
+                        }
+						
+						
                     } else {
                         //Asterisk Manager 1.1 (If the call is internal, this will be skipped)
                         if (preg_match($asteriskMatchInternal, $eChannel) && !preg_match($asteriskMatchInternal, $eDestination)) {
@@ -543,7 +552,8 @@ while (true) {
                             $callDirection = 'Inbound';
                             logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
 
-                            callinize_push($inboundExtension,$tmpCallerID, $callRecordId);
+							//FIXME REENABLE
+                            //callinize_push($inboundExtension,$tmpCallerID, $callRecordId);
                         }
                         mysql_checked_query($query);
 
@@ -1177,7 +1187,7 @@ exit(0);
 function callinize_push($inboundExtension,$phone_number, $call_record_id)
 {
     global $cntb;
-    logLine("CallenizeSTART####");
+    logLine("### Callinize START####");
     $assocAccount = findSugarAccountByPhoneNumber($phone_number);
     if ($assocAccount != FALSE) {
         logLine("Found a matching account, relating to account instead of contact\n");
@@ -1192,7 +1202,7 @@ function callinize_push($inboundExtension,$phone_number, $call_record_id)
     }
     // FIXME doesn't handle multiple matching contacts right now.
     logLine("here!!!!! CALLE---" . $beanID);
-    logLine("### CALLENIZE: " . $call_record_id . " " . $beanID . " " . $beanType . " " . $inboundExtension);
+    logLine("### CALLINIZE: " . $call_record_id . " " . $beanID . " " . $beanType . " " . $inboundExtension);
 
     // GET Contact Info
     $sql = "select contacts.*, accounts.name from contacts join accounts_contacts on contacts.id = accounts_contacts.contact_id join accounts on accounts_contacts.account_id = accounts.id where contacts.id = '$beanID'";
@@ -1243,7 +1253,7 @@ function callinize_push($inboundExtension,$phone_number, $call_record_id)
         $airship = new Airship($APP_KEY, $APP_MASTER_SECRET);
         $message = array('aps'=>array('alert'=>$pushMessage)); //,'sound'=>'default'
         logLine("Sleeping..");
-        sleep(7);
+        //sleep(2); // FIXME Remove
         logLine("Done Sleeping.");
         $airship->push($message, $TEST_DEVICE_TOKEN);
 
@@ -1309,10 +1319,12 @@ function getTimestamp() {
 
 function dumpEvent(&$event) {
     // Skip 'Newexten' events - there just toooo many of 'em || For Asterisk manager 1.1 i choose to ignore another stack of events cause the log is populated with useless events
-    if ($event['Event'] === 'Newexten' || $event['Event'] == 'UserEvent' || $event['Event'] == 'AGIExec' || $event['Event'] == 'Newchannel' || $event['Event'] == 'Newstate' || $event['Event'] == 'ExtensionStatus') {
-        LogLine("! AMI Event '" . $event['Event'] . " suppressed.\n");
-        return;
-    }
+
+  // FIXME REENABLE
+  //  if ($event['Event'] === 'Newexten' || $event['Event'] == 'UserEvent' || $event['Event'] == 'AGIExec' /*|| $event['Event'] == 'Newchannel' || $event['Event'] == 'Newstate' */|| $event['Event'] == 'ExtensionStatus') {
+  //      LogLine("! AMI Event '" . $event['Event'] . " suppressed.\n");
+  //      return;
+  //  }
 
     $eventType = $event['Event'];
 
