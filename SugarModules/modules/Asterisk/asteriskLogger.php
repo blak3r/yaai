@@ -1242,6 +1242,9 @@ function callinize_push($inboundExtension,$phone_number, $call_record_id)
     // Create Airship object
         $airship = new Airship($APP_KEY, $APP_MASTER_SECRET);
         $message = array('aps'=>array('alert'=>$pushMessage)); //,'sound'=>'default'
+        logLine("Sleeping..");
+        sleep(7);
+        logLine("Done Sleeping.");
         $airship->push($message, $TEST_DEVICE_TOKEN);
 
         logLine( "StackMob Response: " . $sm->response);
