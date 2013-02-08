@@ -95,6 +95,7 @@ var YAAI = {
     // CREATE
     
     createCallBox : function (callboxid, entry, modstrings) {
+       if($('#callbox_'+callboxid).attr('id') == undefined){
         var html;
         var template = Handlebars.templates['call-template.html'];
         var context = {
@@ -167,6 +168,8 @@ var YAAI = {
 
         $('.callbox').show();
         $("#callbox_"+callboxid).show();
+
+       }
     },
     
     // UPDATE
