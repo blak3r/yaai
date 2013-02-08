@@ -46,7 +46,7 @@ function program1(depth0,data) {
   foundHelper = helpers.call_type;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.call_type; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1) + "</h4>\n            <div class=\"tabForm\">\n                <table class=\"asterisk_data\">\n                    <tr class=\"multiplematchingcontacts\">\n                        <td colspan=\"2\">\n                            <b>";
+  buffer += escapeExpression(stack1) + "</h4>\n            <div>\n                <table class=\"asterisk_data\">\n                    <tr class=\"multiplematchingcontacts\">\n                        <td colspan=\"2\">\n                            <b>";
   foundHelper = helpers.select_contact_label;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.select_contact_label; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
