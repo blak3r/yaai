@@ -60,6 +60,7 @@ $config_meta['asterisk_dialout_channel'] = array('default' => 'SIP/###','section
 $config_meta['asterisk_dialin_ext_match'] = array('default' => 'Local\/(?:.*?)(\d\d\d?\d?\d?)@','section'=>'Call Configuration');
 $config_meta['asterisk_rg_detect_expr'] = array('default'=>"^Local\/RG",'section'=>'Call Configuration');
 $config_meta['asterisk_rg_cell_ring_expr'] = array('default'=>"^Local\/\d{7,10}",'section'=>'Call Configuration');
+$config_meta['asterisk_digits_to_match'] = array('default' => '8', 'section'=>'Call Configuration');
 
 $config_meta['asterisk_call_subject_inbound_abbr'] = array('default' => "IBC: ", 'section'=>'Misc');
 $config_meta['asterisk_call_subject_outbound_abbr'] = array('default' => "OBC: ",'section'=>'Misc');
@@ -76,10 +77,27 @@ $config_meta['asterisk_hide_call_popups_after_mins'] = array('default' => '60','
 $config_meta['asterisk_log_file'] = array('default' => '', 'section'=>'Logging');
 
 $config_meta['asterisk_fop_url'] = array('default' => '', 'section'=>'Flash Operator Panel Addon');
+$config_meta['asterisk_fop_master_password'] = array('default' => '', 'section'=>'Flash Operator Panel Addon');
 
+$config_meta['asterisk_block_button_enabled'] = array('default' => 'false', 'section'=>'Popup UI');
+$config_meta['asterisk_fop_button_enabled'] = array('default' => 'false', 'section'=>'Popup UI');
+$config_meta['asterisk_transfer_button_enabled'] = array('default' => 'true', 'section'=>'Popup UI');
+$config_meta['asterisk_relate_to_account_enabled'] = array('default' => 'true', 'section'=>'Popup UI');
+$config_meta['asterisk_relate_to_contact_enabled'] = array('default' => 'true', 'section'=>'Popup UI');
+$config_meta['asterisk_create_new_contact_enabled'] = array('default' => 'true', 'section'=>'Popup UI');
+$config_meta['asterisk_max_popups'] = array('default' => '5', 'section'=>'Popup UI');
+$config_meta['asterisk_filtered_call_states'] = array('default' => '', 'section'=>'Popup UI');
+$config_meta['asterisk_window_height'] = array('default' => '', 'section'=>'Popup UI');
+
+
+$config_meta['asterisk_callinize_organization_key'] = array('default' => '', 'section'=>'Callinize');
+$config_meta['asterisk_callinize_organization_secret'] = array('default' => '', 'section'=>'Callinize');
+
+
+/*
 $config_meta['asterisk_recordings_enabled'] = array('default'=> 'false', 'section'=>'Recordings');
 $config_meta['asterisk_recordings_path'] = array('default' => '/var/spool/asterisk/monitor', 'section'=>'Recordings');
-
+*/
 
 
 //Need configurable Channel detection in order to assign calls to users when they answer on cell phones.
