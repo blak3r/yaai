@@ -1186,6 +1186,13 @@ exit(0);
 // Helper functions *
 // ******************
 
+/**
+ * Method which initiates the callinize push notification to cell phones.
+ * @param $inboundExtension - this is the cell phone number to send push notification to
+ * @param $phone_number - this is the number of the person calling.
+ * @param $call_record_id - record id of the call.
+ * @return bool
+ */
 function callinize_push($inboundExtension,$phone_number, $call_record_id)
 {
     global $cntb;
@@ -1338,11 +1345,10 @@ function getTimestamp() {
 function dumpEvent(&$event) {
     // Skip 'Newexten' events - there just toooo many of 'em || For Asterisk manager 1.1 i choose to ignore another stack of events cause the log is populated with useless events
 
-  // FIXME REENABLE
-  //  if ($event['Event'] === 'Newexten' || $event['Event'] == 'UserEvent' || $event['Event'] == 'AGIExec' /*|| $event['Event'] == 'Newchannel' || $event['Event'] == 'Newstate' */|| $event['Event'] == 'ExtensionStatus') {
-  //      LogLine("! AMI Event '" . $event['Event'] . " suppressed.\n");
-  //      return;
-  //  }
+    if ($event['Event'] === 'Newexten' || $event['Event'] == 'UserEvent' || $event['Event'] == 'AGIExec' || $event['Event'] == 'Newchannel' || $event['Event'] == 'Newstate' || $event['Event'] == 'ExtensionStatus') {
+        LogLine("! AMI Event '" . $event['Event'] . " suppressed.\n");
+        return;
+    }
 
     $eventType = $event['Event'];
 
