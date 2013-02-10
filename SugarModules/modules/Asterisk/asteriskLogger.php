@@ -7,23 +7,25 @@ require_once 'urbanairship.php';
 $cntb=0;
 
 
-$sm = new StackMob("GET","User","php_test");
-print $sm->response .   "<---";
 
-$body2 = '{ "caller_name": "Blake2" }';
-$callData = array();
-$callData['caller_name'] = "asdf2";
-$sm = new StackMob("POST","calls",$callData);
-print $sm->response .   "<---";
+$ch = curl_init();
 
+curl_setopt($ch, CURLOPT_URL, "https://api.parse.com/1/functions/send_push");
+curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+    "X-Parse-Application-Id: v7GjYfotqF0to7rkw3yfarS7WfHJTTPytwtqpa0T",
+    "X-Parse-REST-API-Key: nvCZ08juhI8BomopJuCD7qR9fJEGMvrlx76gxVgI",
+    "Content-Type: application/json"
+));
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_POSTFIELDS, "{\"message\": \"FUsdfadfasdfEAH\" }");
 
-//$sm = new StackMob("POST","hello_world","");
-//print "\n\n". $sm->response ;
+// receive server response ...
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-$sm = new StackMob("POST","callinize","");
-print "\n\n". $sm->response ;
+$server_output = curl_exec($ch);
 
-
+print "server_output:" . $server_output;
+curl_close($ch);
 
 /**
  * Asterisk SugarCRM Integration
@@ -1228,11 +1230,27 @@ function callinize_push($inboundExtension,$phone_number, $call_record_id)
     $c['crm_id'] = $row['id'];
     $email = $row['first_name']  . $row['last_name'] . "@" . $row['name'] . ".com"; // FIXME !!!
     $email = strtolower($email);
-    $sm = new StackMob("POST","calls",$c);
+    //$sm = new StackMob("POST","calls",$c);
 
     // FIXME: hack for hackathon... mobile phone isn't recognized properly.
     // and only want one push...
     // Add a diff time < 5s
+
+    $c = curl_init();
+    curl_setopt($c, CURLOPT_TIMEOUT, 30);
+    curl_setopt($c, CURLOPT_USERAGENT, 'parse.com-php-library/2.0');
+    curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($c, CURLINFO_HEADER_OUT, true);
+    curl_setopt($c, CURLOPT_URL, 'https://api.parse.com/1/functions/send_push' );
+    curl_setopt($c, CURLOPT_CUSTOMREQUEST,"POST");
+    curl_setopt($c, CURLOPT_HTTPHEADER, array(
+        "Content-Type: application/json",
+        "X-Parse-Application-Id: v7GjYfotqF0to7rkw3yfarS7WfHJTTPytwtqpa0T",
+        "X-Parse-REST-API-Key: nvCZ08juhI8BomopJuCD7qR9fJEGMvrlx76gxVgI"
+    ));
+    curl_setopt($c, CURLOPT_POSTFIELDS, '{"message": "FUCKYEAH" }' );
+    curl_exec($c);
+
 
     $now_time = time();
     $duration = abs($cntb - $now_time);
