@@ -1,32 +1,4 @@
 <?php
-
-require_once('stackmob.php');
-
-// Urban airship stuff
-require_once 'urbanairship.php';
-$cntb=0;
-
-
-
-$ch = curl_init();
-
-curl_setopt($ch, CURLOPT_URL, "https://api.parse.com/1/functions/send_push");
-curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-    "X-Parse-Application-Id: v7GjYfotqF0to7rkw3yfarS7WfHJTTPytwtqpa0T",
-    "X-Parse-REST-API-Key: nvCZ08juhI8BomopJuCD7qR9fJEGMvrlx76gxVgI",
-    "Content-Type: application/json"
-));
-curl_setopt($ch, CURLOPT_POST, 1);
-curl_setopt($ch, CURLOPT_POSTFIELDS, "{\"message\": \"FUsdfadfasdfEAH\" }");
-
-// receive server response ...
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-$server_output = curl_exec($ch);
-
-print "server_output:" . $server_output;
-curl_close($ch);
-
 /**
  * Asterisk SugarCRM Integration
  * (c) KINAMU Business Solutions AG 2009
@@ -64,6 +36,8 @@ curl_close($ch);
  * Section 5 of the GNU General Public License version 3.
  *
  */
+
+require_once 'parse.php';
 //
 // Debug flags
 //
@@ -74,6 +48,7 @@ $log_memory_usage = 0;
 $memory_usage_log_file = "c:\mem_usage.csv";
 $memory_usage_log_frequency_secs = 10*60;
 $last_memory_log_entry = "";
+$last_push_time=0;
 
 // All Sugar timestamps are UTC
 date_default_timezone_set('UTC');
@@ -1193,96 +1168,75 @@ exit(0);
  * @param $call_record_id - record id of the call.
  * @return bool
  */
-function callinize_push($inboundExtension,$phone_number, $call_record_id)
-{
-    global $cntb;
-    logLine("### Callinize START####");
-    $assocAccount = findSugarAccountByPhoneNumber($phone_number);
-    if ($assocAccount != FALSE) {
-        logLine("Found a matching account, relating to account instead of contact\n");
-        $beanID = $assocAccount['values']['id'];
-        $beanType = $assocAccount['type'];
-        $parentType = 'Accounts';
-        $parentID = $beanID;
-    } else {
-        $assoSugarObject = findSugarObjectByPhoneNumber($phone_number);
-        $beanID = $assoSugarObject['values']['id'];
-        $beanType = $assoSugarObject['type'];
-    }
-    // FIXME doesn't handle multiple matching contacts right now.
-    logLine("here!!!!! CALLE---" . $beanID);
-    logLine("### CALLINIZE: " . $call_record_id . " " . $beanID . " " . $beanType . " " . $inboundExtension);
+    function callinize_push($inboundExtension,$phone_number, $call_record_id)
+    {
+        global $last_push_time;
+        $now_time = time();
+        $duration = abs($last_push_time - $now_time);
+        if( strlen($inboundExtension) < 4 && $duration > 30) {
+            $last_push_time = time();
+            logLine("### Callinize START ####");
+            logLine("Last Push was $duration secs ago");
 
-    // GET Contact Info
-    $sql = "select contacts.*, accounts.name from contacts join accounts_contacts on contacts.id = accounts_contacts.contact_id join accounts on accounts_contacts.account_id = accounts.id where contacts.id = '$beanID'";
-    $queryResult = mysql_checked_query($sql);
-    if ($queryResult === FALSE) {
-        logLine("! Contact lookup failed");
-        return FALSE;
+            $assocAccount = findSugarAccountByPhoneNumber($phone_number);
+            if ($assocAccount != FALSE) {
+                logLine("Found a matching account, relating to account instead of contact\n");
+                $beanID = $assocAccount['values']['id'];
+                $beanType = $assocAccount['type'];
+                $parentType = 'Accounts';
+                $parentID = $beanID;
+            } else {
+                $assoSugarObject = findSugarObjectByPhoneNumber($phone_number);
+                $beanID = $assoSugarObject['values']['id'];
+                $beanType = $assoSugarObject['type'];
+            }
+            // FIXME doesn't handle multiple matching contacts right now.
+            logLine(" Details: " . $call_record_id . " " . $beanID . " " . $beanType . " " . $inboundExtension);
+
+            // GET Contact Info
+            $sql = "select contacts.*, accounts.name from contacts join accounts_contacts on contacts.id = accounts_contacts.contact_id join accounts on accounts_contacts.account_id = accounts.id where contacts.id = '$beanID'";
+            $queryResult = mysql_checked_query($sql);
+            if ($queryResult === FALSE) {
+                logLine("! Contact lookup failed");
+                return FALSE;
+            }
+            else {
+                $row = mysql_fetch_assoc($queryResult);
+            }
+
+            // TODO Finalize exactly what we let the backend handle... $body below is all the contact info.
+            $body = json_encode($row);
+
+            $c = array();
+            $c['caller_name'] = $row['first_name'] . " " . $row['last_name'];
+            $c['caller_account'] = $row['name'];
+            $c['caller_description'] = $row['description'];
+            $c['caller_title'] = $row['title'];
+            $c['crm_id'] = $row['id'];
+            $c['call_record_id'] = $call_record_id;
+            $c['caller_phone'] = $phone_number;
+            $c['push_to_phone'] = $inboundExtension;
+
+            if( !empty($row['first_name']) ) {
+                $pushMessage = "x$inboundExtension: {$row['first_name']} {$row['last_name']},{$row['title']}\n{$row['name']}\nLead\n{$row['description']}";
+            }
+            else {
+                require_once 'include/opencnam.php';
+                $opencnam = new opencnam();
+                $callerid = $opencnam->fetch($phone_number);
+                $callerIdInfo = "";
+                if( !empty($callerid) ) {
+                    $callerIdInfo = "CallerID: " . $callerid;
+                }
+                $pushMessage = "x$inboundExtension: Not in CRM\n" . $callerIdInfo;
+            }
+            $c['message'] = $pushMessage;
+
+            $parse = new ParseBackendWrapper();
+            $parse->customCodeMethod('send_push', $c);
     }
     else {
-        $row = mysql_fetch_assoc($queryResult);
-    }
-
-
-   // logLine( $row['first_name'] . "other stuff from db");
-
-    $body = json_encode($row);
-    //logLine( "json" . $body);
-    $c = array();
-    $c['caller_name'] = $row['first_name'] . " " . $row['last_name'];
-    $c['caller_account'] = $row['name'];
-    $c['caller_description'] = $row['description'];
-    $c['caller_title'] = $row['title'];
-    $c['crm_id'] = $row['id'];
-    $email = $row['first_name']  . $row['last_name'] . "@" . $row['name'] . ".com"; // FIXME !!!
-    $email = strtolower($email);
-    //$sm = new StackMob("POST","calls",$c);
-
-    // FIXME: hack for hackathon... mobile phone isn't recognized properly.
-    // and only want one push...
-    // Add a diff time < 5s
-
-    $c = curl_init();
-    curl_setopt($c, CURLOPT_TIMEOUT, 30);
-    curl_setopt($c, CURLOPT_USERAGENT, 'parse.com-php-library/2.0');
-    curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($c, CURLINFO_HEADER_OUT, true);
-    curl_setopt($c, CURLOPT_URL, 'https://api.parse.com/1/functions/send_push' );
-    curl_setopt($c, CURLOPT_CUSTOMREQUEST,"POST");
-    curl_setopt($c, CURLOPT_HTTPHEADER, array(
-        "Content-Type: application/json",
-        "X-Parse-Application-Id: v7GjYfotqF0to7rkw3yfarS7WfHJTTPytwtqpa0T",
-        "X-Parse-REST-API-Key: nvCZ08juhI8BomopJuCD7qR9fJEGMvrlx76gxVgI"
-    ));
-    curl_setopt($c, CURLOPT_POSTFIELDS, '{"message": "FUCKYEAH" }' );
-    curl_exec($c);
-
-
-    $now_time = time();
-    $duration = abs($cntb - $now_time);
-    logLine("Duration: " . $duration);
-    if( strlen($inboundExtension) < 4 && $duration > 30) {
-        $cntb = time();
-        if( !empty($row['first_name']) ) {
-            $pushMessage = "x$inboundExtension: {$row['first_name']} {$row['last_name']},{$row['title']}\n{$row['name']}\nLead\n{$row['description']}";
-        }
-        else {
-            $pushMessage = "x$inboundExtension: Not in DB -- OpenCNAM TODO";
-        }
-        logLine("Pushing: " . $pushMessage);
-        $APP_MASTER_SECRET = 'D9cp-gezS-uVdvyc3sc6Lg';
-        $APP_KEY = '3HRM1R0XQ3qJvwZ_eluXyg';
-        $TEST_DEVICE_TOKEN = 'BEB287468FF32A47179B69530493E1519A035708039FB089664EEA64DB25127D';
-    // Create Airship object
-        $airship = new Airship($APP_KEY, $APP_MASTER_SECRET);
-        $message = array('aps'=>array('alert'=>$pushMessage)); //,'sound'=>'default'
-        logLine("Sleeping..");
-        //sleep(2); // FIXME Remove
-        logLine("Done Sleeping.");
-        $airship->push($message, $TEST_DEVICE_TOKEN);
-
-        logLine( "StackMob Response: " . $sm->response);
+        logLine("Callinize Push Surpressed... last push was $duration secs ago");
     }
 }
 

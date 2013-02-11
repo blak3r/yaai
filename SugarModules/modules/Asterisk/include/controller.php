@@ -660,11 +660,12 @@ REGEXP '%s$' = 1
 * @todo implement a number cleaner that always formats input into 10 digits
 */
 function get_open_cnam_result($row, $current_user) {
-
+    require_once 'opencnam.php';
     // Check OpenCNAM if we don't already have the Company Name in Sugar.
     if (!isset($found['company']) && $GLOBALS['sugar_config']['asterisk_opencnam_enabled'] == "true") {
         if ($row['opencnam'] == NULL) {
-            $tempCnamResult = opencnam_fetch(get_callerid($row));
+            $opencnam = new opencnam();
+            $tempCnamResult = $opencnam->fetch(get_callerid($row));
             $tempCnamResult = preg_replace('/[^a-z0-9\-\. ]/i', '', $tempCnamResult);
             $tempCallRecordId = preg_replace('/[^a-z0-9\-\. ]/i', '', $row['call_record_id']);
             $cnamUpdateQuery = "UPDATE asterisk_log SET opencnam='$tempCnamResult' WHERE call_record_id='$tempCallRecordId'";
@@ -673,35 +674,6 @@ function get_open_cnam_result($row, $current_user) {
         }
     }
     return $callerid;
-}
-
-/**
-* Fetch a list of records from OpenCNAM
-*
-* @param string $phoneNumber 10 digit US telephone number
-*
-* @return array fetch results of OpenCNAM lookup
-*
-* @todo implement a number cleaner that always formats input into 10 digits
-*/
-function opencnam_fetch($phoneNumber) {
-    $request_url = "https://api.opencnam.com/v1/phone/" . $phoneNumber . "?format=text";
-    $found = false;
-    $i = 0;
-    do {
-        $response = file_get_contents($request_url); // First call returns with 404 immediately with free api, 2nd call will succeed. See https://github.com/blak3r/yaai/issues/5
-        // "Currently running a lookup for phone '7858647222'. Please check back in a few seconds."
-        if (empty($response) || strpos($response, "running a lookup") !== false) {
-            usleep(1000000 * ($i)); // wait 500ms, 1000ms, then 1500ms, etc.
-            // 2:25pm uped to 500,000 8x
-        } else {
-            $found = true;
-        }
-    } while ($i++ < 7 && $found == false);
-    if (empty($response)) {
-        $response = " "; // return a space character so it doesn't keep attempting to lookup number next time callListener is called.
-    }
-    return $response;
 }
 
 /**
