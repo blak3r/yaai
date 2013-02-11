@@ -1161,13 +1161,13 @@ exit(0);
 // Helper functions *
 // ******************
 
-/**
- * Method which initiates the callinize push notification to cell phones.
- * @param $inboundExtension - this is the cell phone number to send push notification to
- * @param $phone_number - this is the number of the person calling.
- * @param $call_record_id - record id of the call.
- * @return bool
- */
+    /**
+     * Method which initiates the callinize push notification to cell phones.
+     * @param $inboundExtension - this is the cell phone number to send push notification to
+     * @param $phone_number - this is the number of the person calling.
+     * @param $call_record_id - record id of the call.
+     * @return bool
+     */
     function callinize_push($inboundExtension,$phone_number, $call_record_id)
     {
         global $sugar_config;

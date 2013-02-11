@@ -34,7 +34,7 @@ class opencnam
             // Assume it's a US phone number.
             $phoneNumber = "+1" . $phoneNumber;
         }
-        else if($strlen($phoneNumber) > 10 ) {
+        else if(strlen($phoneNumber) > 10 ) {
             $phoneNumber = "+" . $phoneNumber;
         }
 
