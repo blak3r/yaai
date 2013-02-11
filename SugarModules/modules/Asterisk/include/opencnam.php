@@ -29,8 +29,10 @@ class opencnam
             $credentials = "&auth_token=$_auth_token&account_sid=$_account_sid";
         }
 
+        // TODO need to format into E194 first to work outside the us.
+
         $phoneNumber = preg_replace('/\D/i', '', $phoneNumber); // Removes everything but digits.
-        $request_url = "https://api.opencnam.com/v2/phone/+" . $phoneNumber . "?format=text" . $credentials;
+        $request_url = "https://api.opencnam.com/v2/phone/" . $phoneNumber . "?format=text" . $credentials;
         $found = false;
         $response = file_get_contents($request_url); // First call returns with 404 immediately with free api, 2nd call will succeed. See https://github.com/blak3r/yaai/issues/5
         // "Currently running a lookup for phone '7858647222'. Please check back in a few seconds."
