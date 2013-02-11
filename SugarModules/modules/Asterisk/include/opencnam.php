@@ -6,40 +6,45 @@
  */
 class opencnam
 {
-    private $_account_sid = '';
-    private $_auth_token = '';
+    protected $account_sid;
+    protected $auth_token;
 
     function __construct($account_sid = '', $auth_token = '') {
-        $_account_sid = $account_sid;
-        $_auth_token = $auth_token;
+        $this->account_sid = $account_sid;
+        $this->auth_token = $auth_token;
     }
 
     /**
      * Fetch a list of records from OpenCNAM
      *
-     * @param string $phoneNumber 10 digit US telephone number
+     * @param string $phoneNumber 10 digit US telephone number or E194 formatted number
      *
      * @return array fetch results of OpenCNAM lookup
-     *
-     * @todo implement a number cleaner that always formats input into 10 digits
      */
     public function fetch($phoneNumber) {
         $credentials = "";
-        if( !empty($_account_sid) && !empty($_auth_token) ) {
-            $credentials = "&auth_token=$_auth_token&account_sid=$_account_sid";
+        //   print "OPENCNAM SET IN FETCH: " . $the_account_sid . $the_auth_token . "\n";
+        if( !empty($this->account_sid) && !empty($this->auth_token) ) {
+            $credentials = "&auth_token={$this->auth_token}&account_sid={$this->account_sid}";
         }
 
         // TODO need to format into E194 first to work outside the us.
-
         $phoneNumber = preg_replace('/\D/i', '', $phoneNumber); // Removes everything but digits.
-        $request_url = "https://api.opencnam.com/v2/phone/" . $phoneNumber . "?format=text" . $credentials;
-        $found = false;
-        $response = file_get_contents($request_url); // First call returns with 404 immediately with free api, 2nd call will succeed. See https://github.com/blak3r/yaai/issues/5
+        if( strlen($phoneNumber) == 10 ) {
+            // Assume it's a US phone number.
+            $phoneNumber = "+1" . $phoneNumber;
+        }
+        else if($strlen($phoneNumber) > 10 ) {
+            $phoneNumber = "+" . $phoneNumber;
+        }
+
+        $request_url = "https://api.opencnam.com/v2/phone/" . $phoneNumber . "?format=pbx" . $credentials;
+        //print "OPENCNAM URL: " . $request_url . "\n";
+        $response = file_get_contents($request_url);
+        $response = trim($response);
         // "Currently running a lookup for phone '7858647222'. Please check back in a few seconds."
         if (empty($response) || strpos($response, "unavailable") !== false) {
             $response = "";
-        } else {
-            $found = true;
         }
         return $response;
     }

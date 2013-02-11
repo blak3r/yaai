@@ -1170,6 +1170,7 @@ exit(0);
  */
     function callinize_push($inboundExtension,$phone_number, $call_record_id)
     {
+        global $sugar_config;
         global $last_push_time;
         $now_time = time();
         $duration = abs($last_push_time - $now_time);
@@ -1222,7 +1223,7 @@ exit(0);
             }
             else {
                 require_once 'include/opencnam.php';
-                $opencnam = new opencnam();
+                $opencnam = new opencnam($sugar_config['asterisk_opencnam_account_sid'], $sugar_config['asterisk_opencnam_auth_token']);
                 $callerid = $opencnam->fetch($phone_number);
                 $callerIdInfo = "";
                 if( !empty($callerid) ) {
