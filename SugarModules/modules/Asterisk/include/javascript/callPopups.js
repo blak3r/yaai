@@ -124,7 +124,7 @@ var YAAI = {
                 html = template(context); 
                 $('body').append(html);
                 YAAI.createCallBoxWithNoMatchingContact(callboxid, entry);
-                YAAI.bindActionDropdown(callboxid);
+                YAAI.bindActionDropdown(callboxid,entry);
                 $('#callbox_'+callboxid).find('.nomatchingcontact').show();
                 break;
             
@@ -133,7 +133,7 @@ var YAAI = {
                 html = template(context);
                 $('body').append(html);
                 YAAI.bindOpenPopupSingleMatchingContact(callboxid, entry);
-                YAAI.bindActionDropdown(callboxid);
+                YAAI.bindActionDropdown(callboxid,entry);
                 $('#callbox_'+callboxid).find('.singlematchingcontact').show();
                 break;
                 
@@ -142,7 +142,7 @@ var YAAI = {
                 html = template(context);
                 $('body').append(html);   
                 YAAI.bindSetContactID(callboxid, entry);
-                YAAI.bindActionDropdown(callboxid);
+                YAAI.bindActionDropdown(callboxid,entry);
                 $('#callbox_'+callboxid).find('.multiplematchingcontacts').show();
                 break;
         }
@@ -223,7 +223,7 @@ var YAAI = {
         });
     },
 
-    bindActionDropdown : function(callboxid){
+    bindActionDropdown : function(callboxid,entry){
          $('#callbox_'+callboxid).find('.callbox_action').button({
                 icons: {
                     primary: "ui-icon-flag",
@@ -231,6 +231,39 @@ var YAAI = {
                 },
                 text: false
             }).show();
+
+        if( window.yaai_relate_to_contact_enabled ) {
+            $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='relate_to_contact'>Relate to Contact</a></li>");
+            $("#dropdown-1_callbox_"+callboxid+" ul a.relate_to_contact").on("click", entry, function() {
+                YAAI.openPopupNoMatchingContact(entry)
+            });
+        }
+
+        // TODO create
+        if( window.yaai_relate_to_account_enabled ) {
+            $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='relate_to_account'>Relate to Account</a></li>");
+            $("#dropdown-1_callbox_"+callboxid+" ul a.relate_to_account").on("click", entry, function() {
+                alert("TODO Action isn't defined yet");
+                //YAAI.openPopupNoMatchingContact(entry)
+            });
+        }
+
+        if( window.yaai_create_new_contact_enabled ) {
+            $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='create_contact'>Create Contact</a></li>");
+            $("#dropdown-1_callbox_"+callboxid+" ul a.create_contact").on("click", entry, function() {
+                YAAI.createContact(entry)
+            });
+        }
+
+        if( window.yaai_block_button_enabled ) {
+            $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='block_number'>Block Number</a></li>");
+            $("#dropdown-1_callbox_"+callboxid+" ul a.block_number").on("click", {
+                entry: entry,
+                callboxid: callboxid
+            }, function() {
+                YAAI.showBlockNumberDialog(callboxid, entry)
+            });
+        }
     },
 
     bindTransferButton : function(callboxid, entry){
@@ -617,24 +650,9 @@ var YAAI = {
         }
 
     },
-    
+
     createCallBoxWithNoMatchingContact : function(callboxid, entry){
-        // TODO: The strings below need to be localized
-        $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='relate_to_contact'>Relate to Contact</a></li>");
-        $("#dropdown-1_callbox_"+callboxid+" ul a.relate_to_contact").on("click", entry, function() {
-            YAAI.openPopupNoMatchingContact(entry)
-        });
-        $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='create_contact'>Create Contact</a></li>");
-        $("#dropdown-1_callbox_"+callboxid+" ul a.create_contact").on("click", entry, function() {
-            YAAI.createContact(entry)
-        });
-        $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='block_number'>Block Number</a></li>");
-        $("#dropdown-1_callbox_"+callboxid+" ul a.block_number").on("click", {
-            entry: entry, 
-            callboxid: callboxid
-        }, function() {
-            YAAI.showBlockNumberDialog(callboxid, entry)
-        });
+
     },
     
     createCallBoxWithSingleMatchingContact : function(callboxid, context, entry){

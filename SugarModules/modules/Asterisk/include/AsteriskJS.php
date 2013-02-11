@@ -56,8 +56,7 @@ class AsteriskJS {
             $fop_user = $GLOBALS['current_user']->asterisk_fop_user_c;
             $fop_pass = $GLOBALS['current_user']->asterisk_fop_pass_c;
             $fop_url = $GLOBALS['sugar_config']['asterisk_fop_url'];
-            $fop_enabled = !empty($fop_url);
-            $transfer_enabled = "true"; // TODO replace with config option
+            $fop_enabled = !empty($fop_url) ? 1 : 0;
 
             //JS Global Variables
             echo '<script type="text/javascript">window.yaai_poll_rate = ' . $poll_rate . ';</script>';
@@ -66,8 +65,12 @@ class AsteriskJS {
             echo '<script type="text/javascript">window.yaai_fop_user = "' . $fop_user . '";</script>';
             echo '<script type="text/javascript">window.yaai_fop_pass = "' . $fop_pass . '";</script>';
             echo '<script type="text/javascript">window.yaai_fop_url= "' . $fop_url . '";</script>';
-            echo '<script type="text/javascript">window.yaai_fop_enabled= "' . $fop_enabled . '";</script>';
-            echo '<script type="text/javascript">window.yaai_show_transfer_button= "' . $transfer_enabled . '";</script>';
+            echo '<script type="text/javascript">window.yaai_fop_enabled= ' . $fop_enabled . ';</script>';
+            echo '<script type="text/javascript">window.yaai_show_transfer_button= ' . $GLOBALS['sugar_config']['asterisk_transfer_button_enabled'] . ';</script>';
+            echo '<script type="text/javascript">window.yaai_relate_to_account_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_account_enabled'] . ';</script>';
+            echo '<script type="text/javascript">window.yaai_relate_to_contact_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_contact_enabled'] . ';</script>';
+            echo '<script type="text/javascript">window.yaai_create_new_contact_enabled = ' . $GLOBALS['sugar_config']['asterisk_create_new_contact_enabled'] . ';</script>';
+            echo '<script type="text/javascript">window.yaai_block_button_enabled = ' . $GLOBALS['sugar_config']['asterisk_block_button_enabled'] . ';</script>';
 
             echo '<script type="text/javascript"> if (!window.console) console = {log: function() {}}; </script>'; // Prevents bug in IE (See Issue #108)
 
