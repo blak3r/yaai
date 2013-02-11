@@ -17,3 +17,4 @@ copyToDir.*
 *tplOut.txt
 .DS_Store
 /nbproject/private/
+ca-bundle-mozilla.crt

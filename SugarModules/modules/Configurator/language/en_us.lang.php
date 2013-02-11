@@ -106,4 +106,17 @@ $mod_strings['LBL_ASTERISK_RECORDINGS_PATH_DESC'] = 'NOT YET RELEASED - This is 
 $mod_strings['LBL_ASTERISK_FOP_URL'] = 'Flash Operator Panel URL';
 $mod_strings['LBL_ASTERISK_FOP_URL_DESC'] = 'If you have the FOP2 extension installed on your asterisk box, specify the URL to use here.  Leave it blank to leave it disabled.';
 
+$mod_strings['LBL_ASTERISK_FOP_MASTER_PASSWORD'] = 'FOP2 Master Pass (optional)';
+$mod_strings['LBL_ASTERISK_BLOCK_BUTTON_ENABLED'] = 'Show Block Call';
+$mod_strings['LBL_ASTERISK_FOP_BUTTON_ENABLED'] = 'Show FOP2 Button';
+$mod_strings['LBL_ASTERISK_TRANSFER_BUTTON_ENABLED'] = 'Show Transfer Button';
+$mod_strings['LBL_ASTERISK_RELATE_TO_ACCOUNT_ENABLED'] = 'Show Relate to Account';
+$mod_strings['LBL_ASTERISK_RELATE_TO_CONTACT_ENABLED'] = 'Show Relate To Contact';
+$mod_strings['LBL_ASTERISK_CREATE_NEW_CONTACT_ENABLED'] = 'Show Create New Contact';
+$mod_strings['LBL_ASTERISK_MAX_POPUPS'] = 'Sets the Max Call Popups';
+$mod_strings['LBL_ASTERISK_FILTERED_CALL_STATES'] = 'Filtered Call States';
+$mod_strings['LBL_ASTERISK_WINDOW_HEIGHT'] = 'Custom Window Height';
+$mod_strings['LBL_ASTERISK_CALLINIZE_ORGANIZATION_KEY'] = 'Organization Key';
+$mod_strings['LBL_ASTERISK_CALLINIZE_ORGANIZATION_SECRET'] = 'Organization Secret';
+
 ?>

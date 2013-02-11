@@ -43,6 +43,7 @@
 
 <BR/>
 <img src="http://www.blakerobertson.com/ext/yaai-config-logo-26.png" alt="YAAI Logo"><br>
+<img src="https://gitimg.com/blak3r/yaai/config-v3/track" alt="Config Logo"><br>
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
 <tr>
@@ -67,25 +68,12 @@
     <!-- ------------------- [ PASTE OUTPUT OF CONFIGURATORGENERATORUTIL BELOW THIS LINE ]----------------------------- -->
 
 
+
     <TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h3>Asterisk Server Settings</h3></TD></tr>
 
 
 
     <TR>
-
-        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_HOST}
-        {if !empty($MOD.LBL_ASTERISK_HOST_DESC)}
-            [<a href="#" title="{$MOD.LBL_ASTERISK_HOST_DESC}">?</a>]:
-        {/if}
-        </td>
-        <td width="25%" class="dataField">
-        {if empty($config.asterisk_host )}
-            {assign var='asterisk_host' value=$asterisk_config.asterisk_host}
-            {else}
-            {assign var='asterisk_host' value=$config.asterisk_host}
-        {/if}
-            <input type='textbox' name='asterisk_host' size="45" value='{$asterisk_host}'>
-        </td>
 
         <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_PORT}
         {if !empty($MOD.LBL_ASTERISK_PORT_DESC)}
@@ -101,8 +89,6 @@
             <input type='int' name='asterisk_port' size="45" value='{$asterisk_port}'>
         </td>
 
-    <TR>
-
         <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_USER}
         {if !empty($MOD.LBL_ASTERISK_USER_DESC)}
             [<a href="#" title="{$MOD.LBL_ASTERISK_USER_DESC}">?</a>]:
@@ -116,6 +102,10 @@
         {/if}
             <input type='textbox' name='asterisk_user' size="45" value='{$asterisk_user}'>
         </td>
+
+
+
+    <TR>
 
         <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_SECRET}
         {if !empty($MOD.LBL_ASTERISK_SECRET_DESC)}
@@ -131,7 +121,7 @@
             <input type='textbox' name='asterisk_secret' size="45" value='{$asterisk_secret}'>
         </td>
 
-
+        <TD>&nbsp;</TD><TD>&nbsp;</TD> </tr>
 
     <TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h3>SugarCRM SOAP Settings</h3></TD></tr>
 
@@ -300,6 +290,24 @@
         </td>
 
 
+
+    <TR>
+
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_DIGITS_TO_MATCH}
+        {if !empty($MOD.LBL_ASTERISK_DIGITS_TO_MATCH_DESC)}
+            [<a href="#" title="{$MOD.LBL_ASTERISK_DIGITS_TO_MATCH_DESC}">?</a>]:
+        {/if}
+        </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_digits_to_match )}
+            {assign var='asterisk_digits_to_match' value=$asterisk_config.asterisk_digits_to_match}
+            {else}
+            {assign var='asterisk_digits_to_match' value=$config.asterisk_digits_to_match}
+        {/if}
+            <input type='textbox' name='asterisk_digits_to_match' size="45" value='{$asterisk_digits_to_match}'>
+        </td>
+
+        <TD>&nbsp;</TD><TD>&nbsp;</TD> </tr>
 
     <TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h3>Misc</h3></TD></tr>
 
@@ -503,8 +511,11 @@
             <input type='textbox' name='asterisk_log_file' size="45" value='{$asterisk_log_file}'>
         </td>
 
+        <TD>&nbsp;</TD><TD>&nbsp;</TD> </tr>
 
     <TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h3>Flash Operator Panel Addon</h3></TD></tr>
+
+
 
     <TR>
 
@@ -522,9 +533,206 @@
             <input type='textbox' name='asterisk_fop_url' size="45" value='{$asterisk_fop_url}'>
         </td>
 
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_FOP_MASTER_PASSWORD}
+        {if !empty($MOD.LBL_ASTERISK_FOP_MASTER_PASSWORD_DESC)}
+            [<a href="#" title="{$MOD.LBL_ASTERISK_FOP_MASTER_PASSWORD_DESC}">?</a>]:
+        {/if}
+        </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_fop_master_password )}
+            {assign var='asterisk_fop_master_password' value=$asterisk_config.asterisk_fop_master_password}
+            {else}
+            {assign var='asterisk_fop_master_password' value=$config.asterisk_fop_master_password}
+        {/if}
+            <input type='textbox' name='asterisk_fop_master_password' size="45" value='{$asterisk_fop_master_password}'>
+        </td>
+
+
+
+    <TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h3>Popup UI</h3></TD></tr>
+
+
+
+    <TR>
+
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_BLOCK_BUTTON_ENABLED}
+        {if !empty($MOD.LBL_ASTERISK_BLOCK_BUTTON_ENABLED_DESC)}
+            [<a href="#" title="{$MOD.LBL_ASTERISK_BLOCK_BUTTON_ENABLED_DESC}">?</a>]:
+        {/if}
+        </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_block_button_enabled )}
+            {assign var='asterisk_block_button_enabled' value=$asterisk_config.asterisk_block_button_enabled}
+            {else}
+            {assign var='asterisk_block_button_enabled' value=$config.asterisk_block_button_enabled}
+        {/if}
+            <input type='textbox' name='asterisk_block_button_enabled' size="45" value='{$asterisk_block_button_enabled}'>
+        </td>
+
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_FOP_BUTTON_ENABLED}
+        {if !empty($MOD.LBL_ASTERISK_FOP_BUTTON_ENABLED_DESC)}
+            [<a href="#" title="{$MOD.LBL_ASTERISK_FOP_BUTTON_ENABLED_DESC}">?</a>]:
+        {/if}
+        </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_fop_button_enabled )}
+            {assign var='asterisk_fop_button_enabled' value=$asterisk_config.asterisk_fop_button_enabled}
+            {else}
+            {assign var='asterisk_fop_button_enabled' value=$config.asterisk_fop_button_enabled}
+        {/if}
+            <input type='textbox' name='asterisk_fop_button_enabled' size="45" value='{$asterisk_fop_button_enabled}'>
+        </td>
+
+
+
+    <TR>
+
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_TRANSFER_BUTTON_ENABLED}
+        {if !empty($MOD.LBL_ASTERISK_TRANSFER_BUTTON_ENABLED_DESC)}
+            [<a href="#" title="{$MOD.LBL_ASTERISK_TRANSFER_BUTTON_ENABLED_DESC}">?</a>]:
+        {/if}
+        </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_transfer_button_enabled )}
+            {assign var='asterisk_transfer_button_enabled' value=$asterisk_config.asterisk_transfer_button_enabled}
+            {else}
+            {assign var='asterisk_transfer_button_enabled' value=$config.asterisk_transfer_button_enabled}
+        {/if}
+            <input type='textbox' name='asterisk_transfer_button_enabled' size="45" value='{$asterisk_transfer_button_enabled}'>
+        </td>
+
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_RELATE_TO_ACCOUNT_ENABLED}
+        {if !empty($MOD.LBL_ASTERISK_RELATE_TO_ACCOUNT_ENABLED_DESC)}
+            [<a href="#" title="{$MOD.LBL_ASTERISK_RELATE_TO_ACCOUNT_ENABLED_DESC}">?</a>]:
+        {/if}
+        </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_relate_to_account_enabled )}
+            {assign var='asterisk_relate_to_account_enabled' value=$asterisk_config.asterisk_relate_to_account_enabled}
+            {else}
+            {assign var='asterisk_relate_to_account_enabled' value=$config.asterisk_relate_to_account_enabled}
+        {/if}
+            <input type='textbox' name='asterisk_relate_to_account_enabled' size="45" value='{$asterisk_relate_to_account_enabled}'>
+        </td>
+
+
+
+    <TR>
+
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_RELATE_TO_CONTACT_ENABLED}
+        {if !empty($MOD.LBL_ASTERISK_RELATE_TO_CONTACT_ENABLED_DESC)}
+            [<a href="#" title="{$MOD.LBL_ASTERISK_RELATE_TO_CONTACT_ENABLED_DESC}">?</a>]:
+        {/if}
+        </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_relate_to_contact_enabled )}
+            {assign var='asterisk_relate_to_contact_enabled' value=$asterisk_config.asterisk_relate_to_contact_enabled}
+            {else}
+            {assign var='asterisk_relate_to_contact_enabled' value=$config.asterisk_relate_to_contact_enabled}
+        {/if}
+            <input type='textbox' name='asterisk_relate_to_contact_enabled' size="45" value='{$asterisk_relate_to_contact_enabled}'>
+        </td>
+
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_CREATE_NEW_CONTACT_ENABLED}
+        {if !empty($MOD.LBL_ASTERISK_CREATE_NEW_CONTACT_ENABLED_DESC)}
+            [<a href="#" title="{$MOD.LBL_ASTERISK_CREATE_NEW_CONTACT_ENABLED_DESC}">?</a>]:
+        {/if}
+        </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_create_new_contact_enabled )}
+            {assign var='asterisk_create_new_contact_enabled' value=$asterisk_config.asterisk_create_new_contact_enabled}
+            {else}
+            {assign var='asterisk_create_new_contact_enabled' value=$config.asterisk_create_new_contact_enabled}
+        {/if}
+            <input type='textbox' name='asterisk_create_new_contact_enabled' size="45" value='{$asterisk_create_new_contact_enabled}'>
+        </td>
+
+
+
+    <TR>
+
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_MAX_POPUPS}
+        {if !empty($MOD.LBL_ASTERISK_MAX_POPUPS_DESC)}
+            [<a href="#" title="{$MOD.LBL_ASTERISK_MAX_POPUPS_DESC}">?</a>]:
+        {/if}
+        </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_max_popups )}
+            {assign var='asterisk_max_popups' value=$asterisk_config.asterisk_max_popups}
+            {else}
+            {assign var='asterisk_max_popups' value=$config.asterisk_max_popups}
+        {/if}
+            <input type='textbox' name='asterisk_max_popups' size="45" value='{$asterisk_max_popups}'>
+        </td>
+
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_FILTERED_CALL_STATES}
+        {if !empty($MOD.LBL_ASTERISK_FILTERED_CALL_STATES_DESC)}
+            [<a href="#" title="{$MOD.LBL_ASTERISK_FILTERED_CALL_STATES_DESC}">?</a>]:
+        {/if}
+        </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_filtered_call_states )}
+            {assign var='asterisk_filtered_call_states' value=$asterisk_config.asterisk_filtered_call_states}
+            {else}
+            {assign var='asterisk_filtered_call_states' value=$config.asterisk_filtered_call_states}
+        {/if}
+            <input type='textbox' name='asterisk_filtered_call_states' size="45" value='{$asterisk_filtered_call_states}'>
+        </td>
+
+
+
+    <TR>
+
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_WINDOW_HEIGHT}
+        {if !empty($MOD.LBL_ASTERISK_WINDOW_HEIGHT_DESC)}
+            [<a href="#" title="{$MOD.LBL_ASTERISK_WINDOW_HEIGHT_DESC}">?</a>]:
+        {/if}
+        </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_window_height )}
+            {assign var='asterisk_window_height' value=$asterisk_config.asterisk_window_height}
+            {else}
+            {assign var='asterisk_window_height' value=$config.asterisk_window_height}
+        {/if}
+            <input type='textbox' name='asterisk_window_height' size="45" value='{$asterisk_window_height}'>
+        </td>
+
         <TD>&nbsp;</TD><TD>&nbsp;</TD> </tr>
 
-        <!-- ------------------- [ PASTE OUTPUT OF CONFIGURATORGENERATORUTIL ABOVE THIS LINE ]----------------------------- -->
+    <TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h3>Callinize</h3></TD></tr>
+
+
+
+    <TR>
+
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_CALLINIZE_ORGANIZATION_KEY}
+        {if !empty($MOD.LBL_ASTERISK_CALLINIZE_ORGANIZATION_KEY_DESC)}
+            [<a href="#" title="{$MOD.LBL_ASTERISK_CALLINIZE_ORGANIZATION_KEY_DESC}">?</a>]:
+        {/if}
+        </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_callinize_organization_key )}
+            {assign var='asterisk_callinize_organization_key' value=$asterisk_config.asterisk_callinize_organization_key}
+            {else}
+            {assign var='asterisk_callinize_organization_key' value=$config.asterisk_callinize_organization_key}
+        {/if}
+            <input type='textbox' name='asterisk_callinize_organization_key' size="45" value='{$asterisk_callinize_organization_key}'>
+        </td>
+
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_CALLINIZE_ORGANIZATION_SECRET}
+        {if !empty($MOD.LBL_ASTERISK_CALLINIZE_ORGANIZATION_SECRET_DESC)}
+            [<a href="#" title="{$MOD.LBL_ASTERISK_CALLINIZE_ORGANIZATION_SECRET_DESC}">?</a>]:
+        {/if}
+        </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_callinize_organization_secret )}
+            {assign var='asterisk_callinize_organization_secret' value=$asterisk_config.asterisk_callinize_organization_secret}
+            {else}
+            {assign var='asterisk_callinize_organization_secret' value=$config.asterisk_callinize_organization_secret}
+        {/if}
+            <input type='textbox' name='asterisk_callinize_organization_secret' size="45" value='{$asterisk_callinize_organization_secret}'>
+        </td>
+    <!-- ------------------- [ PASTE OUTPUT OF CONFIGURATORGENERATORUTIL ABOVE THIS LINE ]----------------------------- -->
 
 </table>
 </td></tr>

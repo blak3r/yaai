@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Asterisk SugarCRM Integration
  * (c) KINAMU Business Solutions AG 2009
@@ -37,6 +36,8 @@
  * Section 5 of the GNU General Public License version 3.
  *
  */
+
+require_once 'parse.php';
 //
 // Debug flags
 //
@@ -47,6 +48,7 @@ $log_memory_usage = 0;
 $memory_usage_log_file = "c:\mem_usage.csv";
 $memory_usage_log_frequency_secs = 10*60;
 $last_memory_log_entry = "";
+$last_push_time=0;
 
 // All Sugar timestamps are UTC
 date_default_timezone_set('UTC');
@@ -495,6 +497,15 @@ while (true) {
                             preg_match($rgCellRingRegex, $eChannel)) {
                         deleteCall($callRecordId);
                         logLine("INTERNAL call detected, Deleting Call Record $callRecordId\n");
+						
+						// HERE We detect if this is the outbound call to a cell phone... 
+						$query = "SELECT * FROM asterisk_log WHERE channel like '%" . $e['ConnectedLineNum'] . "%' AND callerID = '" . $tmpCallerID . "'";
+                        $result = mysql_checked_query($query);
+                        while ($pd = mysql_fetch_array($result)) {
+                            callinize_push("207", $tmpCallerID,$pd['call_record_id']); // FIXME
+                        }
+						
+						
                     } else {
                         //Asterisk Manager 1.1 (If the call is internal, this will be skipped)
                         if (preg_match($asteriskMatchInternal, $eChannel) && !preg_match($asteriskMatchInternal, $eDestination)) {
@@ -517,6 +528,9 @@ while (true) {
                             $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestamp_call, asterisk_dest_id,user_extension,inbound_extension) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s','%s','%s')", AMI_getUniqueIdFromEvent($e), $callRecordId, $eDestination, $eChannel, 'Dial', 'I', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $e['DestUniqueID'], $userExtension, $inboundExtension);
                             $callDirection = 'Inbound';
                             logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
+
+							//FIXME REENABLE
+                            //callinize_push($inboundExtension,$tmpCallerID, $callRecordId);
                         }
                         mysql_checked_query($query);
 
@@ -686,6 +700,7 @@ while (true) {
                                     $beanID = $direction['contact_id'];
                                     $beanType = "Contacts";
                                 } else {
+
                                     $assocAccount = findSugarAccountByPhoneNumber($rawData['callerID']);
                                     if ($assocAccount != FALSE) {
                                         logLine("Found a matching account, relating to account instead of contact\n");
@@ -1147,6 +1162,85 @@ exit(0);
 // ******************
 
 /**
+ * Method which initiates the callinize push notification to cell phones.
+ * @param $inboundExtension - this is the cell phone number to send push notification to
+ * @param $phone_number - this is the number of the person calling.
+ * @param $call_record_id - record id of the call.
+ * @return bool
+ */
+    function callinize_push($inboundExtension,$phone_number, $call_record_id)
+    {
+        global $last_push_time;
+        $now_time = time();
+        $duration = abs($last_push_time - $now_time);
+        if( strlen($inboundExtension) < 4 && $duration > 30) {
+            $last_push_time = time();
+            logLine("### Callinize START ####");
+            logLine("Last Push was $duration secs ago");
+
+            $assocAccount = findSugarAccountByPhoneNumber($phone_number);
+            if ($assocAccount != FALSE) {
+                logLine("Found a matching account, relating to account instead of contact\n");
+                $beanID = $assocAccount['values']['id'];
+                $beanType = $assocAccount['type'];
+                $parentType = 'Accounts';
+                $parentID = $beanID;
+            } else {
+                $assoSugarObject = findSugarObjectByPhoneNumber($phone_number);
+                $beanID = $assoSugarObject['values']['id'];
+                $beanType = $assoSugarObject['type'];
+            }
+            // FIXME doesn't handle multiple matching contacts right now.
+            logLine(" Details: " . $call_record_id . " " . $beanID . " " . $beanType . " " . $inboundExtension);
+
+            // GET Contact Info
+            $sql = "select contacts.*, accounts.name from contacts join accounts_contacts on contacts.id = accounts_contacts.contact_id join accounts on accounts_contacts.account_id = accounts.id where contacts.id = '$beanID'";
+            $queryResult = mysql_checked_query($sql);
+            if ($queryResult === FALSE) {
+                logLine("! Contact lookup failed");
+                return FALSE;
+            }
+            else {
+                $row = mysql_fetch_assoc($queryResult);
+            }
+
+            // TODO Finalize exactly what we let the backend handle... $body below is all the contact info.
+            $body = json_encode($row);
+
+            $c = array();
+            $c['caller_name'] = $row['first_name'] . " " . $row['last_name'];
+            $c['caller_account'] = $row['name'];
+            $c['caller_description'] = $row['description'];
+            $c['caller_title'] = $row['title'];
+            $c['crm_id'] = $row['id'];
+            $c['call_record_id'] = $call_record_id;
+            $c['caller_phone'] = $phone_number;
+            $c['push_to_phone'] = $inboundExtension;
+
+            if( !empty($row['first_name']) ) {
+                $pushMessage = "x$inboundExtension: {$row['first_name']} {$row['last_name']},{$row['title']}\n{$row['name']}\nLead\n{$row['description']}";
+            }
+            else {
+                require_once 'include/opencnam.php';
+                $opencnam = new opencnam();
+                $callerid = $opencnam->fetch($phone_number);
+                $callerIdInfo = "";
+                if( !empty($callerid) ) {
+                    $callerIdInfo = "CallerID: " . $callerid;
+                }
+                $pushMessage = "x$inboundExtension: Not in CRM\n" . $callerIdInfo;
+            }
+            $c['message'] = $pushMessage;
+
+            $parse = new ParseBackendWrapper();
+            $parse->customCodeMethod('send_push', $c);
+    }
+    else {
+        logLine("Callinize Push Surpressed... last push was $duration secs ago");
+    }
+}
+
+/**
  * Removes calls from asterisk_log that have expired or closed.
  * 1) Call Popup Closed Manually by user in sugar.
  * 2) Call has been hungup for at least an hour
@@ -1204,6 +1298,7 @@ function getTimestamp() {
 
 function dumpEvent(&$event) {
     // Skip 'Newexten' events - there just toooo many of 'em || For Asterisk manager 1.1 i choose to ignore another stack of events cause the log is populated with useless events
+
     if ($event['Event'] === 'Newexten' || $event['Event'] == 'UserEvent' || $event['Event'] == 'AGIExec' || $event['Event'] == 'Newchannel' || $event['Event'] == 'Newstate' || $event['Event'] == 'ExtensionStatus') {
         LogLine("! AMI Event '" . $event['Event'] . " suppressed.\n");
         return;
