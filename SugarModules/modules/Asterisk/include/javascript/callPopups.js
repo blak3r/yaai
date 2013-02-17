@@ -98,6 +98,7 @@ var YAAI = {
        if($('#callbox_'+callboxid).attr('id') == undefined){
         var html;
         var template = Handlebars.templates['call-template.html'];
+        // Creates the modstrings needed by the template
         var context = {
             callbox_id : 'callbox_' + callboxid,
             title : entry['title'],
@@ -233,30 +234,30 @@ var YAAI = {
             }).show();
 
         if( window.yaai_relate_to_contact_enabled ) {
-            $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='relate_to_contact'>Relate to Contact</a></li>");
+            $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='relate_to_contact'>"+entry['mod_strings']['RELATE_TO_CONTACT']+"</a></li>");
             $("#dropdown-1_callbox_"+callboxid+" ul a.relate_to_contact").on("click", entry, function() {
-                YAAI.openPopupNoMatchingContact(entry)
+                YAAI.openContactRelatePopup(entry)
             });
         }
 
         // TODO create
         if( window.yaai_relate_to_account_enabled ) {
-            $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='relate_to_account'>Relate to Account</a></li>");
+            $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='relate_to_account'>"+entry['mod_strings']['RELATE_TO_ACCOUNT']+"</a></li>");
             $("#dropdown-1_callbox_"+callboxid+" ul a.relate_to_account").on("click", entry, function() {
-                alert("TODO Action isn't defined yet");
-                //YAAI.openPopupNoMatchingContact(entry)
+                alert("This isn't fully implemented yet, the popup to select account will appear but it will not save.");
+                YAAI.openAccountRelatePopup(entry);
             });
         }
 
         if( window.yaai_create_new_contact_enabled ) {
-            $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='create_contact'>Create Contact</a></li>");
+            $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='create_contact'>"+entry['mod_strings']['CREATE_NEW_CONTACT']+"</a></li>");
             $("#dropdown-1_callbox_"+callboxid+" ul a.create_contact").on("click", entry, function() {
                 YAAI.createContact(entry)
             });
         }
 
         if( window.yaai_block_button_enabled ) {
-            $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='block_number'>Block Number</a></li>");
+            $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='block_number'>"+entry['mod_strings']['BLOCK_NUMBER']+"</a></li>");
             $("#dropdown-1_callbox_"+callboxid+" ul a.block_number").on("click", {
                 entry: entry,
                 callboxid: callboxid
@@ -391,13 +392,10 @@ var YAAI = {
             });
         }
     },
-    openPopupNoMatchingContact : function(entry){
-        YAAI.openPopup(entry);  
-    },
-    
-    openPopup : function (entry){
+
+    openContactRelatePopup : function (entry){
         open_popup( "Contacts", 600, 400, "", true, true, {
-            "call_back_function":"YAAI.relate_popup_callback",
+            "call_back_function":"YAAI.relate_contact_popup_callback",
             "form_name": entry['call_record_id'],
             "field_to_name_array":{
                 "id":"relateContactId",
@@ -406,6 +404,18 @@ var YAAI = {
             }
         },"single",true);   
     },
+
+    openAccountRelatePopup : function (entry){
+        open_popup( "Accounts", 600, 400, "", true, true, {
+            "call_back_function":"YAAI.relate_account_popup_callback",
+            "form_name": entry['call_record_id'],
+            "field_to_name_array":{
+                "id":"relateAccountId",
+                "name":"relateAccountName"
+            }
+        },"single",true);
+    },
+
 
     showTransferMenu : function(entry, callboxid, exten ) {
         if( callboxid != '' ) {
@@ -461,14 +471,14 @@ var YAAI = {
         });  
     },
     
-    /*
+/*
  * Relate Contact Callback method.
  * This is called by the open_popup sugar call when a contact is selected.
  *
  * I basically copied the set_return method and added some stuff onto the bottom.  I couldn't figure out how to add
  * change events to my form elements.  This method wouldn't be needed if I figured that out.
  */
-    relate_popup_callback : function(popup_reply_data){
+    relate_contact_popup_callback : function(popup_reply_data){
         var from_popup_return2 = true;
         var form_name = popup_reply_data.form_name;
         var name_to_value_array = popup_reply_data.name_to_value_array;
@@ -502,6 +512,50 @@ var YAAI = {
         }
         
     },
+
+    /*
+     * Relate Contact Callback method.
+     * This is called by the open_popup sugar call when a contact is selected.
+     *
+     * I basically copied the set_return method and added some stuff onto the bottom.  I couldn't figure out how to add
+     * change events to my form elements.  This method wouldn't be needed if I figured that out.
+     */
+    relate_account_popup_callback : function(popup_reply_data){
+        var from_popup_return2 = true;
+        var form_name = popup_reply_data.form_name;
+        var name_to_value_array = popup_reply_data.name_to_value_array;
+
+        for (var the_key in name_to_value_array)
+        {
+            if(the_key == 'toJSON')
+            {
+                /* just ignore */
+            }
+            else
+            {
+                var displayValue=name_to_value_array[the_key].replace(/&amp;/gi,'&').replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/&#039;/gi,'\'').replace(/&quot;/gi,'"');
+                ;
+                if(window.document.forms[form_name] && window.document.forms[form_name].elements[the_key])
+                {
+                    window.document.forms[form_name].elements[the_key].value = displayValue;
+                    SUGAR.util.callOnChangeListers(window.document.forms[form_name].elements[the_key]);
+                }
+            }
+        }
+
+        // Everything above is from the default set_return method in parent_popup_helper.
+
+        var accountId = window.document.forms[form_name].elements['relateAccountId'].value;
+        if( accountId != null ) {
+            alert("YAAI.setAccountID not yet implemented!");
+            YAAI.setAccountID(form_name,accountId);
+        }
+        else {
+            alert("Error updating related Account");
+        }
+
+    },
+
 
     // DRAWING/UI FUNCTIONS
 

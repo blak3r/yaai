@@ -77,6 +77,11 @@ $mod_strings = array ( 'YAAI' => array(
     'SAVE'                          => 'Guardar',
     'ASTERISKLBL_USER_EXT'         => 'Ext de usuario',
     'ASTERISKLBL_INBOUND_EXT'      => 'Ext entrante',
+    'RELATE_TO_CONTACT'            => 'Relacionar to Contact',
+    'RELATE_TO_ACCOUNT'            => 'Relacionar to Cuenta',
+    'CREATE_NEW_ACCOUNT'           => 'Crear New Cuenta',
+    'CREATE_NEW_CONTACT'           => 'Crear New Contact',
+    'BLOCK_NUMBER'                 => 'Bloquear Número',
 )
 );
 

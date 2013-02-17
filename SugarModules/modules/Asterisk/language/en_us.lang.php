@@ -79,6 +79,13 @@ $mod_strings = array ( 'YAAI' => array(
     'SAVE'                          => 'Save Memo',
     'ASTERISKLBL_USER_EXT'         => 'User Ext',
     'ASTERISKLBL_INBOUND_EXT'      => 'Inbound Ext',
+    'RELATE_TO_CONTACT'            => 'Relate to Contact',
+    'RELATE_TO_ACCOUNT'            => 'Relate to Account',
+    'CREATE_NEW_ACCOUNT'           => 'Create New Account',
+    'CREATE_NEW_CONTACT'           => 'Create New Contact',
+    'BLOCK_NUMBER'                 => 'Block Number',
+
+
   )
   );
 
