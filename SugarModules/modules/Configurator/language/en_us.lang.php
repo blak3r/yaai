@@ -125,4 +125,10 @@ $mod_strings['LBL_ASTERISK_WINDOW_HEIGHT'] = 'Custom Window Height';
 $mod_strings['LBL_ASTERISK_CALLINIZE_USERNAME'] = 'Callinize Username';
 $mod_strings['LBL_ASTERISK_CALLINIZE_PASSWORD'] = 'Callinize Password';
 
+$mod_strings['LBL_ASTERISK_CONTACT_PHONE_FIELDS'] = "Contact Phone Fields";
+$mod_strings['LBL_ASTERISK_CONTACT_PHONE_FIELDS_DESC'] = "These are the phone fields that will be searched when trying to find matching contacts.  If you've created your own custom fields, you can add them to the list here.  Be sure to add: Comma separated field names and no spaces.";
+$mod_strings['LBL_ASTERISK_ACCOUNT_PHONE_FIELDS'] = "Account Phone Fields";
+$mod_strings['LBL_ASTERISK_CONTACT_PHONE_FIELDS_DESC'] = "These are the phone fields that will be searched when trying to find matching accounts.  If you've created your own custom fields, you can add them to the list here.  Be sure to add: Comma separated field names and no spaces.";
+
+
 ?>

@@ -589,6 +589,8 @@ function get_contacts($innerResultSet, $current_user, $row) {
 }
 
 function fetch_contacts_associated_to_phone_number($phoneToFind, $row, $current_user) {
+    global $sugar_config;
+
     $phoneToFind = ltrim($phoneToFind, '0');
     $phoneToFind = preg_replace('/\D/', '', $phoneToFind); // Removes and non digits such as + chars.
 
@@ -598,7 +600,54 @@ function fetch_contacts_associated_to_phone_number($phoneToFind, $row, $current_
     }
 
     if (strlen($phoneToFind) > 5) {
-        $sqlReplace = "
+
+       // TODO fix the join so that account is optional... I think just add INNER
+        // REMOVED: phone_work, phone_home, phone_mobile, phone_other,
+        $selectPortion = "SELECT c.id as contact_id, first_name, last_name, a.name as account_name, account_id "
+                . " FROM contacts c "
+                . " join contacts_cstm on c.id = contacts_cstm.id_c"
+                . " left join accounts_contacts ac on (c.id=ac.contact_id) and (ac.deleted='0' OR ac.deleted is null)"
+                . " left join accounts a on (ac.account_id=a.id) and (a.deleted='0' or a.deleted is null)";
+
+        if ($row['contact_id']) {
+            // log_entry("Quick where query\n", "c:/callListener.txt");
+            $wherePortion = " WHERE c.id='{$row['contact_id']}' and c.deleted='0'";
+        }
+        // We only do this expensive query if it's not already set!
+        else {
+            log_entry("Performing Expensive where query\n", "c:/callListener.txt");
+
+            $phoneFields = array();
+            // Here we add any custom contact fields.
+            if( !empty($sugar_config['asterisk_contact_phone_fields']) ) {
+                $customPhoneFields = explode(',', $sugar_config['asterisk_contact_phone_fields'] );
+                foreach ($customPhoneFields as $currCol) {
+                    array_push($phoneFields, sql_replace_phone_number($currCol, $phoneToFind) );
+                }
+            }
+
+            $phoneFieldsWherePortion = implode(' OR ', $phoneFields);
+
+            $wherePortion = " WHERE (" . $phoneFieldsWherePortion . ") and c.deleted='0'";
+           // log_entry("Where == " . $wherePortion, "c:/callListener.txt");
+
+        }
+
+        $queryContact = $selectPortion . $wherePortion;
+        //log_entry("QUERY: $queryContact\n","c:/callListener.txt");
+        return $current_user->db->query($queryContact, false);
+    }
+}
+
+/**
+ * returns a formatted string for inserting into a WHERE clause.
+ *
+ * @param $column_name
+ * @param $phoneNumber
+ * @return string
+ */
+function sql_replace_phone_number($column_name, $phoneNumber) {
+    $sqlReplace = "
 replace(
 replace(
 replace(
@@ -620,32 +669,7 @@ replace(
 '-', '')
 REGEXP '%s$' = 1
 ";
-
-
-        // TODO fix the join so that account is optional... I think just add INNER
-        $selectPortion = "SELECT c.id as contact_id, first_name, last_name, phone_work, phone_home, phone_mobile, phone_other, a.name as account_name, account_id "
-                . " FROM contacts c "
-                . " left join accounts_contacts ac on (c.id=ac.contact_id) and (ac.deleted='0' OR ac.deleted is null)"
-                . " left join accounts a on (ac.account_id=a.id) and (a.deleted='0' or a.deleted is null)";
-
-        if ($row['contact_id']) {
-            // log_entry("Quick where query\n", "c:/callListener.txt");
-            $wherePortion = " WHERE c.id='{$row['contact_id']}' and c.deleted='0'";
-        }
-        // We only do this expensive query if it's not already set!
-        else {
-            // log_entry("Performing Expensive where query\n", "c:/callListener.txt");
-            $wherePortion = " WHERE (";
-            $wherePortion .= sprintf($sqlReplace, "phone_work", $phoneToFind) . " OR ";
-            $wherePortion .= sprintf($sqlReplace, "phone_home", $phoneToFind) . " OR ";
-            $wherePortion .= sprintf($sqlReplace, "phone_other", $phoneToFind) . " OR ";
-            $wherePortion .= sprintf($sqlReplace, "assistant_phone", $phoneToFind) . " OR ";
-            $wherePortion .= sprintf($sqlReplace, "phone_mobile", $phoneToFind) . ") and c.deleted='0'";
-        }
-
-        $queryContact = $selectPortion . $wherePortion;
-        return $current_user->db->query($queryContact, false);
-    }
+    return sprintf($sqlReplace, $column_name, $phoneNumber);
 }
 
 /**

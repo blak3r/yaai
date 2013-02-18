@@ -590,36 +590,36 @@
 
 
 
-<TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h3>Callinize</h3></TD></tr>
+<TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h3>Phone Fields</h3></TD></tr>
 
 
 <TR>
 
-    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_CALLINIZE_USERNAME}
-      {if !empty($MOD.LBL_ASTERISK_CALLINIZE_USERNAME_DESC)}
-          [<a href="#" title="{$MOD.LBL_ASTERISK_CALLINIZE_USERNAME_DESC}">?</a>]:
+    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_CONTACT_PHONE_FIELDS}
+      {if !empty($MOD.LBL_ASTERISK_CONTACT_PHONE_FIELDS_DESC)}
+          [<a href="#" title="{$MOD.LBL_ASTERISK_CONTACT_PHONE_FIELDS_DESC}">?</a>]:
       {/if}
     </td>
     <td width="25%" class="dataField">
-    {if empty($config.asterisk_callinize_username )}
-        {assign var='asterisk_callinize_username' value=$asterisk_config.asterisk_callinize_username}
+    {if empty($config.asterisk_contact_phone_fields )}
+        {assign var='asterisk_contact_phone_fields' value=$asterisk_config.asterisk_contact_phone_fields}
     {else}
-        {assign var='asterisk_callinize_username' value=$config.asterisk_callinize_username}
+        {assign var='asterisk_contact_phone_fields' value=$config.asterisk_contact_phone_fields}
     {/if}
-        <input type='textbox' name='asterisk_callinize_username' size="45" value='{$asterisk_callinize_username}'>
+        <input type='textbox' name='asterisk_contact_phone_fields' size="45" value='{$asterisk_contact_phone_fields}'>
     </td>
 
-    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_CALLINIZE_PASSWORD}
-      {if !empty($MOD.LBL_ASTERISK_CALLINIZE_PASSWORD_DESC)}
-          [<a href="#" title="{$MOD.LBL_ASTERISK_CALLINIZE_PASSWORD_DESC}">?</a>]:
+    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_ACCOUNT_PHONE_FIELDS}
+      {if !empty($MOD.LBL_ASTERISK_ACCOUNT_PHONE_FIELDS_DESC)}
+          [<a href="#" title="{$MOD.LBL_ASTERISK_ACCOUNT_PHONE_FIELDS_DESC}">?</a>]:
       {/if}
     </td>
     <td width="25%" class="dataField">
-    {if empty($config.asterisk_callinize_password )}
-        {assign var='asterisk_callinize_password' value=$asterisk_config.asterisk_callinize_password}
+    {if empty($config.asterisk_account_phone_fields )}
+        {assign var='asterisk_account_phone_fields' value=$asterisk_config.asterisk_account_phone_fields}
     {else}
-        {assign var='asterisk_callinize_password' value=$config.asterisk_callinize_password}
+        {assign var='asterisk_account_phone_fields' value=$config.asterisk_account_phone_fields}
     {/if}
-        <input type='textbox' name='asterisk_callinize_password' size="45" value='{$asterisk_callinize_password}'>
+        <input type='textbox' name='asterisk_account_phone_fields' size="45" value='{$asterisk_account_phone_fields}'>
     </td>
 
