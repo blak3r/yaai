@@ -236,11 +236,12 @@ if ($argc > 1 && $argv[1] == "test") {
     $ext1 = 51;
     $ext2 = 52;
     //$extensions = (51,52,207);
-    $phones = array('4102152497', 'sdfasdf', '(267) 222-8385', '2672228385');
+    $phones = array('4102152497', '4108464565', 'sdfasdf', '(267) 222-8385', '2672228385');
 
     print "Entered test mode!";
 
     $obj = findSugarObjectByPhoneNumber("4102152497");
+    $obj = findSugarObjectByPhoneNumber("4108464565");
     print "findUserByAsteriskExtension(51) returned: " . findUserByAsteriskExtension("51") . "\n";
     print "findUserByAsteriskExtension(207) returned: " . findUserByAsteriskExtension("207") . "\n";
     print "findUserByAsteriskExtension(710) returned: " . findUserByAsteriskExtension('710') . "\n";
@@ -498,14 +499,14 @@ while (true) {
                         deleteCall($callRecordId);
                         logLine("INTERNAL call detected, Deleting Call Record $callRecordId\n");
 						
-						// HERE We detect if this is the outbound call to a cell phone... 
+						// HERE We detect if this is the outbound call to a cell phone...
+                        /*
 						$query = "SELECT * FROM asterisk_log WHERE channel like '%" . $e['ConnectedLineNum'] . "%' AND callerID = '" . $tmpCallerID . "'";
                         $result = mysql_checked_query($query);
                         while ($pd = mysql_fetch_array($result)) {
                             callinize_push("207", $tmpCallerID,$pd['call_record_id']); // FIXME
                         }
-						
-						
+                        */
                     } else {
                         //Asterisk Manager 1.1 (If the call is internal, this will be skipped)
                         if (preg_match($asteriskMatchInternal, $eChannel) && !preg_match($asteriskMatchInternal, $eDestination)) {
@@ -1496,7 +1497,7 @@ function findSugarAccountByPhoneNumber($aPhoneNumber) {
 //
 //
 function findSugarObjectByPhoneNumber($aPhoneNumber) {
-    global $soapClient, $soapSessionId;
+    global $soapClient, $soapSessionId, $sugar_config;
     logLine("### +++ find ContactByPhoneNumber($aPhoneNumber)\n");
 
     // Add if phonenumber .length == 10
@@ -1545,7 +1546,19 @@ function findSugarObjectByPhoneNumber($aPhoneNumber) {
     logLine(" findSugarObjectByPhoneNumber: Contact query components- Phone: $aPhoneNumber RegEx: $regje\n");
     //*******/
 
-
+    $phoneFields = array();
+    // Here we build the list of phone fields to search
+    if( !empty($sugar_config['asterisk_contact_phone_fields']) ) {
+        $customPhoneFields = explode(',', $sugar_config['asterisk_contact_phone_fields'] );
+        foreach ($customPhoneFields as $currCol) {
+            $tablePrefix = "contacts.";
+            if( endsWith($currCol,"_c") ) {
+                $tablePrefix = "contacts_cstm.";
+            }
+             array_push($phoneFields, $tablePrefix . $currCol . " REGEXP '" . $regje . "'" );
+        }
+    }
+    $phoneFieldsWherePortion = implode(' OR ', $phoneFields);
 
     $soapArgs = array(
         'session' => $soapSessionId,
@@ -1553,9 +1566,10 @@ function findSugarObjectByPhoneNumber($aPhoneNumber) {
         'select_fields' => array('id', 'account_id', 'first_name', 'last_name'),
         // 2nd version 'query' => "((contacts.phone_work = '$searchPattern') OR (contacts.phone_mobile = '$searchPattern') OR (contacts.phone_home = '$searchPattern') OR (contacts.phone_other = '$searchPattern'))", );
         // Original...
-//'query' => "((contacts.phone_work LIKE '$searchPattern') OR (contacts.phone_mobile LIKE '$searchPattern') OR (contacts.phone_home LIKE '$searchPattern') OR (contacts.phone_other LIKE '$searchPattern'))"
-// Liz Version: Only works on mysql
-        'query' => "contacts.phone_home REGEXP '$regje' OR contacts.phone_mobile REGEXP '$regje' OR contacts.phone_work REGEXP '$regje' OR contacts.phone_other REGEXP '$regje' OR contacts.phone_fax REGEXP '$regje'",
+        //'query' => "((contacts.phone_work LIKE '$searchPattern') OR (contacts.phone_mobile LIKE '$searchPattern') OR (contacts.phone_home LIKE '$searchPattern') OR (contacts.phone_other LIKE '$searchPattern'))"
+        // Liz Version: Only works on mysql
+        //'query' => "contacts.phone_home REGEXP '$regje' OR contacts.phone_mobile REGEXP '$regje' OR contacts.phone_work REGEXP '$regje' OR contacts.phone_other REGEXP '$regje' OR contacts.phone_fax REGEXP '$regje' OR phone_custom_c REGEXP '$regje'",
+        'query' => $phoneFieldsWherePortion,
     );
 
     // print "--- SOAP get_entry_list() ----- ARGS ----------------------------------------\n";

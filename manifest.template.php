@@ -162,7 +162,14 @@ $installdefs = array (
                                     'from' => '<basepath>/SugarModules/modules/Configurator/asterisk_configurator.tpl',
                                     'to' => 'custom/modules/Configurator/asterisk_configurator.tpl',
                                     ),
-							
+                              array (
+                                  'from' => '<basepath>/SugarModules/modules/Configurator/asterisk_configurator_table.tpl',
+                                  'to' => 'custom/modules/Configurator/asterisk_configurator_table.tpl',
+                              ),
+                              array (
+                                  'from' => '<basepath>/SugarModules/modules/Configurator/asterisk_config_meta.php',
+                                  'to' => 'custom/modules/Configurator/asterisk_config_meta.php',
+                              ),
                            
 							/*
 							array (

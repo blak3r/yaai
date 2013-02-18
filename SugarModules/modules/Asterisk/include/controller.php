@@ -214,7 +214,7 @@ function transferCall($extension, $call_record) {
 function blockNumber($number, $description) {
     $e164_number = formatPhoneNumberToE164($number);
     $description = trim($description);
-    $cmd = "ACTION: DBPut\r\nFamily: blacklist\r\nKey: {$e164_number}\r\nValue: {$description}\r\n\r\n\r\n\r\n";
+    $cmd = "ACTION: DBPut\r\nFamily: blacklist\r\nKey: {$e164_number}\r\nValue: {$description}\r\n\r\n";
     SendAMICommand($cmd);
 }
 
@@ -727,6 +727,13 @@ function get_title($contacts, $phone_number, $state, $mod_strings) {
             break;
     }
     $title = $title . " - " . $state;
+
+    // Limit title length (to prevent X from overflowing)
+    // TODO: handle this with CSS instead
+    if(strlen($title) > 24) {
+        $title = substr($title,0,24) . "...";
+    }
+
 
     return $title;
 }

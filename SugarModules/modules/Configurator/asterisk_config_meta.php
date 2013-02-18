@@ -30,23 +30,21 @@ $config_meta['asterisk_hide_call_popups_after_mins'] = array('default' => '60','
 
 $config_meta['asterisk_log_file'] = array('default' => '', 'section'=>'Logging');
 
-
 $config_meta['asterisk_opencnam_enabled'] = array('default' => 'true','section'=>'OpenCNAM');
 $config_meta['asterisk_opencnam_account_sid'] = array('default'=> '', 'section' => 'OpenCNAM');
 $config_meta['asterisk_opencnam_auth_token'] = array('default' => '', 'section'=>'OpenCNAM');
 
-
 $config_meta['asterisk_fop_url'] = array('default' => '', 'section'=>'Flash Operator Panel Addon');
 $config_meta['asterisk_fop_master_password'] = array('default' => '', 'section'=>'Flash Operator Panel Addon');
 
-$config_meta['asterisk_block_button_enabled'] = array('default' => 'false', 'section'=>'Popup UI');
+$config_meta['asterisk_block_button_enabled'] = array('default' => '0', 'section'=>'Popup UI');
 //$config_meta['asterisk_fop_button_enabled'] = array('default' => 'false', 'section'=>'Popup UI');
-$config_meta['asterisk_transfer_button_enabled'] = array('default' => 'true', 'section'=>'Popup UI');
-$config_meta['asterisk_relate_to_account_enabled'] = array('default' => 'true', 'section'=>'Popup UI');
-$config_meta['asterisk_relate_to_contact_enabled'] = array('default' => 'true', 'section'=>'Popup UI');
-$config_meta['asterisk_create_new_contact_enabled'] = array('default' => 'true', 'section'=>'Popup UI');
-$config_meta['asterisk_max_popups'] = array('default' => '5', 'section'=>'Popup UI');
-$config_meta['asterisk_filtered_call_states'] = array('default' => '', 'section'=>'Popup UI');
+$config_meta['asterisk_transfer_button_enabled'] = array('default' => '1', 'section'=>'Popup UI');
+$config_meta['asterisk_relate_to_account_enabled'] = array('default' => '0', 'section'=>'Popup UI');
+$config_meta['asterisk_relate_to_contact_enabled'] = array('default' => '1', 'section'=>'Popup UI');
+$config_meta['asterisk_create_new_contact_enabled'] = array('default' => '1', 'section'=>'Popup UI');
+//$config_meta['asterisk_max_popups'] = array('default' => '5', 'section'=>'Popup UI');
+//$config_meta['asterisk_filtered_call_states'] = array('default' => '', 'section'=>'Popup UI');
 $config_meta['asterisk_window_height'] = array('default' => '', 'section'=>'Popup UI');
 
 /*
@@ -55,7 +53,7 @@ $config_meta['asterisk_callinize_password'] = array('default' => '', 'section'=>
 */
 
 $config_meta['asterisk_contact_phone_fields'] = array('default' => 'phone_work,phone_home,phone_mobile,phone_other,assistant_phone', 'section' => 'Phone Fields');
-$config_meta['asterisk_account_phone_fields'] = array('default' => 'phone_office,phone_alternate', 'section' => 'Phone Fields');
+//$config_meta['asterisk_account_phone_fields'] = array('default' => 'phone_office,phone_alternate', 'section' => 'Phone Fields');
 
 /*
 $config_meta['asterisk_recordings_enabled'] = array('default'=> 'false', 'section'=>'Recordings');

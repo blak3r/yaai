@@ -74,9 +74,9 @@ $manifest = array (
                    'icon' => '',
                    'is_uninstallable' => true,
                    'name' => 'Asterisk SugarCRM Connector',
-                   'published_date' => '2013-Feb-11 03:02',
+                   'published_date' => '2013-Feb-18 04:02',
                    'type' => 'module',
-                   'version' => '3.2.2.',
+                   'version' => '3.2.3c',
                    'remove_tables' => 'true',  /** This does absolutely nothing since our asterisk log table is created manually instead of as a bean **/
                    );
 
@@ -168,7 +168,14 @@ $installdefs = array (
                                     'from' => '<basepath>/SugarModules/modules/Configurator/asterisk_configurator.tpl',
                                     'to' => 'custom/modules/Configurator/asterisk_configurator.tpl',
                                     ),
-							
+                              array (
+                                  'from' => '<basepath>/SugarModules/modules/Configurator/asterisk_configurator_table.tpl',
+                                  'to' => 'custom/modules/Configurator/asterisk_configurator_table.tpl',
+                              ),
+                              array (
+                                  'from' => '<basepath>/SugarModules/modules/Configurator/asterisk_config_meta.php',
+                                  'to' => 'custom/modules/Configurator/asterisk_config_meta.php',
+                              ),
                            
 							/*
 							array (

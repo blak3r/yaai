@@ -542,38 +542,6 @@
         <input type='textbox' name='asterisk_create_new_contact_enabled' size="45" value='{$asterisk_create_new_contact_enabled}'>
     </td>
 
-    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_MAX_POPUPS}
-      {if !empty($MOD.LBL_ASTERISK_MAX_POPUPS_DESC)}
-          [<a href="#" title="{$MOD.LBL_ASTERISK_MAX_POPUPS_DESC}">?</a>]:
-      {/if}
-    </td>
-    <td width="25%" class="dataField">
-    {if empty($config.asterisk_max_popups )}
-        {assign var='asterisk_max_popups' value=$asterisk_config.asterisk_max_popups}
-    {else}
-        {assign var='asterisk_max_popups' value=$config.asterisk_max_popups}
-    {/if}
-        <input type='textbox' name='asterisk_max_popups' size="45" value='{$asterisk_max_popups}'>
-    </td>
-
-
-
-<TR>
-
-    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_FILTERED_CALL_STATES}
-      {if !empty($MOD.LBL_ASTERISK_FILTERED_CALL_STATES_DESC)}
-          [<a href="#" title="{$MOD.LBL_ASTERISK_FILTERED_CALL_STATES_DESC}">?</a>]:
-      {/if}
-    </td>
-    <td width="25%" class="dataField">
-    {if empty($config.asterisk_filtered_call_states )}
-        {assign var='asterisk_filtered_call_states' value=$asterisk_config.asterisk_filtered_call_states}
-    {else}
-        {assign var='asterisk_filtered_call_states' value=$config.asterisk_filtered_call_states}
-    {/if}
-        <input type='textbox' name='asterisk_filtered_call_states' size="45" value='{$asterisk_filtered_call_states}'>
-    </td>
-
     <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_WINDOW_HEIGHT}
       {if !empty($MOD.LBL_ASTERISK_WINDOW_HEIGHT_DESC)}
           [<a href="#" title="{$MOD.LBL_ASTERISK_WINDOW_HEIGHT_DESC}">?</a>]:
@@ -609,17 +577,4 @@
         <input type='textbox' name='asterisk_contact_phone_fields' size="45" value='{$asterisk_contact_phone_fields}'>
     </td>
 
-    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_ACCOUNT_PHONE_FIELDS}
-      {if !empty($MOD.LBL_ASTERISK_ACCOUNT_PHONE_FIELDS_DESC)}
-          [<a href="#" title="{$MOD.LBL_ASTERISK_ACCOUNT_PHONE_FIELDS_DESC}">?</a>]:
-      {/if}
-    </td>
-    <td width="25%" class="dataField">
-    {if empty($config.asterisk_account_phone_fields )}
-        {assign var='asterisk_account_phone_fields' value=$asterisk_config.asterisk_account_phone_fields}
-    {else}
-        {assign var='asterisk_account_phone_fields' value=$config.asterisk_account_phone_fields}
-    {/if}
-        <input type='textbox' name='asterisk_account_phone_fields' size="45" value='{$asterisk_account_phone_fields}'>
-    </td>
-
+<TD>&nbsp;</TD><TD>&nbsp;</TD> </tr>
