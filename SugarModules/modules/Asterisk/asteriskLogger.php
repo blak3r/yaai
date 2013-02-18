@@ -1444,20 +1444,21 @@ function decode_name_value_list(&$nvl) {
 // Attempt to find a Sugar Account with a matching phone number.
 //
 function findSugarAccountByPhoneNumber($aPhoneNumber) {
-    global $soapClient, $soapSessionId;
+    global $soapClient, $soapSessionId, $sugar_config;
     logLine("# +++ find AccountByPhoneNumber($aPhoneNumber)\n");
 
     // Add if phonenumber .length == 10
     $searchPattern = $aPhoneNumber;
 
     $aPhoneNumber = preg_replace('/\D/', '', $aPhoneNumber); // removes everything that isn't a digit.
-    if (preg_match('/([0-9]{10})$/', $aPhoneNumber, $matches)) {
+    if (preg_match('/([0-9]{' . $sugar_config['asterisk_digits_to_match'] . '})$/', $aPhoneNumber, $matches)) {
         $aPhoneNumber = $matches[1];
     }
 
     $regje = preg_replace('/(\d)/', '$1\[^\\d\]*', $aPhoneNumber);
     $regje = '(' . $regje . ')$';
 
+    // TODO make this dynamic from config (see contacts below for example)
     $soapArgs = array(
         'session' => $soapSessionId,
         'module_name' => 'Accounts',
@@ -1535,8 +1536,7 @@ function findSugarObjectByPhoneNumber($aPhoneNumber) {
     // TODO figure out what that 2nd case could be the elseif part...
 
     $aPhoneNumber = preg_replace('/\D/', '', $aPhoneNumber); // removes everything that isn't a digit.
-    // TODO make the '7' below a configurable parameter... some may prefer to match on 10.
-    if (preg_match('/([0-9]{7})$/', $aPhoneNumber, $matches)) {
+    if (preg_match('/([0-9]{' . $sugar_config['asterisk_digits_to_match'] . '})$/', $aPhoneNumber, $matches)) {
         $aPhoneNumber = $matches[1];
     }
 
