@@ -59,7 +59,7 @@ var YAAI = {
         // So, now I only schedule a setTimeout upon a successful AJAX call.  The only downside of this is if there is a legit reason
         // the call does fail it'll never try again..
         $.getJSON('index.php?entryPoint=AsteriskController&action=get_calls', function(data){
-            console.log(data);
+            YAAI.log(data);
             var callboxids = [];
             
             //if the loop variable is true then setup the loop, if it is false then don't, because a one-time refresh was called'
@@ -75,11 +75,11 @@ var YAAI = {
 	    
                         if(YAAI.callBoxHasNotAlreadyBeenCreated(callboxid)) {
                             YAAI.createCallBox(callboxid, entry);
-                            console.log('create');
+                            YAAI.log('create');
                         }
                         else {  
                             YAAI.updateCallBox(callboxid, entry);
-                            console.log('update');
+                            YAAI.log('update');
                         }
                     }
                 });  
@@ -88,7 +88,7 @@ var YAAI = {
             YAAI.wasCallBoxClosedInAnotherBrowserWindow(callboxids);
         })
         .error(function(){
-            YAAI.log('there is a problem with getJSON in checkForNewStates()');
+            YAAI.log('There is a problem with getJSON in checkForNewStates()');
         });	
     },
 
@@ -225,6 +225,7 @@ var YAAI = {
     },
 
     bindActionDropdown : function(callboxid,entry){
+        YAAI.log("Binding Action Dropdown for "+ callboxid);
          $('#callbox_'+callboxid).find('.callbox_action').button({
                 icons: {
                     primary: "ui-icon-flag",
@@ -234,6 +235,7 @@ var YAAI = {
             }).show();
 
         if( window.yaai_relate_to_contact_enabled ) {
+            YAAI.log("  Adding Relate to Contact");
             $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='relate_to_contact'>"+entry['mod_strings']['RELATE_TO_CONTACT']+"</a></li>");
             $("#dropdown-1_callbox_"+callboxid+" ul a.relate_to_contact").on("click", entry, function() {
                 YAAI.openContactRelatePopup(entry)
@@ -242,6 +244,7 @@ var YAAI = {
 
         // TODO create
         if( window.yaai_relate_to_account_enabled ) {
+            YAAI.log("  Adding Relate to Account");
             $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='relate_to_account'>"+entry['mod_strings']['RELATE_TO_ACCOUNT']+"</a></li>");
             $("#dropdown-1_callbox_"+callboxid+" ul a.relate_to_account").on("click", entry, function() {
                 alert("This isn't fully implemented yet, the popup to select account will appear but it will not save.");
@@ -250,6 +253,7 @@ var YAAI = {
         }
 
         if( window.yaai_create_new_contact_enabled ) {
+            YAAI.log("  Adding Create New Contact");
             $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='create_contact'>"+entry['mod_strings']['CREATE_NEW_CONTACT']+"</a></li>");
             $("#dropdown-1_callbox_"+callboxid+" ul a.create_contact").on("click", entry, function() {
                 YAAI.createContact(entry)
@@ -257,6 +261,7 @@ var YAAI = {
         }
 
         if( window.yaai_block_button_enabled ) {
+            YAAI.log("  Adding Block Button Enabled");
             $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='block_number'>"+entry['mod_strings']['BLOCK_NUMBER']+"</a></li>");
             $("#dropdown-1_callbox_"+callboxid+" ul a.block_number").on("click", {
                 entry: entry,
@@ -649,7 +654,7 @@ var YAAI = {
 
            if(old_contact_id != new_contact_id || old_company_id != new_company_id){
                 YAAI.refreshSingleMatchingContact(callboxid, entry);
-                console.log('refreshing');
+               YAAI.log('refreshing');
            }
         }
         
@@ -860,6 +865,7 @@ var YAAI = {
     
     log : function(message) {
         if (YAAI.options.debug) {
+            if (!window.console) console = {log: function() {}};
             console.log(message);
         }
     },
@@ -932,6 +938,7 @@ jQuery.cookie = function(name, value, options) {
 
 $(document).ready(function(){
     var isAjaxUiEnabled=/ajaxUI/gi.test(window.location.search.substring(1));
+    if (!window.console) console = {log: function() {}};
     console.log('ready() hist_loaded: ' + SUGAR.ajaxUI.hist_loaded + " ajaxUIEnabled = " + isAjaxUiEnabled);
 
     // if ajaxui in url... and SUGAR.ajaxUI.hist_loaded is true. -- include
