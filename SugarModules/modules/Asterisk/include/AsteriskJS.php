@@ -48,14 +48,20 @@ class AsteriskJS {
     function echoJavaScript() {
         // asterisk hack: include ajax callbacks in every sugar page except ajax requests:
 
-        if ((!isset($_REQUEST['sugar_body_only']) || $_REQUEST['sugar_body_only'] != true) && $_REQUEST['action'] != 'modulelistmenu' && $_REQUEST['action'] != 'Popup' && empty($_REQUEST['to_pdf']) && (!empty($_REQUEST['module']) && $_REQUEST['module'] != 'ModuleBuilder') && empty($_REQUEST['to_csv']) && $_REQUEST['action'] != 'Login' && $_REQUEST['module'] != 'Timesheets') {
+        if ((!isset($_REQUEST['sugar_body_only']) || $_REQUEST['sugar_body_only'] != true) && $_REQUEST['action'] != 'modulelistmenu' &&
+             $_REQUEST['action'] != "Favorites" && $_REQUEST['action'] != 'Popup' && empty($_REQUEST['to_pdf']) &&
+            (!empty($_REQUEST['module']) && $_REQUEST['module'] != 'ModuleBuilder') && empty($_REQUEST['to_csv']) && $_REQUEST['action'] != 'Login'
+            && $_REQUEST['module'] != 'Timesheets') {
 
             $poll_rate = !empty($GLOBALS['sugar_config']['asterisk_listener_poll_rate']) ? $GLOBALS['sugar_config']['asterisk_listener_poll_rate'] : "10000";
             $user_extension = !empty($GLOBALS['current_user']->asterisk_ext_c) ? $GLOBALS['current_user']->asterisk_ext_c : "Not Configured!";
             $current_user_id = $GLOBALS['current_user']->id;
             $fop_user = $GLOBALS['current_user']->asterisk_fop_user_c;
             $fop_pass = $GLOBALS['current_user']->asterisk_fop_pass_c;
-            $fop_url = $GLOBALS['sugar_config']['asterisk_fop_url'];
+            $fop_url = "";
+            if( !empty($GLOBALS['sugar_config']['asterisk_fop_url'])) {
+                $fop_url = $GLOBALS['sugar_config']['asterisk_fop_url'];
+            }
             $fop_enabled = !empty($fop_url) ? 1 : 0;
 
             //JS Global Variables
