@@ -96,80 +96,78 @@ var YAAI = {
     
     createCallBox : function (callboxid, entry, modstrings) {
        if($('#callbox_'+callboxid).attr('id') == undefined){
-        var html;
-        var template = Handlebars.templates['call-template.html'];
-        // Creates the modstrings needed by the template
-        var context = {
-            callbox_id : 'callbox_' + callboxid,
-            title : entry['title'],
-            asterisk_state : entry['state'],
-            call_type : entry['call_type'],
-            duration : entry['duration'] + ' mins',
-            phone_number: entry['phone_number'],
-            caller_id: entry['caller_id'],
-            call_record_id: entry['call_record_id'],
-            select_contact_label: entry['mod_strings']['ASTERISKLBL_SELECTCONTACT'],
-            name_label: entry['mod_strings']['ASTERISKLBL_NAME'],
-            company_label: entry['mod_strings']['ASTERISKLBL_COMPANY'],
-            create_label: entry['mod_strings']['CREATE'],
-            relate_to_label: entry['mod_strings']['RELATE_TO'],
-            caller_id_label: entry['mod_strings']['ASTERISKLBL_CALLERID'],
-            phone_number_label: entry['mod_strings']['CALL_DESCRIPTION_PHONE_NUMBER'],
-            duration_label: entry['mod_strings']['ASTERISKLBL_DURATION'],
-            block_label: entry['mod_strings']['BLOCK'],
-            save_label: entry['mod_strings']['SAVE']
-        };
+            var html;
+            var template = Handlebars.templates['call-template.html'];
+            // Creates the modstrings needed by the template
+            var context = {
+                callbox_id : 'callbox_' + callboxid,
+                title : entry['title'],
+                asterisk_state : entry['state'],
+                call_type : entry['call_type'],
+                duration : entry['duration'] + ' mins',
+                phone_number: entry['phone_number'],
+                caller_id: entry['caller_id'],
+                call_record_id: entry['call_record_id'],
+                select_contact_label: entry['mod_strings']['ASTERISKLBL_SELECTCONTACT'],
+                name_label: entry['mod_strings']['ASTERISKLBL_NAME'],
+                company_label: entry['mod_strings']['ASTERISKLBL_COMPANY'],
+                create_label: entry['mod_strings']['CREATE'],
+                relate_to_label: entry['mod_strings']['RELATE_TO'],
+                caller_id_label: entry['mod_strings']['ASTERISKLBL_CALLERID'],
+                phone_number_label: entry['mod_strings']['CALL_DESCRIPTION_PHONE_NUMBER'],
+                duration_label: entry['mod_strings']['ASTERISKLBL_DURATION'],
+                block_label: entry['mod_strings']['BLOCK'],
+                save_label: entry['mod_strings']['SAVE']
+            };
 
-        switch(entry['contacts'].length){
-            case 0 :
-                html = template(context); 
-                $('body').append(html);
-                YAAI.createCallBoxWithNoMatchingContact(callboxid, entry);
-                YAAI.bindActionDropdown(callboxid,entry);
-                $('#callbox_'+callboxid).find('.nomatchingcontact').show();
-                break;
-            
-            case 1 :
-                context = YAAI.createCallBoxWithSingleMatchingContact(callboxid, context, entry);
-                html = template(context);
-                $('body').append(html);
-                YAAI.bindOpenPopupSingleMatchingContact(callboxid, entry);
-                YAAI.bindActionDropdown(callboxid,entry);
-                $('#callbox_'+callboxid).find('.singlematchingcontact').show();
-                break;
-                
-            default :
-                context = YAAI.createCallBoxWithMultipleMatchingContacts(callboxid, context, entry);
-                html = template(context);
-                $('body').append(html);   
-                YAAI.bindSetContactID(callboxid, entry);
-                YAAI.bindActionDropdown(callboxid,entry);
-                $('#callbox_'+callboxid).find('.multiplematchingcontacts').show();
-                break;
-        }
-        
-        //bind user actions
-        YAAI.bindCheckCallBoxInputKey(callboxid, entry['call_record_id'], entry['phone_number'], entry['direction']);
-        //YAAI.fop2 ? YAAI.bindOperatorPanel(callboxid) : YAAI.bindTransferButton(callboxid, entry);
-        if( YAAI.fop2 ) YAAI.bindOperatorPanel(callboxid);
-        // Transfer Button happens in updateCall method
-        YAAI.bindCloseCallBox(callboxid, entry['call_record_id']);
-        YAAI.bindToggleCallBoxGrowth(callboxid);
-        YAAI.bindSaveMemo(callboxid, entry['call_record_id'], entry['phone_number'], entry['direction']);
+            switch(entry['contacts'].length){
+                case 0 :
+                    html = template(context);
+                    $('body').append(html);
+                    YAAI.createCallBoxWithNoMatchingContact(callboxid, entry);
+                    $('#callbox_'+callboxid).find('.nomatchingcontact').show();
+                    break;
 
-        //draw 
-        YAAI.showCallerIDWhenAvailable(entry);
-        YAAI.minimizeExistingCallboxesWhenNewCallComesIn();
-        YAAI.startVerticalEndVertical(callboxid);  //procedurally this must go after minimizeExistingCallboxesWhenNewCallComesIn
-        YAAI.checkMinimizeCookie(callboxid);
-        YAAI.setupCallBoxFocusAndBlurSettings(callboxid);
-        YAAI.setCallBoxHeadColor(callboxid, entry);
-        
-        YAAI.checkForErrors(entry);
+                case 1 :
+                    context = YAAI.createCallBoxWithSingleMatchingContact(callboxid, context, entry);
+                    html = template(context);
+                    $('body').append(html);
+                    YAAI.bindOpenPopupSingleMatchingContact(callboxid, entry);
+                    $('#callbox_'+callboxid).find('.singlematchingcontact').show();
+                    break;
 
-        $('.callbox').show();
-        $("#callbox_"+callboxid).show();
+                default :
+                    context = YAAI.createCallBoxWithMultipleMatchingContacts(callboxid, context, entry);
+                    html = template(context);
+                    $('body').append(html);
+                    YAAI.bindSetContactID(callboxid, entry);
+                    $('#callbox_'+callboxid).find('.multiplematchingcontacts').show();
+                    break;
+            }
 
+            YAAI.bindActionDropdown(callboxid,entry);
+
+            //bind user actions
+            YAAI.bindCheckCallBoxInputKey(callboxid, entry['call_record_id'], entry['phone_number'], entry['direction']);
+            //YAAI.fop2 ? YAAI.bindOperatorPanel(callboxid) : YAAI.bindTransferButton(callboxid, entry);
+            if( YAAI.fop2 ) YAAI.bindOperatorPanel(callboxid);
+            // Transfer Button happens in updateCall method
+            YAAI.bindCloseCallBox(callboxid, entry['call_record_id']);
+            YAAI.bindToggleCallBoxGrowth(callboxid);
+            YAAI.bindSaveMemo(callboxid, entry['call_record_id'], entry['phone_number'], entry['direction']);
+
+            //draw
+            YAAI.showCallerIDWhenAvailable(entry);
+            YAAI.minimizeExistingCallboxesWhenNewCallComesIn();
+            YAAI.startVerticalEndVertical(callboxid);  //procedurally this must go after minimizeExistingCallboxesWhenNewCallComesIn
+            YAAI.checkMinimizeCookie(callboxid);
+            YAAI.setupCallBoxFocusAndBlurSettings(callboxid);
+            YAAI.setCallBoxHeadColor(callboxid, entry);
+
+            YAAI.checkForErrors(entry);
+
+            $('.callbox').show();
+            $("#callbox_"+callboxid).show();
        }
     },
     
@@ -226,6 +224,10 @@ var YAAI = {
 
     bindActionDropdown : function(callboxid,entry){
         YAAI.log("Binding Action Dropdown for "+ callboxid);
+
+        // TODO Remove line below... for debugging
+        YAAI.log("Looking for button: " + $('#callbox_'+callboxid).find('.callbox_action').button().length );
+
          $('#callbox_'+callboxid).find('.callbox_action').button({
                 icons: {
                     primary: "ui-icon-flag",
@@ -236,6 +238,9 @@ var YAAI = {
 
         if( window.yaai_relate_to_contact_enabled ) {
             YAAI.log("  Adding Relate to Contact");
+            // TODO Remove line below... for debugging
+            YAAI.log( $("#dropdown-1_callbox_"+callboxid+" ul").length + " was found?");
+
             $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='relate_to_contact'>"+entry['mod_strings']['RELATE_TO_CONTACT']+"</a></li>");
             $("#dropdown-1_callbox_"+callboxid+" ul a.relate_to_contact").on("click", entry, function() {
                 YAAI.openContactRelatePopup(entry)
@@ -750,6 +755,7 @@ var YAAI = {
         else {
             $("#callbox_"+callboxid+" .callboxhead").css("background-color", "#0D5995"); // a blue color
         }
+
     },
 
     setTransferButton : function(callboxid, entry ) {

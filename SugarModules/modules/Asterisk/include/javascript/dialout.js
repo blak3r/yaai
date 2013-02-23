@@ -64,12 +64,16 @@ $(document).ready(function()
 			
 			$('.asterisk_placeCall', this).click(function()
 			{
-				// alert("phoneNr : "+phoneNr+" , contactId: "+contactId);
-				var call = $.get('index.php?entryPoint=AsteriskCallCreate', 
+				var call = $.get('index.php?entryPoint=AsteriskCallCreate',
 					{phoneNr : phoneNr, contactId: contactId},
 					function(data){
+                      console.log("CreateCall Action Response: " + data);
+                      if( data.indexOf('Error') || data.indexOf("ERROR") ) {
+                          alert("Click to Dial Failed:\n\n------------\n" + data + "\n------------\n");  // Shows error message on ClickToDial failure.
+                      }
 					  call = null;
 					});
+
 				// Wait for 5 seconds
 				setTimeout(function()
 				{

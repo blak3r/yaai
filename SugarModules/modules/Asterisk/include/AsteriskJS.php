@@ -49,7 +49,7 @@ class AsteriskJS {
         // asterisk hack: include ajax callbacks in every sugar page except ajax requests:
 
         if ((!isset($_REQUEST['sugar_body_only']) || $_REQUEST['sugar_body_only'] != true) && $_REQUEST['action'] != 'modulelistmenu' &&
-             $_REQUEST['action'] != "Favorites" && $_REQUEST['action'] != 'Popup' && empty($_REQUEST['to_pdf']) &&
+             $_REQUEST['action'] != "favorites" && $_REQUEST['action'] != 'Popup' && empty($_REQUEST['to_pdf']) &&
             (!empty($_REQUEST['module']) && $_REQUEST['module'] != 'ModuleBuilder') && empty($_REQUEST['to_csv']) && $_REQUEST['action'] != 'Login'
             && $_REQUEST['module'] != 'Timesheets') {
 

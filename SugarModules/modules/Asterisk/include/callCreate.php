@@ -100,14 +100,18 @@ $socket = fsockopen($server, $port, $errno, $errstr, 20);
 	$result = fgets($socket,128);
 	echo("Login Response: " . $result);
 	logLine("[CreateCall] Login Result: $result\n");
-	
+
+    $result = ReadResponse($socket);
+    echo "Login Response: "
+
 	//format Phone Number
 	$number = $_REQUEST['phoneNr'];
 	$prefix = $sugar_config['asterisk_prefix'];
 	$number = str_replace("+", "00", $number);
 	$number = str_replace(array("(", ")", " ", "-", "/", "."), "", $number);
 	$number = $prefix.$number;
-	
+
+
 	echo "Originate Params: Number: $number, Channel: $channel, Context: $context, Exten: $number...\n";
 	
 	
@@ -119,23 +123,45 @@ $socket = fsockopen($server, $port, $errno, $errstr, 20);
 	fputs($socket, "Exten: " . $number . "\r\n");		
 	fputs($socket, "Priority: 1\r\n");		
 	fputs($socket, "Callerid:" . $_REQUEST['phoneNr'] ."\r\n");	
-	fputs($socket, "Variable: CALLERID(number)=" . $extension . "\r\n");
+	fputs($socket, "Variable: CALLERID(number)=" . $extension . "\r\n\r\n");
+
+    $result = ReadResponse($socket);
+    echo "Originate Response: " . $result;
+
 	fputs($socket, "Action: Logoff\r\n\r\n");
 	fputs($socket, "\r\n");	
 	
-	$result = fgets($socket,128);
-	echo("Originate/Logout Response: " . $result);
+	$result = ReadResponse($socket);
+	echo("Logout Response: " . $result);
 	
 	//var_dump($result);
 	//var_dump($channel);
 	//var_dump($context);
 	//var_dump($number);
-	sleep(1);
+	//sleep(1);
 	
 	// close socket
 	fclose($socket);
-	}
+}
 
+
+/**
+ * Read the socket response
+ *
+ * @param object $socket Socket
+ *
+ * @return array Array of socket responses
+ */
+function ReadResponse($socket) {
+    $retVal = '';
+
+    // Sets timeout to 1/2 a second
+    stream_set_timeout($socket, 0, 500000);
+    while (($buffer = fgets($socket, 20)) !== false) {
+        $retVal .= $buffer;
+    }
+    return $retVal;
+}
 
 /**
  * Another var_dump() alternative, for debugging use.

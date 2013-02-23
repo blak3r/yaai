@@ -219,8 +219,11 @@ function blockNumber($number, $description) {
 }
 
 function getCalls($mod_strings) {
+    //logLine("  getCalls START", "c:/controller.log");
     $result_set = get_calls();
+    //logLine("  get_calls() returned", "c:/controller.log");
     $response = build_item_list($result_set, $GLOBALS['current_user'], $mod_strings);
+    //logLine("  build_item_list done... ", "c:/controller.log");
     // print out json
     $response_array = array();
     if (count($response) == 0) {
@@ -255,7 +258,7 @@ function SendAMICommand($amiCmd, &$status = true) {
     $socket = fsockopen($server, $port, $errno, $errstr, 20);
 
     if (!$socket) {
-        echo "couldn't connect ($errno): $errstr <br>\n";
+        echo "Error: couldn't connect ($errno): $errstr <br>\n";
     } else {
         // log on to Asterisk
         fputs($socket, "Action: Login\r\n");
@@ -382,7 +385,7 @@ function get_calls() {
     $query .=") AND (uistate IS NULL OR uistate != \"Closed\")";
 
 
-   // log_entry("getCalls Query: " . $query . "\n\n", "c:/callListener.txt");
+   // logLine("getCalls Query: " . $query . "\n\n", "c:/callListener.txt");
 
     $result_set = $GLOBALS['current_user']->db->query($query, false);
     if ($GLOBALS['current_user']->db->checkError()) {
@@ -411,7 +414,7 @@ function build_item_list($result_set, $current_user, $mod_strings) {
 
         // If only one contact is returned, we set db column so we don't reperform expensive phone number lookup qry anymore
         if( empty( $row['contact_id'] ) && count($contacts) == 1 ) {
-            // log_entry("Updating db, " . $row['call_record_id'] . "  contact:" . $contacts[0]['contact_id'] . "\n", "c:/callListener.txt");
+            // logLine("Updating db, " . $row['call_record_id'] . "  contact:" . $contacts[0]['contact_id'] . "\n", "c:/callListener.txt");
             setContactID($row['call_record_id'], $contacts[0]['contact_id'] );
         }
 
@@ -552,8 +555,9 @@ function get_duration($row) {
 */
 function get_contact_information($phone_number, $row, $current_user) {
     $innerResultSet = fetch_contacts_associated_to_phone_number($phone_number, $row, $current_user);
-
+    //logLine("pre get_contacts", "c:/controller.log");
     $contacts = get_contacts($innerResultSet, $current_user, $row);
+    //logLine("post get_contacts", "c:/controller.log");
 
     return $contacts;
 }
@@ -610,12 +614,12 @@ function fetch_contacts_associated_to_phone_number($phoneToFind, $row, $current_
                 . " left join accounts a on (ac.account_id=a.id) and (a.deleted='0' or a.deleted is null)";
 
         if ($row['contact_id']) {
-            // log_entry("Quick where query\n", "c:/callListener.txt");
+            // logLine("Quick where query\n", "c:/callListener.txt");
             $wherePortion = " WHERE c.id='{$row['contact_id']}' and c.deleted='0'";
         }
         // We only do this expensive query if it's not already set!
         else {
-            log_entry("Performing Expensive where query\n", "c:/callListener.txt");
+            //logLine("Performing Expensive where query\n", "c:/callListener.txt");
 
             $phoneFields = array();
             // Here we add any custom contact fields.
@@ -629,12 +633,12 @@ function fetch_contacts_associated_to_phone_number($phoneToFind, $row, $current_
             $phoneFieldsWherePortion = implode(' OR ', $phoneFields);
 
             $wherePortion = " WHERE (" . $phoneFieldsWherePortion . ") and c.deleted='0'";
-           // log_entry("Where == " . $wherePortion, "c:/callListener.txt");
+           // logLine("Where == " . $wherePortion, "c:/callListener.txt");
 
         }
 
         $queryContact = $selectPortion . $wherePortion;
-        //log_entry("QUERY: $queryContact\n","c:/callListener.txt");
+        //logLine("QUERY: $queryContact\n","c:/callListener.txt");
         return $current_user->db->query($queryContact, false);
     }
 }
@@ -769,16 +773,48 @@ function formatPhoneNumberToE164($number) {
     }
 }
 
+
+function startsWith($haystack, $needle) {
+    $length = strlen($needle);
+    return (substr($haystack, 0, $length) === $needle);
+}
+
+function endsWith($haystack, $needle) {
+    $length = strlen($needle);
+    $start = $length * -1; //negative
+    return (substr($haystack, $start) === $needle);
+}
+
 /**
 * Helper method for logging
 *
 * @param string $str The string you want to log
 * @param string $file The log file you want to log to
 */
-function log_entry($str, $file = "default") {
-    $handle = fopen($file, 'a');
-    fwrite($handle, "[" . date('Y-m-j H:i:s') . "] " . $str);
-    fclose($handle);
+function logLine($str, $logFile = "default") {
+    global $sugar_config;
+
+    if (!endsWith($str, "\n")) {
+        $str = $str . "\n";
+    }
+
+    if( $logFile == "default" && !empty($sugar_config['asterisk_log_file']) ) {
+        $myFile = $sugar_config['asterisk_log_file'];
+    }
+    else {
+        $myFile = $logFile;
+    }
+    if( !empty($myFile) ) {
+        try {
+            $fh = fopen($myFile, 'a');
+            fwrite($fh, $str);
+            fclose($fh);
+        }
+        catch(Exception $e) {
+
+        }
+    }
+
 }
 
 /**
