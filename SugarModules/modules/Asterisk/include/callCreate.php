@@ -84,38 +84,37 @@ $extension = $extensionsArray[0];
 preg_match('/([^#]*)(#+)([^#]*)/',$sugar_config['asterisk_dialout_channel'],$matches);
 $channel = $matches[1] . $extension . $matches[3];
 
-logLine("Creating Call, channel for originate command is: $channel\n");	
-												
+logLine("Creating Call, channel for originate command is: $channel\n");
+
+//format Phone Number
+$number = $_REQUEST['phoneNr'];
+$prefix = $sugar_config['asterisk_prefix'];
+$number = str_replace("+", "00", $number);
+$number = str_replace(array("(", ")", " ", "-", "/", "."), "", $number);
+$number = $prefix.$number;
+echo "Originate Params: Number: $number, Channel: $channel, Context: $context, Exten: $number...\n";
+
+
 $socket = fsockopen($server, $port, $errno, $errstr, 20);
 	
 	if (!$socket) {
 		echo "errstr ($errno) <br>\n";
 				
-	} else { 
-	// log on to Asterisk
-	fputs($socket, "Action: Login\r\n"); 
-	fputs($socket, $Username); 
-	fputs($socket, $Secret);
-	fputs($socket, "\r\n");	
-	$result = fgets($socket,128);
-	echo("Login Response: " . $result);
-	logLine("[CreateCall] Login Result: $result\n");
+	} else {
 
     $result = ReadResponse($socket);
-    echo "Login Response: "
+    echo "AMI Header: " . $result;
 
-	//format Phone Number
-	$number = $_REQUEST['phoneNr'];
-	$prefix = $sugar_config['asterisk_prefix'];
-	$number = str_replace("+", "00", $number);
-	$number = str_replace(array("(", ")", " ", "-", "/", "."), "", $number);
-	$number = $prefix.$number;
+	// log on to Asterisk
+	fputs($socket, "Action: Login\r\n"); 
+	fputs($socket, $Username);
+	fputs($socket, $Secret);
+    fputs($socket, "Events: off\r\n");
+	fputs($socket, "\r\n");	
+	$result = ReadResponse($socket);
+	echo("Login Response: " . $result . "\n");
 
 
-	echo "Originate Params: Number: $number, Channel: $channel, Context: $context, Exten: $number...\n";
-	
-	
-	
 	// dial number
 	fputs($socket, "Action: originate\r\n");		
 	fputs($socket, "Channel: ". $channel ."\r\n");	
@@ -126,7 +125,7 @@ $socket = fsockopen($server, $port, $errno, $errstr, 20);
 	fputs($socket, "Variable: CALLERID(number)=" . $extension . "\r\n\r\n");
 
     $result = ReadResponse($socket);
-    echo "Originate Response: " . $result;
+    echo "Originate Response: " . $result . "\n";
 
 	fputs($socket, "Action: Logoff\r\n\r\n");
 	fputs($socket, "\r\n");	
@@ -155,11 +154,20 @@ $socket = fsockopen($server, $port, $errno, $errstr, 20);
 function ReadResponse($socket) {
     $retVal = '';
 
-    // Sets timeout to 1/2 a second
-    stream_set_timeout($socket, 0, 500000);
-    while (($buffer = fgets($socket, 20)) !== false) {
+    // Sets timeout to 1 1/2 a second
+    /*
+
+    $chars = 15;
+    while(($buffer = stream_get_line($socket)) !== false) {
         $retVal .= $buffer;
     }
+    */
+    stream_set_timeout($socket, 0, 2000000);
+    while (($buffer = fgets($socket, 20)) !== false) {
+        $retVal .= $buffer;
+        $chars = 1;
+    }
+
     return $retVal;
 }
 

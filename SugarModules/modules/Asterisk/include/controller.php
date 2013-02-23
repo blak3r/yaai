@@ -264,6 +264,7 @@ function SendAMICommand($amiCmd, &$status = true) {
         fputs($socket, "Action: Login\r\n");
         fputs($socket, $Username);
         fputs($socket, $Secret);
+        fputs($socket, "Events: off\r\n");
         fputs($socket, "\r\n");
 
         $response = ReadResponse($socket);
@@ -287,7 +288,7 @@ function SendAMICommand($amiCmd, &$status = true) {
             // Don't really care if logoff was successful;
             //$status = $status && WasAmiCmdSuccessful( $response );
         }
-        sleep(1);
+        //sleep(1);
         fclose($socket);
     }
 }

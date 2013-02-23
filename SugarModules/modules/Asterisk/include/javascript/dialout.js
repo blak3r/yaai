@@ -68,7 +68,7 @@ $(document).ready(function()
 					{phoneNr : phoneNr, contactId: contactId},
 					function(data){
                       console.log("CreateCall Action Response: " + data);
-                      if( data.indexOf('Error') || data.indexOf("ERROR") ) {
+                      if( data.indexOf('Error') != -1 || data.indexOf("ERROR") != -1 ) {
                           alert("Click to Dial Failed:\n\n------------\n" + data + "\n------------\n");  // Shows error message on ClickToDial failure.
                       }
 					  call = null;
@@ -82,7 +82,7 @@ $(document).ready(function()
 				    {
 				  	    call.abort();
 				    };
-				}, 10000);
+				}, 20000);
 			});
 		}
 	});
