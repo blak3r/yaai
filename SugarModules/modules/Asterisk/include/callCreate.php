@@ -102,8 +102,8 @@ $socket = fsockopen($server, $port, $errno, $errstr, 20);
 				
 	} else {
 
-    $result = ReadResponse($socket);
-    echo "AMI Header: " . $result;
+//    $result = ReadResponse($socket);
+//    echo "AMI Header: " . $result;
 
 	// log on to Asterisk
 	fputs($socket, "Action: Login\r\n"); 
@@ -124,7 +124,9 @@ $socket = fsockopen($server, $port, $errno, $errstr, 20);
 	fputs($socket, "Callerid:" . $_REQUEST['phoneNr'] ."\r\n");	
 	fputs($socket, "Variable: CALLERID(number)=" . $extension . "\r\n\r\n");
 
-    $result = ReadResponse($socket);
+    // You will not get an originate response unless you wait for the phone to be answered... so it's impractical to wait.
+    // but, if there is a permission issue it will fail almost immediately with permission denied.
+    $result = ReadResponse($socket, 10000000);
     echo "Originate Response: " . $result . "\n";
 
 	fputs($socket, "Action: Logoff\r\n\r\n");
@@ -148,10 +150,11 @@ $socket = fsockopen($server, $port, $errno, $errstr, 20);
  * Read the socket response
  *
  * @param object $socket Socket
+ * @param int $timeout in uS, default is 500000 (1/2 a second)
  *
  * @return array Array of socket responses
  */
-function ReadResponse($socket) {
+function ReadResponse($socket, $timeout = 500000) {
     $retVal = '';
 
     // Sets timeout to 1 1/2 a second
@@ -162,10 +165,9 @@ function ReadResponse($socket) {
         $retVal .= $buffer;
     }
     */
-    stream_set_timeout($socket, 0, 2000000);
+    stream_set_timeout($socket, 0, $timeout);
     while (($buffer = fgets($socket, 20)) !== false) {
         $retVal .= $buffer;
-        $chars = 1;
     }
 
     return $retVal;

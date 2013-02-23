@@ -464,7 +464,16 @@ var YAAI = {
                         }, 
                         type: "POST",			
                         success: function(transport){
-                            alert(entry['phone_number'] + ' Caller Blocked');
+                            YAAI.log("BlockCall Action Response: " + transport);
+                            if( transport.indexOf('Permission denied') != -1 ) {
+                                alert("Unable to BLOCK Number.\nAMI Connection requires write: system priviledge\nYou can disable this drop down item in Admin Config\n\n------------\n" + transport + "\n------------\n");  // Shows error message on ClickToDial failure.
+                            }
+                            else if( transport.indexOf('Error') != -1 ) {
+                                alert("Unable to BLOCK Number.  See Details Below.\nYou can disable this drop down item in Admin Config\n\n------------\n" + transport + "\n------------\n");  // Shows error message on ClickToDial failure.
+                            }
+                            else {
+                                alert(entry['phone_number'] + ' has been Blocked');
+                            }
                         },
                         error: function (jqXHR, textStatus, thrownError){
                             YAAI.log(jqXHR.status);
