@@ -1,9 +1,105 @@
-(function() {
-  var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
-templates['call-template.tmpl'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  helpers = helpers || Handlebars.helpers; data = data || {};
-  
+<div id="{{callbox_id}}" class="callbox">
+    <div class="callboxhead">
+        <div class="callboxtitle">{{title}}</div>
+        <div class="callboxoptions">
+            <a href="#" class="callbox_close">X</a>
+        </div>
+    </div>
+    <div class="control_panel">
+        <button class="transfer_panel"></button>
+        <button class="operator_panel"></button> 
+        <button class="callbox_action" data-dropdown="#dropdown-1_{{callbox_id}}"></button>
+    </div>
+    <div class="callboxcontent">  
+        <div class="asterisk_info">
+            <h4 class="call_type">{{call_type}}</h4>
+            <div>
+                <table class="asterisk_data">
+                    <tr class="multiplematchingcontacts">
+                        <td colspan="2">
+                            <b>{{select_contact_label}}</b>
+                            {{#each contacts}}
+                            <p class="select_contact" id="contact_{{contact_id}}">
+                                <input type="radio" name="contactSelect"  value={{contact_id}}  />
+                                <a class="multiplecontacts" title="{{contact_full_name}}" href="index.php?module=Contacts&action=DetailView&record={{contact_id}}">{{contact_full_name}}</a>
+                            </p>
+                            {{/each}}
+                        </td>
+                    </tr>
+                    <tr class="singlematchingcontact">
+                        <td>{{name_label}}</td>
+                        <td><a class="contact_id" href="index.php?module=Contacts&action=DetailView&record={{contact_id}}">
+                                <span class="call_contacts">{{full_name}}</span>
+                            </a>
+                            <button class="unrelate_contact"></button>
+                        </td>
+                    </tr>
+                    <tr class="singlematchingcontact singlematchingaccount">
+                        <td>{{company_label}}</td>
+                        <td><a class="company" href="index.php?module=Accounts&action=DetailView&record={{company_id}}">{{company}}</a></td>
+                    </tr>
+                    <tr class="caller_id_box">
+                        <td class="caller_id_label">{{caller_id_label}}:</td>
+                        <td class="caller_id">{{caller_id}}</td>
+                    </tr>
+                    <tr class="phone_number_box">
+                        <td class="phone_number_label">{{phone_number_label}}:</td>
+                        <td class="phone_number">{{phone_number}}</td>
+                    </tr>
+                    <tr class="call_duration_box">
+                        <td class="call_duration_label">{{duration_label}}:</td>
+                        <td>
+                            <span class="call_duration">{{duration}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="callboxinput">
+        <textarea rows="4" cols="30" class="callboxtextarea callboxtextareaselected"></textarea>
+        <div class="callboxbuttons">
+            <table width="100%">
+                <tbody>
+                    <tr>
+                        <td valign="bottom">
+                            <button class="save_memo">{{save_label}}</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <form class="call_record_id" name="{{call_record_id}}">
+        <input type='hidden' name="relateContactId"/>
+        <input type='hidden' name="relateContactFirstName"/>
+        <input type='hidden' name="relateContactLastName"/>
+        <input type='hidden' name="relateAccountId"/>
+        <input type='hidden' name="relateAccountName"/>
+    </form>
+</div>
+<div id="block-number-{{callbox_id}}" title="Block Caller" style="display:none;">
+    <form>
+        <fieldset>
+            <label for="block-phone-number">Phone Number</label>
+            <input type="text" name="block-phone-number" class="block-phone-number text ui-widget-content ui-corner-all" disabled="disabled"/>
+            <label for="block-reason">Block Reason:</label>
+            <select name="block-reason" class="block-reason">
+                <option>Marketer</option>
+                <option>Annoying</option>
+            </select>
+            <p>Please provide more details if needed:</p>
+            <textarea rows="4" cols="30" class="block-description"></textarea>
+            <p>
+                <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;">
+                </span>
+                This person will be permanently blocked from calling. Are you sure?
+            </p>        
+        </fieldset>
+    </form>
+</div>
+<div id="dropdown-1_{{callbox_id}}" class="dropdown-menu has-tip">
+    <ul>
+    </ul>
+</div>
 
-
-  return "(function() {\n  var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};\ntemplates['call-template.html'] = template(function (Handlebars,depth0,helpers,partials,data) {\n  helpers = helpers || Handlebars.helpers; data = data || {};\n  var buffer = \"\", stack1, stack2, foundHelper, functionType=\"function\", escapeExpression=this.escapeExpression, self=this;\n\nfunction program1(depth0,data) {\n  \n  var buffer = \"\", stack1, foundHelper;\n  buffer += \"\\n                            <p class=\\\"select_contact\\\" id=\\\"contact_\";\n  foundHelper = helpers.contact_id;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.contact_id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"\\\">\\n                                <input type=\\\"radio\\\" name=\\\"contactSelect\\\"  value=\";\n  foundHelper = helpers.contact_id;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.contact_id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"  />\\n                                <a class=\\\"multiplecontacts\\\" title=\\\"\";\n  foundHelper = helpers.contact_full_name;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.contact_full_name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"\\\" href=\\\"index.php?module=Contacts&action=DetailView&record=\";\n  foundHelper = helpers.contact_id;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.contact_id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"\\\">\";\n  foundHelper = helpers.contact_full_name;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.contact_full_name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"</a>\\n                            </p>\\n                            \";\n  return buffer;}\n\n  buffer += \"<div id=\\\"\";\n  foundHelper = helpers.callbox_id;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.callbox_id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"\\\" class=\\\"callbox\\\">\\n    <div class=\\\"callboxhead\\\">\\n        <div class=\\\"callboxtitle\\\">\";\n  foundHelper = helpers.title;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"</div>\\n        <div class=\\\"callboxoptions\\\">\\n            <a href=\\\"#\\\" class=\\\"callbox_close\\\">X</a>\\n        </div>\\n    </div>\\n    <div class=\\\"control_panel\\\">\\n        <button class=\\\"transfer_panel\\\"></button>\\n        <button class=\\\"operator_panel\\\"></button> \\n        <button class=\\\"callbox_action\\\" data-dropdown=\\\"#dropdown-1_\";\n  foundHelper = helpers.callbox_id;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.callbox_id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"\\\"></button>\\n    </div>\\n    <div class=\\\"callboxcontent\\\">  \\n        <div class=\\\"asterisk_info\\\">\\n            <h4 class=\\\"call_type\\\">\";\n  foundHelper = helpers.call_type;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.call_type; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"</h4>\\n            <div>\\n                <table class=\\\"asterisk_data\\\">\\n                    <tr class=\\\"multiplematchingcontacts\\\">\\n                        <td colspan=\\\"2\\\">\\n                            <b>\";\n  foundHelper = helpers.select_contact_label;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.select_contact_label; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"</b>\\n                            \";\n  stack1 = depth0.contacts;\n  stack2 = {};\n  stack1 = helpers.each.call(depth0, stack1, {hash:stack2,inverse:self.noop,fn:self.program(1, program1, data),data:data});\n  if(stack1 || stack1 === 0) { buffer += stack1; }\n  buffer += \"\\n                        </td>\\n                    </tr>\\n                    <tr class=\\\"singlematchingcontact\\\">\\n                        <td>\";\n  foundHelper = helpers.name_label;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.name_label; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"</td>\\n                        <td><a class=\\\"contact_id\\\" href=\\\"index.php?module=Contacts&action=DetailView&record=\";\n  foundHelper = helpers.contact_id;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.contact_id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"\\\">\\n                                <span class=\\\"call_contacts\\\">\";\n  foundHelper = helpers.full_name;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.full_name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"</span>\\n                            </a>\\n                            <button class=\\\"unrelate_contact\\\"></button>\\n                        </td>\\n                    </tr>\\n                    <tr class=\\\"singlematchingcontact\\\">\\n                        <td>\";\n  foundHelper = helpers.company_label;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.company_label; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"</td>\\n                        <td><a class=\\\"company\\\" href=\\\"index.php?module=Accounts&action=DetailView&record=\";\n  foundHelper = helpers.company_id;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.company_id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"\\\">\";\n  foundHelper = helpers.company;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.company; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"</a></td>\\n                    </tr>\\n                    <tr class=\\\"caller_id_box\\\">\\n                        <td class=\\\"caller_id_label\\\">\";\n  foundHelper = helpers.caller_id_label;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.caller_id_label; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \":</td>\\n                        <td class=\\\"caller_id\\\">\";\n  foundHelper = helpers.caller_id;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.caller_id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"</td>\\n                    </tr>\\n                    <tr class=\\\"phone_number_box\\\">\\n                        <td class=\\\"phone_number_label\\\">\";\n  foundHelper = helpers.phone_number_label;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.phone_number_label; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \":</td>\\n                        <td class=\\\"phone_number\\\">\";\n  foundHelper = helpers.phone_number;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.phone_number; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"</td>\\n                    </tr>\\n                    <tr class=\\\"call_duration_box\\\">\\n                        <td class=\\\"call_duration_label\\\">\";\n  foundHelper = helpers.duration_label;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.duration_label; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \":</td>\\n                        <td>\\n                            <span class=\\\"call_duration\\\">\";\n  foundHelper = helpers.duration;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.duration; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"</span>\\n                        </td>\\n                    </tr>\\n                </table>\\n            </div>\\n        </div>\\n    </div>\\n    <div class=\\\"callboxinput\\\">\\n        <textarea rows=\\\"4\\\" cols=\\\"30\\\" class=\\\"callboxtextarea callboxtextareaselected\\\"></textarea>\\n        <div class=\\\"callboxbuttons\\\">\\n            <table width=\\\"100%\\\">\\n                <tbody>\\n                    <tr>\\n                        <td valign=\\\"bottom\\\">\\n                            <button class=\\\"save_memo\\\">\";\n  foundHelper = helpers.save_label;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.save_label; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"</button>\\n                        </td>\\n                    </tr>\\n                </tbody>\\n            </table>\\n        </div>\\n    </div>\\n    <form class=\\\"call_record_id\\\" name=\\\"\";\n  foundHelper = helpers.call_record_id;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.call_record_id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"\\\">\\n        <input type='hidden' name=\\\"relateContactId\\\"/>\\n        <input type='hidden' name=\\\"relateContactFirstName\\\"/>\\n        <input type='hidden' name=\\\"relateContactLastName\\\"/>\\n        <input type='hidden' name=\\\"relateAccountId\\\"/>\\n        <input type='hidden' name=\\\"relateAccountName\\\"/>\\n    </form>\\n</div>\\n<div id=\\\"block-number-\";\n  foundHelper = helpers.callbox_id;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.callbox_id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"\\\" title=\\\"Block Caller\\\" style=\\\"display:none;\\\">\\n    <form>\\n        <fieldset>\\n            <label for=\\\"block-phone-number\\\">Phone Number</label>\\n            <input type=\\\"text\\\" name=\\\"block-phone-number\\\" class=\\\"block-phone-number text ui-widget-content ui-corner-all\\\" disabled=\\\"disabled\\\"/>\\n            <label for=\\\"block-reason\\\">Block Reason:</label>\\n            <select name=\\\"block-reason\\\" class=\\\"block-reason\\\">\\n                <option>Marketer</option>\\n                <option>Annoying</option>\\n            </select>\\n            <p>Please provide more details if needed:</p>\\n            <textarea rows=\\\"4\\\" cols=\\\"30\\\" class=\\\"block-description\\\"></textarea>\\n            <p>\\n                <span class=\\\"ui-icon ui-icon-alert\\\" style=\\\"float:left; margin:0 7px 20px 0;\\\">\\n                </span>\\n                This person will be permanently blocked from calling. Are you sure?\\n            </p>        \\n        </fieldset>\\n    </form>\\n</div>\\n<div id=\\\"dropdown-1_\";\n  foundHelper = helpers.callbox_id;\n  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }\n  else { stack1 = depth0.callbox_id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }\n  buffer += escapeExpression(stack1) + \"\\\" class=\\\"dropdown-menu has-tip\\\">\\n    <ul>\\n    </ul>\\n</div>\\n\\n\";\n  return buffer;});\n})();";});
-})();

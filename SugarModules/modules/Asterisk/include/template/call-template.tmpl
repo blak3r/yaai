@@ -67,7 +67,7 @@ function program1(depth0,data) {
   foundHelper = helpers.full_name;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.full_name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1) + "</span>\n                            </a>\n                            <button class=\"unrelate_contact\"></button>\n                        </td>\n                    </tr>\n                    <tr class=\"singlematchingcontact\">\n                        <td>";
+  buffer += escapeExpression(stack1) + "</span>\n                            </a>\n                            <button class=\"unrelate_contact\"></button>\n                        </td>\n                    </tr>\n                    <tr class=\"singlematchingcontact singlematchingaccount\">\n                        <td>";
   foundHelper = helpers.company_label;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.company_label; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
