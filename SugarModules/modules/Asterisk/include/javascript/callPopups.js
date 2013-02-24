@@ -140,9 +140,10 @@ var YAAI = {
                     YAAI.bindOpenPopupSingleMatchingContact(callboxid, entry);
                     if( bean_type == "contacts" ){
                         $('#callbox_'+callboxid).find('.singlematchingcontact').show();
+                        $('#callbox_'+callboxid).find('.singlematching').show();
                     }
                     else if( bean_type == "accounts" ) {
-                        $('#callbox_'+callboxid).find('.singlematchingaccount').show();
+                        $('#callbox_'+callboxid).find('.singlematching').show();
                     }
                     break;
 
