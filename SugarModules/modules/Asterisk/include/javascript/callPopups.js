@@ -880,7 +880,6 @@ var YAAI = {
     
     log : function(message) {
         if (YAAI.options.debug) {
-            if (!window.console) console = {log: function() {}};
             console.log(message);
         }
     },
@@ -953,13 +952,12 @@ jQuery.cookie = function(name, value, options) {
 
 $(document).ready(function(){
     var isAjaxUiEnabled=/ajaxUI/gi.test(window.location.search.substring(1));
-    if (!window.console) console = {log: function() {}};
-    console.log('ready() hist_loaded: ' + SUGAR.ajaxUI.hist_loaded + " ajaxUIEnabled = " + isAjaxUiEnabled);
+    YAAI.log('ready() hist_loaded: ' + SUGAR.ajaxUI.hist_loaded + " ajaxUIEnabled = " + isAjaxUiEnabled);
 
     // if ajaxui in url... and SUGAR.ajaxUI.hist_loaded is true. -- include
     // or if ajax isn't in url --- include
     if( !isAjaxUiEnabled || SUGAR.ajaxUI.hist_loaded ) {
-        console.log('loading yaai...');
+        YAAI.log('loading yaai...');
             var loop = true;
             YAAI.checkForNewStates(loop);
     }

@@ -31,6 +31,8 @@ else {
     include("custom/modules/Asterisk/language/en_us.lang.php");
 }
 
+//logLine("At Top\n", "c:/controller.log");
+
 //ACTIONS
 
 switch ($_REQUEST['action']) {
@@ -599,8 +601,7 @@ function fetch_contacts_associated_to_phone_number($phoneToFind, $row, $current_
     $phoneToFind = ltrim($phoneToFind, '0');
     $phoneToFind = preg_replace('/\D/', '', $phoneToFind); // Removes and non digits such as + chars.
 
-    // TODO make the '7' below a configurable parameter... some may prefer to match on 10.
-    if (preg_match('/([0-9]{7})$/', $phoneToFind, $matches)) {
+    if (preg_match('/([0-9]{' . $sugar_config['asterisk_digits_to_match'] . '})$/', $phoneToFind, $matches)) {
         $phoneToFind = $matches[1];
     }
 
