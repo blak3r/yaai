@@ -53,6 +53,8 @@ class AsteriskJS {
             (!empty($_REQUEST['module']) && $_REQUEST['module'] != 'ModuleBuilder') && empty($_REQUEST['to_csv']) && $_REQUEST['action'] != 'Login'
             && $_REQUEST['module'] != 'Timesheets') {
 
+            $yaaiDevMode = $GLOBALS['sugar_config']['asterisk_yaai_dev'];
+
             $poll_rate = !empty($GLOBALS['sugar_config']['asterisk_listener_poll_rate']) ? $GLOBALS['sugar_config']['asterisk_listener_poll_rate'] : "10000";
             $user_extension = !empty($GLOBALS['current_user']->asterisk_ext_c) ? $GLOBALS['current_user']->asterisk_ext_c : "Not Configured!";
             $current_user_id = $GLOBALS['current_user']->id;
@@ -65,6 +67,8 @@ class AsteriskJS {
             $fop_enabled = !empty($fop_url) ? 1 : 0;
 
             //JS Global Variables
+            echo '<script type="text/javascript">window.yaai_dev = ' . $GLOBALS['sugar_config']['asterisk_yaai_dev'] . ';</script>';
+            echo '<script type="text/javascript">window.yaai_debug = ' . $GLOBALS['sugar_config']['asterisk_yaai_debug'] . ';</script>';
             echo '<script type="text/javascript">window.yaai_poll_rate = ' . $poll_rate . ';</script>';
             echo '<script type="text/javascript">window.yaai_user_extension = ' . "'$user_extension'" . ';</script>';
             echo '<script type="text/javascript">window.yaai_current_user_id = ' . "'$current_user_id'" . ';</script>';
@@ -87,7 +91,17 @@ class AsteriskJS {
                 echo '<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js" type="text/javascript"></script>';
             }
 
-            echo '<script src="http://cloud.github.com/downloads/wycats/handlebars.js/handlebars.runtime-1.0.rc.1.js"></script>';
+            if( $yaaiDevMode ) {
+                // This version includes the compiler and the non compiled template
+                echo '<script src="https://github.com/downloads/wycats/handlebars.js/handlebars-1.0.rc.1.js"></script>';
+                $template = file_get_contents( "c:/yaai/SugarModules/modules/Asterisk/include/template/call-template.html" );
+                echo '<script id="handlebars-dev-template" type="text/x-handlebars-template">' . $template . '</script>';
+            }
+            else {
+                echo '<script src="http://cloud.github.com/downloads/wycats/handlebars.js/handlebars.runtime-1.0.rc.1.js"></script>';
+                echo '<script src="custom/modules/Asterisk/include/template/call-template.tmpl"></script>';
+            }
+
             echo '<script src="custom/modules/Asterisk/include/javascript/jquery.fancybox.js" type="text/javascript" ></script>';
             echo '<script src="custom/modules/Asterisk/include/javascript/jquery.dropdown.js" type="text/javascript" ></script>';
             
@@ -95,9 +109,8 @@ class AsteriskJS {
             
             echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/callPopups.js"></script>';
             echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/dialout.js"></script>';
-            echo '<script src="custom/modules/Asterisk/include/template/call-template.tmpl"></script>';
-            
-            //CSS Third-Party Libraries        
+
+            //CSS Third-Party Libraries
             echo '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/redmond/jquery-ui.css" />';
             echo '<link rel="stylesheet" type="text/css" href="custom/modules/Asterisk/include/css/jquery.fancybox.css" media="screen" />';
             

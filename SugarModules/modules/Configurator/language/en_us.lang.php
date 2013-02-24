@@ -130,5 +130,12 @@ $mod_strings['LBL_ASTERISK_CONTACT_PHONE_FIELDS_DESC'] = "These are the phone fi
 $mod_strings['LBL_ASTERISK_ACCOUNT_PHONE_FIELDS'] = "Account Phone Fields";
 $mod_strings['LBL_ASTERISK_CONTACT_PHONE_FIELDS_DESC'] = "These are the phone fields that will be searched when trying to find matching accounts.  If you've created your own custom fields, you can add them to the list here.  Be sure to add: Comma separated field names and no spaces.";
 
+$mod_strings['LBL_ASTERISK_YAAI_DEV'] = "Dev Mode Enabled";
+$mod_strings['LBL_ASTERISK_YAAI_DEV_DESC'] = "Enabled developer mode, handlebars template is compiled in browser (rather then pre-compiled).  Set to 0 unless you have a reason to.";
+$mod_strings['LBL_ASTERISK_YAAI_DEBUG'] = "Debug Mode Enabled";
+$mod_strings['LBL_ASTERISK_YAAI_DEBUG_DESC'] = "Provides debug information about call popups in the Console.log (should be 0 in production).";
+
+
+// C:\yaai\SugarModules\modules\Configurator>php configuratorGeneratorUtil.php > asterisk_configurator_table.tpl
 
 ?>

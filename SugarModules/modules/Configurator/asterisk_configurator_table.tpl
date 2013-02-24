@@ -591,3 +591,38 @@
         <input type='textbox' name='asterisk_account_phone_fields' size="45" value='{$asterisk_account_phone_fields}'>
     </td>
 
+
+
+<TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h3>Developer</h3></TD></tr>
+
+
+<TR>
+
+    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_YAAI_DEV}
+      {if !empty($MOD.LBL_ASTERISK_YAAI_DEV_DESC)}
+          [<a href="#" title="{$MOD.LBL_ASTERISK_YAAI_DEV_DESC}">?</a>]:
+      {/if}
+    </td>
+    <td width="25%" class="dataField">
+    {if empty($config.asterisk_yaai_dev )}
+        {assign var='asterisk_yaai_dev' value=$asterisk_config.asterisk_yaai_dev}
+    {else}
+        {assign var='asterisk_yaai_dev' value=$config.asterisk_yaai_dev}
+    {/if}
+        <input type='textbox' name='asterisk_yaai_dev' size="45" value='{$asterisk_yaai_dev}'>
+    </td>
+
+    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_YAAI_DEBUG}
+      {if !empty($MOD.LBL_ASTERISK_YAAI_DEBUG_DESC)}
+          [<a href="#" title="{$MOD.LBL_ASTERISK_YAAI_DEBUG_DESC}">?</a>]:
+      {/if}
+    </td>
+    <td width="25%" class="dataField">
+    {if empty($config.asterisk_yaai_debug )}
+        {assign var='asterisk_yaai_debug' value=$asterisk_config.asterisk_yaai_debug}
+    {else}
+        {assign var='asterisk_yaai_debug' value=$config.asterisk_yaai_debug}
+    {/if}
+        <input type='textbox' name='asterisk_yaai_debug' size="45" value='{$asterisk_yaai_debug}'>
+    </td>
+

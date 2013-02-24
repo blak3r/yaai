@@ -56,7 +56,12 @@ $config_meta['asterisk_contact_phone_fields'] = array('default' => 'phone_work,p
 $config_meta['asterisk_account_phone_fields'] = array('default' => 'phone_office,phone_alternate', 'section' => 'Phone Fields');
 
 
+$config_meta['asterisk_yaai_dev'] = array('default' => '0', 'section' => 'Developer');
+$config_meta['asterisk_yaai_debug'] = array('default' => '0', 'section' => 'Developer');
+
 /*
 $config_meta['asterisk_recordings_enabled'] = array('default'=> 'false', 'section'=>'Recordings');
 $config_meta['asterisk_recordings_path'] = array('default' => '/var/spool/asterisk/monitor', 'section'=>'Recordings');
 */
+
+// C:\yaai\SugarModules\modules\Configurator>php configuratorGeneratorUtil.php > asterisk_configurator_table.tpl

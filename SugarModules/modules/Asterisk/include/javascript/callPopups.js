@@ -97,7 +97,18 @@ var YAAI = {
     createCallBox : function (callboxid, entry, modstrings) {
        if($('#callbox_'+callboxid).attr('id') == undefined){
             var html;
-            var template = Handlebars.templates['call-template.html'];
+
+           var template = '';
+
+           if( window.yaai_dev ) {
+               var source   = $("#handlebars-dev-template").html();
+               YAAI.log("here's the source: " + source);
+               template = Handlebars.compile(source);
+           }
+           else {
+               template = Handlebars.templates['call-template.html'];
+           }
+
             // Creates the modstrings needed by the template
             var context = {
                 callbox_id : 'callbox_' + callboxid,
@@ -109,6 +120,7 @@ var YAAI = {
                 caller_id: entry['caller_id'],
                 call_record_id: entry['call_record_id'],
                 select_contact_label: entry['mod_strings']['ASTERISKLBL_SELECTCONTACT'],
+                select_account_label: entry['mod_strings']['ASTERISKLBL_SELECTACCOUNT'],
                 name_label: entry['mod_strings']['ASTERISKLBL_NAME'],
                 company_label: entry['mod_strings']['ASTERISKLBL_COMPANY'],
                 create_label: entry['mod_strings']['CREATE'],
@@ -123,18 +135,18 @@ var YAAI = {
             var bean_type = 'contacts';
             if( entry['accounts'].length > 0 ) {
                 bean_type = 'accounts';
-                console.log("here accounts is bean");
+                console.log("Account Case!");
             }
             switch(entry[bean_type].length){
                 case 0 :
                     html = template(context);
                     $('body').append(html);
-                    YAAI.createCallBoxWithNoMatchingContact(callboxid, entry);
+                    YAAI.setupHandlebarsContextNoMatchingCase(callboxid, entry);
                     $('#callbox_'+callboxid).find('.nomatchingcontact').show();
                     break;
 
                 case 1 :
-                    context = YAAI.createCallBoxWithSingleMatchingContact(callboxid, context, entry, bean_type);
+                    context = YAAI.setupHandlebarsContextForSingleMatchingCase(callboxid, context, entry, bean_type);
                     html = template(context);
                     $('body').append(html);
                     YAAI.bindOpenPopupSingleMatchingContact(callboxid, entry);
@@ -148,7 +160,7 @@ var YAAI = {
                     break;
 
                 default :
-                    context = YAAI.createCallBoxWithMultipleMatchingContacts(callboxid, context, entry);
+                    context = YAAI.setupHandlebarsContextForMultipleMatchingCase(callboxid, context, entry);
                     html = template(context);
                     $('body').append(html);
                     YAAI.bindSetContactID(callboxid, entry);
@@ -679,8 +691,8 @@ var YAAI = {
            var new_company_id = entry['contacts'][0]['company_id'];
 
            if(old_contact_id != new_contact_id || old_company_id != new_company_id){
-                YAAI.refreshSingleMatchingContact(callboxid, entry);
-               YAAI.log('refreshing');
+               YAAI.refreshSingleMatchingContact(callboxid, entry);
+               YAAI.log('Refreshing ' + callboxid);
            }
         }
         
@@ -736,11 +748,20 @@ var YAAI = {
 
     },
 
-    createCallBoxWithNoMatchingContact : function(callboxid, entry){
+    setupHandlebarsContextNoMatchingCase : function(callboxid, entry){
 
     },
-    
-    createCallBoxWithSingleMatchingContact : function(callboxid, context, entry, bean_type){
+
+    /**
+     * Sets up the handlebars context for the single matching Account or Contact Case.
+     *
+     * @param callboxid
+     * @param context
+     * @param entry
+     * @param bean_type is either "contacts" or "accounts"
+     * @return {*}
+     */
+    setupHandlebarsContextForSingleMatchingCase : function(callboxid, context, entry, bean_type){
         context['contact_id'] = entry[bean_type][0]['contact_id'];
         context['full_name'] = entry[bean_type][0]['contact_full_name'];
         context['company'] = entry[bean_type][0]['company'];
@@ -748,7 +769,7 @@ var YAAI = {
 
         return context;
     },
-    createCallBoxWithMultipleMatchingContacts : function(callboxid, context, entry){
+    setupHandlebarsContextForMultipleMatchingCase : function(callboxid, context, entry){
         
         context['contacts'] = entry['contacts'];
         Handlebars.registerHelper('each', function(context, options) {
@@ -765,7 +786,6 @@ var YAAI = {
         });
     
         return context;
-    
     },
     
     setCallBoxHeadColor : function (callboxid, entry){
