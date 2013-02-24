@@ -414,12 +414,18 @@ function build_item_list($result_set, $current_user, $mod_strings) {
         $phone_number = get_callerid($row);
         $call_direction = get_call_direction($row, $mod_strings);
         $contacts = get_contact_information($phone_number, $row, $current_user);
+        if( count($contacts) == 0 ) {
+            $accounts = get_account_information($phone_number, $row, $current_user);
+        }
+
 
         // If only one contact is returned, we set db column so we don't reperform expensive phone number lookup qry anymore
         if( empty( $row['contact_id'] ) && count($contacts) == 1 ) {
             // logLine("Updating db, " . $row['call_record_id'] . "  contact:" . $contacts[0]['contact_id'] . "\n", "c:/callListener.txt");
             setContactID($row['call_record_id'], $contacts[0]['contact_id'] );
         }
+
+        // TODO Call SetBeanId here when it's the acount case!
 
         $call = array(
             'id' => $row['id'],
@@ -432,6 +438,7 @@ function build_item_list($result_set, $current_user, $mod_strings) {
             'timestamp_call' => $row['timestamp_call'],
             'title' => get_title($contacts, $phone_number, $state, $mod_strings),
             'contacts' => $contacts,
+            'accounts' => $accounts,
             'call_type' => $call_direction['call_type'],
             'direction' => $call_direction['direction'],
             'duration' => get_duration($row),
@@ -548,6 +555,100 @@ function get_duration($row) {
 
     return $duration;
 }
+
+
+/**
+ * GET accounts array
+ *
+ * @param array $row Results from database call in build_item_list
+ *
+ * @return array Returns the whole item array
+ */
+function get_account_information($phone_number, $row, $current_user) {
+    $innerResultSet = fetch_accounts_associated_to_phone_number($phone_number, $row, $current_user);
+    $accounts = get_accounts($innerResultSet, $current_user, $row);
+
+    return $accounts;
+}
+
+
+/**
+ * GET contacts from database
+ *
+ * @param array $innerResultSet Results from function fetch_contacts_associated_to_phone_number
+ *
+ * @param object $current_user Global current_user object - allows db access
+ *
+ * @param array $row Results from database call in build_item_list
+ *
+ * @return array Returns contacts
+ */
+function get_accounts($innerResultSet, $current_user, $row) {
+    $accounts = array();
+
+    while ($accountRow = $current_user->db->fetchByAssoc($innerResultSet)) {
+        logLine("In loop\n", "c:/controller.php");
+        $account = array(
+            'company_id' => $accountRow['account_id'],
+            'company' => $accountRow['name'],
+        );
+
+        $accounts[] = $account;
+    }
+
+    return $accounts;
+}
+
+function fetch_accounts_associated_to_phone_number($phoneToFind, $row, $current_user) {
+    global $sugar_config;
+
+    logLine("fetch_accounts\n", "c:/callListener.txt");
+
+    $phoneToFind = ltrim($phoneToFind, '0');
+    $phoneToFind = preg_replace('/\D/', '', $phoneToFind); // Removes and non digits such as + chars.
+
+    if (preg_match('/([0-9]{' . $sugar_config['asterisk_digits_to_match'] . '})$/', $phoneToFind, $matches)) {
+        $phoneToFind = $matches[1];
+    }
+
+    if (strlen($phoneToFind) > 5) {
+
+        // TODO fix the join so that account is optional... I think just add INNER
+        // REMOVED: phone_work, phone_home, phone_mobile, phone_other,
+        $selectPortion = "SELECT a.id as account_id, name "
+            . " FROM accounts a ";
+
+        if ($row['bean_type'] == "Account") {
+             logLine("Quick ACCOUNT where query\n", "c:/callListener.txt");
+            $wherePortion = " WHERE a.id='{$row['bean_id']}' and a.deleted='0'";
+        }
+        // We only do this expensive query if it's not already set!
+        else {
+            logLine("Performing Expensive ACCOUNT where query\n", "c:/callListener.txt");
+
+            $phoneFields = array();
+            // Here we add any custom account fields.
+            if( !empty($sugar_config['asterisk_account_phone_fields']) ) {
+                $customPhoneFields = explode(',', $sugar_config['asterisk_account_phone_fields'] );
+                foreach ($customPhoneFields as $currCol) {
+                    array_push($phoneFields, sql_replace_phone_number($currCol, $phoneToFind) );
+                }
+            }
+
+            $phoneFieldsWherePortion = implode(' OR ', $phoneFields);
+
+            $wherePortion = " WHERE (" . $phoneFieldsWherePortion . ") and a.deleted='0'";
+            logLine("Where == " . $wherePortion, "c:/callListener.txt");
+        }
+
+        $queryAccount = $selectPortion . $wherePortion;
+        logLine("\nQUERY: $queryAccount\n","c:/callListener.txt");
+        return $current_user->db->query($queryAccount, false);
+    }
+}
+
+
+
 
 /**
 * GET contacts array

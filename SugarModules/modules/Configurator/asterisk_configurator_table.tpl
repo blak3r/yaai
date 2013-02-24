@@ -577,4 +577,17 @@
         <input type='textbox' name='asterisk_contact_phone_fields' size="45" value='{$asterisk_contact_phone_fields}'>
     </td>
 
-<TD>&nbsp;</TD><TD>&nbsp;</TD> </tr>
+    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_ACCOUNT_PHONE_FIELDS}
+      {if !empty($MOD.LBL_ASTERISK_ACCOUNT_PHONE_FIELDS_DESC)}
+          [<a href="#" title="{$MOD.LBL_ASTERISK_ACCOUNT_PHONE_FIELDS_DESC}">?</a>]:
+      {/if}
+    </td>
+    <td width="25%" class="dataField">
+    {if empty($config.asterisk_account_phone_fields )}
+        {assign var='asterisk_account_phone_fields' value=$asterisk_config.asterisk_account_phone_fields}
+    {else}
+        {assign var='asterisk_account_phone_fields' value=$config.asterisk_account_phone_fields}
+    {/if}
+        <input type='textbox' name='asterisk_account_phone_fields' size="45" value='{$asterisk_account_phone_fields}'>
+    </td>
+

@@ -120,7 +120,12 @@ var YAAI = {
                 save_label: entry['mod_strings']['SAVE']
             };
 
-            switch(entry['contacts'].length){
+            var bean_type = 'contacts';
+            if( entry['accounts'].length > 0 ) {
+                bean_type = 'accounts';
+                console.log("here accounts is bean");
+            }
+            switch(entry[bean_type].length){
                 case 0 :
                     html = template(context);
                     $('body').append(html);
@@ -129,11 +134,12 @@ var YAAI = {
                     break;
 
                 case 1 :
-                    context = YAAI.createCallBoxWithSingleMatchingContact(callboxid, context, entry);
+                    context = YAAI.createCallBoxWithSingleMatchingContact(callboxid, context, entry, bean_type);
                     html = template(context);
                     $('body').append(html);
                     YAAI.bindOpenPopupSingleMatchingContact(callboxid, entry);
-                    $('#callbox_'+callboxid).find('.singlematchingcontact').show();
+                    if( bean_type == "contacts" )
+                        $('#callbox_'+callboxid).find('.singlematchingcontact').show();
                     break;
 
                 default :
@@ -144,6 +150,7 @@ var YAAI = {
                     $('#callbox_'+callboxid).find('.multiplematchingcontacts').show();
                     break;
             }
+
 
             YAAI.bindActionDropdown(callboxid,entry);
 
@@ -728,12 +735,12 @@ var YAAI = {
 
     },
     
-    createCallBoxWithSingleMatchingContact : function(callboxid, context, entry){
-        context['contact_id'] = entry['contacts'][0]['contact_id'];
-        context['full_name'] = entry['contacts'][0]['contact_full_name'];
-        context['company'] = entry['contacts'][0]['company'];
-        context['company_id'] = entry['contacts'][0]['company_id'];
-        
+    createCallBoxWithSingleMatchingContact : function(callboxid, context, entry, bean_type){
+        context['contact_id'] = entry[bean_type][0]['contact_id'];
+        context['full_name'] = entry[bean_type][0]['contact_full_name'];
+        context['company'] = entry[bean_type][0]['company'];
+        context['company_id'] = entry[bean_type][0]['company_id'];
+
         return context;
     },
     createCallBoxWithMultipleMatchingContacts : function(callboxid, context, entry){
