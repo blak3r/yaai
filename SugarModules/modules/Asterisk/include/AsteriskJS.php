@@ -94,7 +94,7 @@ class AsteriskJS {
             if( $yaaiDevMode ) {
                 // This version includes the compiler and the non compiled template
                 echo '<script src="https://github.com/downloads/wycats/handlebars.js/handlebars-1.0.rc.1.js"></script>';
-                $template = file_get_contents( "c:/yaai/SugarModules/modules/Asterisk/include/template/call-template.html" );
+                $template = file_get_contents( "custom/modules/Asterisk/include/template/call-template.html" );
                 echo '<script id="handlebars-dev-template" type="text/x-handlebars-template">' . $template . '</script>';
             }
             else {
