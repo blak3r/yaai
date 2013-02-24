@@ -138,8 +138,12 @@ var YAAI = {
                     html = template(context);
                     $('body').append(html);
                     YAAI.bindOpenPopupSingleMatchingContact(callboxid, entry);
-                    if( bean_type == "contacts" )
+                    if( bean_type == "contacts" ){
                         $('#callbox_'+callboxid).find('.singlematchingcontact').show();
+                    }
+                    else if( bean_type == "accounts" ) {
+                        $('#callbox_'+callboxid).find('.singlematchingaccount').show();
+                    }
                     break;
 
                 default :
