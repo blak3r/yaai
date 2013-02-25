@@ -49,9 +49,7 @@ var YAAI = {
     fop2Password : window.yaai_fop_pass,
     showTransferButton : window.yaai_show_transfer_button,
     filteredCallStates : [''], //['Ringing'], // TODO make this configurable
-    options : {
-        debug: true
-    },
+
     checkForNewStates : function(loop){
         // Note: once the user gets logged out, the ajax requests will get redirected to the login page.
         // Originally, the setTimeout method was in this method.  But, no way to detect the redirect without server side
@@ -134,7 +132,6 @@ var YAAI = {
             var bean_module = 'contacts';
             if( entry['accounts'] && entry['accounts'].length > 0 ) {
                 bean_module = 'accounts';
-                console.log("Account Case!");
             }
             switch(entry[bean_module].length){
                 case 0 :
@@ -375,7 +372,7 @@ var YAAI = {
     },
     
     bindSetBeanID : function(callboxid, entry, bean_module){
-        console.log("in bind "+ bean_module + " is what beanmodule is");
+        //console.log("in bind "+ bean_module + " is what beanmodule is");
         $('#callbox_'+callboxid).find('.multiplematchingcontacts td p').on("click", "input",  function(){
             YAAI.setBeanID(entry['call_record_id'], bean_module, this.value);
         })
@@ -967,7 +964,7 @@ refreshSingleMatchingAccount : function(callboxid, entry){
     },
     
     log : function(message) {
-        if (YAAI.options.debug) {
+        if (window.yaai_debug == 1) {
             console.log(message);
         }
     },

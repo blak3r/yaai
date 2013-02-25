@@ -741,6 +741,7 @@ while (true) {
                                 logLine("NAME: " . $callRecord['sweet']['name'] . "\n");
                                 logLine("DESCRIPTION: " . $callRecord['sweet']['description'] . "\n");
 
+                                gitimg_log("call-out");
 
                                 $soapResult = $soapClient->call('set_entry', array(
                                     'session' => $soapSessionId,
@@ -929,6 +930,7 @@ while (true) {
                                 logLine(" NAME: " . $callRecord['sweet']['name'] . "\n");
                                 logLine(" DESCRIPTION: " . $callRecord['sweet']['description'] . "\n");
 
+                                gitimg_log("call-in");
 
                                 $soapResult = $soapClient->call('set_entry', array(
                                     'session' => $soapSessionId,
@@ -1912,10 +1914,43 @@ function mysql_checked_query($aQuery) {
             }
         }
     }
-
-
     return $sqlResult;
 }
+
+// mt_get: returns the current microtime
+function mt_get(){
+    global $mt_time;
+    list($usec, $sec) = explode(" ", microtime());
+    return ((float)$usec + (float)$sec);
+}
+
+// mt_start: starts the microtime counter
+function mt_start(){
+    global $mt_time; $mt_time = mt_get();
+}
+
+// mt_end: calculates the elapsed time
+function mt_end($len=4){
+    global $mt_time;
+    $time_end = mt_get();
+    return round($time_end - $mt_time, $len);
+}
+
+/**
+ * Performs an async get request (doesn't wait for response)
+ * Note: One limitation of this approach is it will not work if server does any URL rewriting
+ */
+function gitimg_log($event) {
+    $host = "gitimg.com";
+    $path = "/rs/track/blak3r/yaai-stats/$event/increment";
+    $fp = fsockopen($host,80, $errno, $errstr, 30);
+    $out = "GET " . $path . " HTTP/1.1\r\n";
+    $out.= "Host: " . $host . "\r\n";
+    $out.= "Connection: Close\r\n\r\n";
+    fwrite($fp, $out);
+    fclose($fp);
+}
+
 
 function logLine($str, $logFile = "default") {
     global $sugar_config;

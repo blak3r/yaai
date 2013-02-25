@@ -134,7 +134,9 @@ $socket = fsockopen($server, $port, $errno, $errstr, 20);
 	
 	$result = ReadResponse($socket);
 	echo("Logout Response: " . $result);
-	
+
+    gitimg_log("click-to-dial");
+
 	//var_dump($result);
 	//var_dump($channel);
 	//var_dump($context);
@@ -171,6 +173,21 @@ function ReadResponse($socket, $timeout = 500000) {
     }
 
     return $retVal;
+}
+
+/**
+ * Performs an async get request (doesn't wait for response)
+ * Note: One limitation of this approach is it will not work if server does any URL rewriting
+ */
+function gitimg_log($event) {
+    $host = "gitimg.com";
+    $path = "/rs/track/blak3r/yaai-stats/$event/increment";
+    $fp = fsockopen($host,80, $errno, $errstr, 30);
+    $out = "GET " . $path . " HTTP/1.1\r\n";
+    $out.= "Host: " . $host . "\r\n";
+    $out.= "Connection: Close\r\n\r\n";
+    fwrite($fp, $out);
+    fclose($fp);
 }
 
 /**

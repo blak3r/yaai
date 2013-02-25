@@ -85,9 +85,26 @@ function memoSave($call_record_id, $sugar_user_id, $phone_number, $description, 
         $call->name = getMemoName($call, $direction, $phone_number);
         $call->assigned_user_id = $sugar_user_id;
         $call->save();
+        gitimg_log("notes-saved");
        // $GLOBALS['log']->fatal('callid_' . $call->id);
     }
 }
+
+/**
+ * Performs an async get request (doesn't wait for response)
+ * Note: One limitation of this approach is it will not work if server does any URL rewriting
+ */
+function gitimg_log($event) {
+    $host = "gitimg.com";
+    $path = "/rs/track/blak3r/yaai-stats/$event/increment";
+    $fp = fsockopen($host,80, $errno, $errstr, 30);
+    $out = "GET " . $path . " HTTP/1.1\r\n";
+    $out.= "Host: " . $host . "\r\n";
+    $out.= "Connection: Close\r\n\r\n";
+    fwrite($fp, $out);
+    fclose($fp);
+}
+
 
 function updateUIState($ui_state, $call_record, $asterisk_id) {
     $cUser = new User();
@@ -442,7 +459,6 @@ function build_item_list($result_set, $current_user, $mod_strings) {
 
         // Dont fetch contacts if it's already known this is already been related to another module.
         if( empty($row['bean_module']) || $row['bean_module'] == "contacts") {
-            logLine("get_contact\n", "c:/controller.log");
             $contacts = get_contact_information($phone_number, $row, $current_user);
         }
 
@@ -625,7 +641,6 @@ function get_accounts($innerResultSet, $current_user, $row) {
     $accounts = array();
 
     while ($accountRow = $current_user->db->fetchByAssoc($innerResultSet)) {
-        logLine("In loop\n", "c:/controller.php");
         $account = array(
             'company_id' => $accountRow['account_id'],
             'company' => $accountRow['name'],
@@ -640,7 +655,7 @@ function get_accounts($innerResultSet, $current_user, $row) {
 function fetch_accounts_associated_to_phone_number($phoneToFind, $row, $current_user) {
     global $sugar_config;
 
-    logLine("fetch_accounts\n", "c:/callListener.txt");
+    //logLine("fetch_accounts\n", "c:/callListener.txt");
 
     $phoneToFind = ltrim($phoneToFind, '0');
     $phoneToFind = preg_replace('/\D/', '', $phoneToFind); // Removes and non digits such as + chars.
@@ -654,15 +669,16 @@ function fetch_accounts_associated_to_phone_number($phoneToFind, $row, $current_
         // TODO fix the join so that account is optional... I think just add INNER
         // REMOVED: phone_work, phone_home, phone_mobile, phone_other,
         $selectPortion = "SELECT a.id as account_id, name "
-            . " FROM accounts a ";
+            . " FROM accounts a "
+            . " left join accounts_cstm on (a.id=accounts_cstm.id_c) ";
 
         if ( !empty($row['bean_id']) && $row['bean_module'] == "accounts") {
-             logLine("Quick ACCOUNT where query\n", "c:/callListener.txt");
+             //logLine("Quick ACCOUNT where query\n", "c:/callListener.txt");
             $wherePortion = " WHERE a.id='{$row['bean_id']}' and a.deleted='0'";
         }
         // We only do this expensive query if it's not already set!
         else {
-            logLine("Performing Expensive ACCOUNT where query\n", "c:/callListener.txt");
+            //logLine("Performing Expensive ACCOUNT where query\n", "c:/callListener.txt");
 
             $phoneFields = array();
             // Here we add any custom account fields.
@@ -676,11 +692,11 @@ function fetch_accounts_associated_to_phone_number($phoneToFind, $row, $current_
             $phoneFieldsWherePortion = implode(' OR ', $phoneFields);
 
             $wherePortion = " WHERE (" . $phoneFieldsWherePortion . ") and a.deleted='0'";
-            logLine("Where == " . $wherePortion, "c:/callListener.txt");
+            //logLine("Where == " . $wherePortion, "c:/callListener.txt");
         }
 
         $queryAccount = $selectPortion . $wherePortion;
-        logLine("\nQUERY: $queryAccount\n","c:/callListener.txt");
+        //logLine("\nQUERY: $queryAccount\n","c:/callListener.txt");
         return $current_user->db->query($queryAccount, false);
     }
 }
@@ -748,11 +764,12 @@ function fetch_contacts_associated_to_phone_number($phoneToFind, $row, $current_
         // REMOVED: phone_work, phone_home, phone_mobile, phone_other,
         $selectPortion = "SELECT c.id as contact_id, first_name, last_name, a.name as account_name, account_id "
                 . " FROM contacts c "
+                . " left join contacts_cstm on (c.id = contacts_cstm.id_c) "
                 . " left join accounts_contacts ac on (c.id=ac.contact_id) and (ac.deleted='0' OR ac.deleted is null)"
                 . " left join accounts a on (ac.account_id=a.id) and (a.deleted='0' or a.deleted is null)";
 
         if (!empty($row['bean_id']) && $row['bean_module'] == "contacts") {
-            logLine("Quick where query\n", "c:/controller.log");
+            //logLine("Quick where query\n", "c:/controller.log");
             $wherePortion = " WHERE c.id='{$row['bean_id']}' and c.deleted='0'";
         }
         // We only do this expensive query if it's not already set!
@@ -778,7 +795,7 @@ function fetch_contacts_associated_to_phone_number($phoneToFind, $row, $current_
         $queryContact = $selectPortion . $wherePortion;
         $logQuery = preg_replace('/\r/','', $queryContact);
         $logQuery = preg_replace('/\n/',' ', $logQuery);
-        logLine("QUERY: $logQuery\n","c:/callListener.txt");
+        //logLine("QUERY: $logQuery\n","c:/callListener.txt");
         return $current_user->db->query($queryContact, false);
     }
 }
