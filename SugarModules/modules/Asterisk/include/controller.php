@@ -38,14 +38,14 @@ else {
 switch ($_REQUEST['action']) {
     case "memoSave" :
         if ($_REQUEST['call_record']) {
-             memoSave($_REQUEST['call_record'], $_REQUEST['sugar_user_id'], $_REQUEST['phone_number'], $_REQUEST['description'], $_REQUEST['contact_id'], $_REQUEST['direction']);
+             memoSave($_REQUEST['call_record'], $_REQUEST['sugar_user_id'], $_REQUEST['phone_number'], $_REQUEST['description'], $_REQUEST['direction']);
         }
         break;
     case "updateUIState" :
         updateUIState($_REQUEST['ui_state'], $_REQUEST['call_record'], $_REQUEST['id']);
         break;
-    case "setContactID" :
-        setContactID($_REQUEST['call_record'], $_REQUEST['contact_id']);
+    case "setBeanID" :
+        setBeanID($_REQUEST['call_record'], $_REQUEST['bean_module'], $_REQUEST['bean_id']);
         break;
     case "call" :
         callCreate();
@@ -66,24 +66,26 @@ switch ($_REQUEST['action']) {
 
 // ACTION FUNCTIONS
 
-function memoSave($call_record_id, $sugar_user_id, $phone_number, $description, $contact_id, $direction) {
+function memoSave($call_record_id, $sugar_user_id, $phone_number, $description, $direction) {
     $GLOBALS['log']->fatal('memoSave' . $phone_number);
     if ($call_record_id) {
         $call = new Call();
 
+        /*
         if (!empty($contact_id)) {
             $call->parent_id = $contact_id;
             $call->parent_type = 'Contacts';
         }
+        */
 
         $call->retrieve($call_record_id);
         $call->description = $description;
         //!$name ? $call->name = getMemoName($call, $direction) : $call->name = $_REQUEST["name"];
-        $GLOBALS['log']->fatal('memoSave' . $phone_number);
+        //$GLOBALS['log']->fatal('memoSave' . $phone_number);
         $call->name = getMemoName($call, $direction, $phone_number);
         $call->assigned_user_id = $sugar_user_id;
         $call->save();
-        $GLOBALS['log']->fatal('callid_' . $call->id);
+       // $GLOBALS['log']->fatal('callid_' . $call->id);
     }
 }
 
@@ -109,34 +111,56 @@ function updateUIState($ui_state, $call_record, $asterisk_id) {
     }
 }
 
-function setContactID($call_record, $contact_id) {
+function setBeanID($call_record, $bean_module, $bean_id) {
     //wrapped the entire action to require a call_record - if this is not being passed then there is no point for this action - PJH
-    if (is_string($call_record) && is_string($contact_id) ) {
+    if (is_string($call_record) && is_string($bean_id) ) {
         // Very basic sanitization
-        $contactId = preg_replace('/[^a-z0-9\-\. ]/i', '', $contact_id);  
-        $callRecord = preg_replace('/[^a-z0-9\-\. ]/i', '', $call_record); 
+        $bean_id = preg_replace('/[^a-z0-9\-\. ]/i', '', $bean_id);
+        $bean_module = preg_replace('/[^a-z0-9\-\. ]/i', '', $bean_module);
+        $call_record = preg_replace('/[^a-z0-9\-\. ]/i', '', $call_record);
         // Workaround See Discussion here: https://github.com/blak3r/yaai/pull/20
 
-        $query = "update asterisk_log set contact_id=\"$contactId\" where call_record_id=\"$callRecord\"";
+        $query = "update asterisk_log set bean_id=\"$bean_id\", bean_module=\"$bean_module\" where call_record_id=\"$call_record\"";
 
         $GLOBALS['current_user']->db->query($query, false);
         if ($GLOBALS['current_user']->db->checkError()) {
             trigger_error("Update setContactId-Query failed: $query");
         }
 
-        // Adds the new relationship! (This must be done here in case the call has already been hungup as that's when asteriskLogger sets relations)
         $focus = new Call();
-        $focus->retrieve($callRecord);
+        $focus->retrieve($call_record);
         $focus->load_relationship('contacts');
+        $focus->load_relationship('accounts');
+        $focus->load_relationship('leads');
+
+        // TODO here, find if there is a way to remove all relationships dynamically so we don't need to specify 'contacts', 'accounts' explicitly
         // Remove any contacts already associated with call (if there are any)
         foreach ($focus->contacts->getBeans() as $contact) {
-            $focus->contacts->delete($callRecord, $contact->id);
+            $focus->contacts->delete($call_record, $contact->id);
         }
-        $focus->contacts->add($contactId); // Add the new one!
-        $contactBean = new Contact();
-        $contactBean->retrieve($contactId);
-        $focus->parent_id = $contactBean->account_id;
-        $focus->parent_type = "Accounts";
+        foreach ($focus->contacts->getBeans() as $contact) {
+            $focus->accounts->delete($call_record, $contact->id);
+        }
+        foreach ($focus->contacts->getBeans() as $contact) {
+            $focus->leads->delete($call_record, $contact->id);
+        }
+
+        switch($bean_module) {
+            case 'contacts':
+                $focus->contacts->add($bean_id); // Add the new one!
+                $contactBean = new Contact();
+                $contactBean->retrieve($bean_id);
+                $focus->parent_id = $contactBean->account_id;
+                $focus->parent_type = "Accounts";
+                break;
+            case 'accounts':
+                $focus->accounts->add($bean_id);
+                break;
+            case 'leads':
+                $focus->leads->add($bean_id);
+                break;
+        }
+
         $focus->save();
     }
 }
@@ -413,16 +437,30 @@ function build_item_list($result_set, $current_user, $mod_strings) {
         $state = get_call_state($row, $mod_strings);
         $phone_number = get_callerid($row);
         $call_direction = get_call_direction($row, $mod_strings);
-        $contacts = get_contact_information($phone_number, $row, $current_user);
+
+        $contacts = array();
+
+        // Dont fetch contacts if it's already known this is already been related to another module.
+        if( empty($row['bean_module']) || $row['bean_module'] == "contacts") {
+            logLine("get_contact\n", "c:/controller.log");
+            $contacts = get_contact_information($phone_number, $row, $current_user);
+        }
+
+        $accounts = array();
         if( count($contacts) == 0 ) {
             $accounts = get_account_information($phone_number, $row, $current_user);
         }
 
 
+        // TODO REFACTOR
         // If only one contact is returned, we set db column so we don't reperform expensive phone number lookup qry anymore
-        if( empty( $row['contact_id'] ) && count($contacts) == 1 ) {
+        if( empty( $row['bean_id'] ) && count($contacts) == 1 ) {
             // logLine("Updating db, " . $row['call_record_id'] . "  contact:" . $contacts[0]['contact_id'] . "\n", "c:/callListener.txt");
-            setContactID($row['call_record_id'], $contacts[0]['contact_id'] );
+            setBeanID($row['call_record_id'], "contacts", $contacts[0]['contact_id'] );
+        }
+        else if( empty( $row['bean_id'] ) && count($accounts) == 1 ) {
+            // logLine("Updating db, " . $row['call_record_id'] . "  contact:" . $contacts[0]['contact_id'] . "\n", "c:/callListener.txt");
+            setBeanID($row['call_record_id'], "accounts", $accounts[0]['company_id'] );
         }
 
         // TODO Call SetBeanId here when it's the acount case!
@@ -618,7 +656,7 @@ function fetch_accounts_associated_to_phone_number($phoneToFind, $row, $current_
         $selectPortion = "SELECT a.id as account_id, name "
             . " FROM accounts a ";
 
-        if ($row['bean_type'] == "Account") {
+        if ( !empty($row['bean_id']) && $row['bean_module'] == "accounts") {
              logLine("Quick ACCOUNT where query\n", "c:/callListener.txt");
             $wherePortion = " WHERE a.id='{$row['bean_id']}' and a.deleted='0'";
         }
@@ -707,18 +745,15 @@ function fetch_contacts_associated_to_phone_number($phoneToFind, $row, $current_
     }
 
     if (strlen($phoneToFind) > 5) {
-
-       // TODO fix the join so that account is optional... I think just add INNER
         // REMOVED: phone_work, phone_home, phone_mobile, phone_other,
         $selectPortion = "SELECT c.id as contact_id, first_name, last_name, a.name as account_name, account_id "
                 . " FROM contacts c "
-                . " join contacts_cstm on c.id = contacts_cstm.id_c"
                 . " left join accounts_contacts ac on (c.id=ac.contact_id) and (ac.deleted='0' OR ac.deleted is null)"
                 . " left join accounts a on (ac.account_id=a.id) and (a.deleted='0' or a.deleted is null)";
 
-        if ($row['contact_id']) {
-            // logLine("Quick where query\n", "c:/callListener.txt");
-            $wherePortion = " WHERE c.id='{$row['contact_id']}' and c.deleted='0'";
+        if (!empty($row['bean_id']) && $row['bean_module'] == "contacts") {
+            logLine("Quick where query\n", "c:/controller.log");
+            $wherePortion = " WHERE c.id='{$row['bean_id']}' and c.deleted='0'";
         }
         // We only do this expensive query if it's not already set!
         else {
@@ -741,7 +776,9 @@ function fetch_contacts_associated_to_phone_number($phoneToFind, $row, $current_
         }
 
         $queryContact = $selectPortion . $wherePortion;
-        //logLine("QUERY: $queryContact\n","c:/callListener.txt");
+        $logQuery = preg_replace('/\r/','', $queryContact);
+        $logQuery = preg_replace('/\n/',' ', $logQuery);
+        logLine("QUERY: $logQuery\n","c:/callListener.txt");
         return $current_user->db->query($queryContact, false);
     }
 }
@@ -819,6 +856,8 @@ function get_open_cnam_result($row, $current_user) {
 * title changes based on whether there are 1) multiple matches found 2) single match found 3) no matches found
 */
 function get_title($contacts, $phone_number, $state, $mod_strings) {
+
+    // TODO Needs to be updated to support Accounts
 
     switch (count($contacts)) {
         case 0:

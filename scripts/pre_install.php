@@ -70,52 +70,45 @@ function pre_install() {
     $db->query($query, false, "Error dropping asterisk_log table: " . $query);
 
     if( !$db->tableExists("asterisk_log") ) {
-        $query = "CREATE TABLE asterisk_log (";
-        $query .= "id int(10) unsigned NOT NULL auto_increment,";
-        $query .= "call_record_id char(36) default NULL,";
-        $query .= "asterisk_id varchar(45) default NULL,";
-        $query .= "callstate varchar(10) default NULL,";
-        $query .= "uistate varchar(10) default NULL,";  // added in v2.0 to keep track of which chat windows were minimized.
-        $query .= "callerID varchar(45) default NULL,";
-        $query .= "callerName varchar(45) default NULL,";
-        $query .= "channel varchar(30) default NULL,";
-        $query .= "remote_channel varchar(30) default NULL,"; // added in v2.0, it's used for transferring.
-        $query .= "timestamp_call datetime default NULL,";
-        $query .= "timestamp_link datetime default NULL,";
-        $query .= "timestamp_hangup datetime default NULL,";
-        $query .= "direction varchar(1) default NULL,";
-        $query .= "hangup_cause integer default NULL,";
-        $query .= "hangup_cause_txt varchar(45) default NULL,";
-        $query .= "asterisk_dest_id varchar(45) default NULL,";
-        $query .= "contact_id VARCHAR(36) DEFAULT NULL,"; // added in v2.0 to keep track of contact.  Helps when it matches multiple ones.
-        $query .= "opencnam VARCHAR(16) DEFAULT NULL,"; // added in v2.2 to keep track of whether number had been looked up in opencnam yet.
-        $query .= "answered TINYINT(1) DEFAULT 0,";
-        $query .= "PRIMARY KEY (id)";
-        $query .= ")";
-        $db->query($query, false, "Error creating call table: " . $query);
+
+$createTableQuery =  <<<CREATETABLE
+CREATE TABLE `asterisk_log` (
+	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`call_record_id` CHAR(36) NULL DEFAULT NULL,
+	`asterisk_id` VARCHAR(45) NULL DEFAULT NULL,
+	`callstate` VARCHAR(10) NULL DEFAULT NULL,
+	`uistate` VARCHAR(10) NULL DEFAULT NULL,
+	`callerID` VARCHAR(45) NULL DEFAULT NULL,
+	`callerName` VARCHAR(45) NULL DEFAULT NULL,
+	`channel` VARCHAR(30) NULL DEFAULT NULL,
+	`remote_channel` VARCHAR(30) NULL DEFAULT NULL,
+	`timestamp_call` DATETIME NULL DEFAULT NULL,
+	`timestamp_link` DATETIME NULL DEFAULT NULL,
+	`timestamp_hangup` DATETIME NULL DEFAULT NULL,
+	`direction` VARCHAR(1) NULL DEFAULT NULL,
+	`hangup_cause` INT(11) NULL DEFAULT NULL,
+	`hangup_cause_txt` VARCHAR(45) NULL DEFAULT NULL,
+	`asterisk_dest_id` VARCHAR(45) NULL DEFAULT NULL,
+	`opencnam` VARCHAR(16) NULL DEFAULT NULL,
+	`answered` TINYINT(1) NULL DEFAULT '0',
+	`user_extension` VARCHAR(16) NULL DEFAULT NULL,
+	`inbound_extension` VARCHAR(16) NULL DEFAULT NULL,
+	`bean_module` VARCHAR(100) NULL DEFAULT NULL,
+	`bean_id` CHAR(36) NULL DEFAULT NULL,
+	PRIMARY KEY (`id`),
+	INDEX `user_extension` (`user_extension`),
+	INDEX `call_record_id` (`call_record_id`),
+	INDEX `uistate` (`uistate`),
+	INDEX `timestamp_call` (`timestamp_call`)
+)
+COLLATE='utf8_general_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=68;
+
+CREATETABLE;
+        $db->query($createTableQuery, false, "Error creating call table: " . $query);
     }
 
-    // Columns Added in v2.0
-    add_column_if_not_exist($db,"asterisk_log","uistate", "VARCHAR(10) DEFAULT NULL");
-    add_column_if_not_exist($db,"asterisk_log","remote_channel", "VARCHAR(30) DEFAULT NULL");
-    add_column_if_not_exist($db,"asterisk_log","contact_id", "VARCHAR(36) DEFAULT NULL");
-    // Columns Added in v2.3
-    add_column_if_not_exist($db,"asterisk_log","opencnam", "VARCHAR(16) DEFAULT NULL");
-
-    // Columns Added in v3.0
-    add_column_if_not_exist($db,"asterisk_log","user_extension", "VARCHAR(16) DEFAULT NULL");
-    add_column_if_not_exist($db,"asterisk_log","answered", "BIT NULL DEFAULT NULL");
-    add_column_if_not_exist($db,"asterisk_log","inbound_extension","VARCHAR(16) DEFAULT NULL");
-
-    add_index_if_not_exist($db,"asterisk_log","timestamp_call");
-    add_index_if_not_exist($db,"asterisk_log","uistate");
-    add_index_if_not_exist($db,"asterisk_log","callstate");
-    add_index_if_not_exist($db,"asterisk_log","channel");
-    add_index_if_not_exist($db,"asterisk_log","asterisk_id");
-    add_index_if_not_exist($db,"asterisk_log","asterisk_dest_id");
-    add_index_if_not_exist($db,"asterisk_log","call_record_id");
-    add_index_if_not_exist($db,"asterisk_log","user_extension");
-    add_index_if_not_exist($db,"asterisk_log","answered");
 }
 
 // http://www.edmondscommerce.co.uk/mysql/mysql-add-column-if-not-exists-php-function/

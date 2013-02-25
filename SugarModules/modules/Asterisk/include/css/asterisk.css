@@ -183,7 +183,7 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
 	float: left;
 }
 
-.multiplematchingcontacts, .singlematchingcontact, .nomatchingcontact, .singlematching {
+.multiplematchingcontacts, .multiplematchingaccounts, .singlematchingcontact, .nomatchingcontact, .singlematching {
         display: none;
 }
 

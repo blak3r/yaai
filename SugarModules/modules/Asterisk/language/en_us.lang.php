@@ -58,6 +58,7 @@ $mod_strings = array ( 'YAAI' => array(
     // Added in v2.2
 	'ASTERISKLBL_DURATION'         => 'Duration',
 	'ASTERISKLBL_SELECTCONTACT'    => 'Select Contact',
+    'ASTERISKLBL_SELECTACCOUNT'    => 'Select Account',   // V3.2
 	'ASTERISKLBL_MULTIPLE_MATCHES' => 'Multiple Matches',
 	'ASTERISKLBL_CALLERID'         => 'CallerID',
 
@@ -72,7 +73,7 @@ $mod_strings = array ( 'YAAI' => array(
 	'CALL_DESCRIPTION_MISSED'       => 'Missed/failed call',
 
     // V3 Additions
-    'CALL_DESCRIPTION_PHONE_NUMBER' => 'Phone Number',
+    'CALL_DESCRIPTION_PHONE_NUMBER' => 'Phone',
     'CREATE'                        => 'Create',
     'RELATE_TO'                     => 'Relate',
     'BLOCK'                         => 'Block',

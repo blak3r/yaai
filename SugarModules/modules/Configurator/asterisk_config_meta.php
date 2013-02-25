@@ -45,7 +45,7 @@ $config_meta['asterisk_relate_to_contact_enabled'] = array('default' => '1', 'se
 $config_meta['asterisk_create_new_contact_enabled'] = array('default' => '1', 'section'=>'Popup UI');
 //$config_meta['asterisk_max_popups'] = array('default' => '5', 'section'=>'Popup UI');
 //$config_meta['asterisk_filtered_call_states'] = array('default' => '', 'section'=>'Popup UI');
-$config_meta['asterisk_window_height'] = array('default' => '', 'section'=>'Popup UI');
+//$config_meta['asterisk_window_height'] = array('default' => '', 'section'=>'Popup UI');
 
 /*
 $config_meta['asterisk_callinize_username'] = array('default' => '', 'section'=>'Callinize');

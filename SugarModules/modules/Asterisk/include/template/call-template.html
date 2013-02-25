@@ -21,7 +21,18 @@
                             {{#each contacts}}
                             <p class="select_contact" id="contact_{{contact_id}}">
                                 <input type="radio" name="contactSelect"  value={{contact_id}}  />
-                                <a class="multiplecontacts" title="{{contact_full_name}}" href="index.php?module=Contacts&action=DetailView&record={{contact_id}}">{{contact_full_name}}</a>
+                                <a class="multiplecontacts" title="{{company}}" href="index.php?module=Contacts&action=DetailView&record={{contact_id}}">{{contact_full_name}}</a>
+                            </p>
+                            {{/each}}
+                        </td>
+                    </tr>
+                    <tr class="multiplematchingaccounts">
+                        <td colspan="2">
+                            <b>{{select_account_label}}</b>
+                            {{#each accounts}}
+                            <p class="select_contact" id="account_{{company_id}}">
+                                <input type="radio" name="accountSelect"  value={{company_id}}  />
+                                <a class="multipleaccounts" title="{{contact_full_name}}" href="index.php?module=Accounts&action=DetailView&record={{company_id}}">{{company}}</a>
                             </p>
                             {{/each}}
                         </td>
@@ -31,7 +42,7 @@
                         <td><a class="contact_id" href="index.php?module=Contacts&action=DetailView&record={{contact_id}}">
                                 <span class="call_contacts">{{full_name}}</span>
                             </a>
-                            <button class="unrelate_contact"></button>
+                            <!-- <button class="unrelate_contact"></button> -->
                         </td>
                     </tr>
                     <tr class="singlematching">

@@ -542,21 +542,7 @@
         <input type='textbox' name='asterisk_create_new_contact_enabled' size="45" value='{$asterisk_create_new_contact_enabled}'>
     </td>
 
-    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_WINDOW_HEIGHT}
-      {if !empty($MOD.LBL_ASTERISK_WINDOW_HEIGHT_DESC)}
-          [<a href="#" title="{$MOD.LBL_ASTERISK_WINDOW_HEIGHT_DESC}">?</a>]:
-      {/if}
-    </td>
-    <td width="25%" class="dataField">
-    {if empty($config.asterisk_window_height )}
-        {assign var='asterisk_window_height' value=$asterisk_config.asterisk_window_height}
-    {else}
-        {assign var='asterisk_window_height' value=$config.asterisk_window_height}
-    {/if}
-        <input type='textbox' name='asterisk_window_height' size="45" value='{$asterisk_window_height}'>
-    </td>
-
-
+<TD>&nbsp;</TD><TD>&nbsp;</TD> </tr>
 
 <TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h3>Phone Fields</h3></TD></tr>
 

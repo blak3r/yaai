@@ -498,7 +498,7 @@ while (true) {
                             preg_match($rgCellRingRegex, $eChannel)) {
                         deleteCall($callRecordId);
                         logLine("INTERNAL call detected, Deleting Call Record $callRecordId\n");
-						
+
 						// HERE We detect if this is the outbound call to a cell phone...
                         /*
 						$query = "SELECT * FROM asterisk_log WHERE channel like '%" . $e['ConnectedLineNum'] . "%' AND callerID = '" . $tmpCallerID . "'";
@@ -610,7 +610,7 @@ while (true) {
                 // Asterisk Manager 1.1
                 if ($e['Event'] == 'Hangup') {
                     $id = AMI_getUniqueIdFromEvent($e);
-                    $query = "SELECT direction,contact_id,user_extension,inbound_extension FROM asterisk_log WHERE asterisk_dest_id = '$id' OR asterisk_id = '$id'";
+                    $query = "SELECT direction,bean_module,bean_id,user_extension,inbound_extension FROM asterisk_log WHERE asterisk_dest_id = '$id' OR asterisk_id = '$id'";
                     $result = mysql_checked_query($query);
                     $direction = mysql_fetch_array($result);
                     //var_dump($direction);
@@ -696,10 +696,10 @@ while (true) {
                                 $beanType = NULL;
                                 $parentID = NULL;
                                 $parentType = NULL;
-                                if (!empty($direction['contact_id'])) {
-                                    logLine("Contact Id already set by callListener to: " . $direction['contact_id'] . "\n");
-                                    $beanID = $direction['contact_id'];
-                                    $beanType = "Contacts";
+                                if (!empty($direction['bean_id'])) {
+                                    logLine("Bean Id already set by callListener to: " . $direction['bean_id'] . "\n");
+                                    $beanID = $direction['bean_id'];
+                                    $beanType = ucfirst($direction['bean_module']);
                                 } else {
 
                                     $assocAccount = findSugarAccountByPhoneNumber($rawData['callerID']);
@@ -723,6 +723,9 @@ while (true) {
                                         $parentType = 'Accounts';
                                         $parentID = $assocAccount;
                                     }
+                                } else if ($beanType == "Accounts") {
+                                    $parentType = "Accounts";
+                                    $parentID = $beanID;
                                 }
 
                                 //var_dump($parentType);
@@ -813,7 +816,7 @@ while (true) {
                         //
                         $callRecord = findCallByAsteriskDestId($id);
                         if ($callRecord) {
-          
+
                             //
                             // update entry in asterisk_log...
                             //
@@ -884,10 +887,10 @@ while (true) {
                                 $beanType = NULL;
                                 $parentID = NULL;
                                 $parentType = NULL;
-                                if (!empty($direction['contact_id'])) {
-                                    logLine("Contact Id already set by callListener to: " . $direction['contact_id'] . "\n");
-                                    $beanID = $direction['contact_id'];
-                                    $beanType = "Contacts";
+                                if (!empty($direction['bean_id'])) {
+                                    logLine("Bean Id already set by callListener to: " . $direction['bean_id'] . "\n");
+                                    $beanID = $direction['bean_id'];
+                                    $beanType = ucfirst($direction['bean_module']);
                                 } else {
                                     $assocAccount = findSugarAccountByPhoneNumber($rawData['callerID']);
                                     if ($assocAccount != FALSE) {
@@ -910,7 +913,7 @@ while (true) {
                                         $parentType = 'Accounts';
                                         $parentID = $assocAccount;
                                     }
-                                } else if ($beanType == "Accounts") {
+                                } else if ( $beanType == "Accounts") {
                                     $parentType = "Accounts";
                                     $parentID = $beanID;
                                 }
@@ -1492,7 +1495,7 @@ function findSugarAccountByPhoneNumber($aPhoneNumber) {
 //
 // Attempt to find a Sugar object (Contact,..) by phone number
 //
-// NOTE: As of v2.2, callListener now updates a column in asterisk_log table with contact_id so it doesn't have to perform
+// NOTE: As of v2.2, callListener now updates a column in asterisk_log table with bean id so it doesn't have to perform
 // a complex query each time. But, since callListener only works when you're logged into sugar and have "Call Notification" on...
 // we still have to try and find object related to phone number here for the other cases.
 //
@@ -2023,7 +2026,7 @@ function was_call_answered($id) {
     $result = mysql_checked_query($query);
     $result = mysql_fetch_array($result);
     $callstate = $result['callstate'];
-    
+
     if($callstate == 'Ringing' || $callstate == 'Dial'){
         return 0;
     }else{

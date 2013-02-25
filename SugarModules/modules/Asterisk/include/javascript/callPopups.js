@@ -96,13 +96,12 @@ var YAAI = {
     
     createCallBox : function (callboxid, entry, modstrings) {
        if($('#callbox_'+callboxid).attr('id') == undefined){
-            var html;
-
+           var html;
            var template = '';
 
            if( window.yaai_dev ) {
+               YAAI.log("WARNING: YAAI Developer Mode is enabled, this should not be used in production!");
                var source   = $("#handlebars-dev-template").html();
-               YAAI.log("here's the source: " + source);
                template = Handlebars.compile(source);
            }
            else {
@@ -132,12 +131,12 @@ var YAAI = {
                 save_label: entry['mod_strings']['SAVE']
             };
 
-            var bean_type = 'contacts';
-            if( entry['accounts'].length > 0 ) {
-                bean_type = 'accounts';
+            var bean_module = 'contacts';
+            if( entry['accounts'] && entry['accounts'].length > 0 ) {
+                bean_module = 'accounts';
                 console.log("Account Case!");
             }
-            switch(entry[bean_type].length){
+            switch(entry[bean_module].length){
                 case 0 :
                     html = template(context);
                     $('body').append(html);
@@ -146,25 +145,30 @@ var YAAI = {
                     break;
 
                 case 1 :
-                    context = YAAI.setupHandlebarsContextForSingleMatchingCase(callboxid, context, entry, bean_type);
+                    context = YAAI.setupHandlebarsContextForSingleMatchingCase(callboxid, context, entry, bean_module);
                     html = template(context);
                     $('body').append(html);
                     YAAI.bindOpenPopupSingleMatchingContact(callboxid, entry);
-                    if( bean_type == "contacts" ){
+                    if( bean_module == "contacts" ){
                         $('#callbox_'+callboxid).find('.singlematchingcontact').show();
                         $('#callbox_'+callboxid).find('.singlematching').show();
                     }
-                    else if( bean_type == "accounts" ) {
+                    else if( bean_module == "accounts" ) {
                         $('#callbox_'+callboxid).find('.singlematching').show();
                     }
                     break;
 
                 default :
-                    context = YAAI.setupHandlebarsContextForMultipleMatchingCase(callboxid, context, entry);
+                    context = YAAI.setupHandlebarsContextForMultipleMatchingCase(callboxid, context, entry, bean_module);
                     html = template(context);
                     $('body').append(html);
-                    YAAI.bindSetContactID(callboxid, entry);
-                    $('#callbox_'+callboxid).find('.multiplematchingcontacts').show();
+                    YAAI.bindSetBeanID(callboxid, entry, bean_module);
+                    if( bean_module == "contacts" ){
+                        $('#callbox_'+callboxid).find('.multiplematchingcontacts').show();
+                    }
+                    else {
+                        $('#callbox_'+callboxid).find('.multiplematchingaccounts').show();
+                    }
                     break;
             }
 
@@ -206,7 +210,7 @@ var YAAI = {
 				
         $(".call_duration", "#callbox_"+callboxid+" .callboxcontent").text( entry['duration'] ); // Updates duration
 
-        YAAI.refreshContactView(callboxid, entry);
+        YAAI.refreshSingleMatchView(callboxid, entry);
         
     },
     
@@ -276,7 +280,6 @@ var YAAI = {
             YAAI.log("  Adding Relate to Account");
             $("#dropdown-1_callbox_"+callboxid+" ul").append("<li><a href='#' class='relate_to_account'>"+entry['mod_strings']['RELATE_TO_ACCOUNT']+"</a></li>");
             $("#dropdown-1_callbox_"+callboxid+" ul a.relate_to_account").on("click", entry, function() {
-                alert("This isn't fully implemented yet, the popup to select account will appear but it will not save.");
                 YAAI.openAccountRelatePopup(entry);
             });
         }
@@ -344,7 +347,8 @@ var YAAI = {
         }); 
         
     },
-    
+
+    // This is the icon next to the name.
     bindOpenPopupSingleMatchingContact : function(callboxid, entry){
         $('#callbox_'+callboxid).find('.singlematchingcontact .unrelate_contact').button({
             icons: {
@@ -356,11 +360,29 @@ var YAAI = {
             YAAI.openPopup(entry);
         });  
     },
+
+    // Not going to have this...
+    bindOpenPopupSingleMatchingAccount : function(callboxid, entry){
+        $('#callbox_'+callboxid).find('.singlematchingcontact .unrelate_contact').button({
+            icons: {
+                primary: 'ui-icon-custom-unrelate',
+                secondary: null
+            },
+            text: false
+        }).on("click", function(){
+                YAAI.openPopup(entry);
+            });
+    },
     
-    bindSetContactID : function(callboxid, entry){
+    bindSetBeanID : function(callboxid, entry, bean_module){
+        console.log("in bind "+ bean_module + " is what beanmodule is");
         $('#callbox_'+callboxid).find('.multiplematchingcontacts td p').on("click", "input",  function(){
-            YAAI.setContactID(entry['call_record_id'], this.value);
-        })  
+            YAAI.setBeanID(entry['call_record_id'], bean_module, this.value);
+        })
+        // TODO Refactor this out
+        $('#callbox_'+callboxid).find('.multiplematchingaccounts td p').on("click", "input",  function(){
+            YAAI.setBeanID(entry['call_record_id'], bean_module, this.value);
+        })
     },
     
     /// USER ACTIONS
@@ -393,10 +415,11 @@ var YAAI = {
         YAAI.restructureCallBoxes(); // BR added... only needed for vertical stack method.
     },
     
-    setContactID : function( callRecordId, contactId) {
-        $.post("index.php?entryPoint=AsteriskController&action=setContactID", {
+    setBeanID : function( callRecordId, beanModule, beanId) {
+        $.post("index.php?entryPoint=AsteriskController&action=setBeanID", {
             call_record: callRecordId, 
-            contact_id: contactId
+            bean_module: beanModule,
+            bean_id: beanId
         } );
      
         //force an out of loop request to refresh contact view
@@ -548,7 +571,7 @@ var YAAI = {
         
         var contactId = window.document.forms[form_name].elements['relateContactId'].value;
         if( contactId != null ) {
-            YAAI.setContactID(form_name,contactId);
+            YAAI.setBeanID(form_name,'contacts',contactId);
         }
         else {
             alert("Error updating related Contact");
@@ -557,7 +580,7 @@ var YAAI = {
     },
 
     /*
-     * Relate Contact Callback method.
+     * Relate Account Callback method.
      * This is called by the open_popup sugar call when a contact is selected.
      *
      * I basically copied the set_return method and added some stuff onto the bottom.  I couldn't figure out how to add
@@ -590,8 +613,7 @@ var YAAI = {
 
         var accountId = window.document.forms[form_name].elements['relateAccountId'].value;
         if( accountId != null ) {
-            alert("YAAI.setAccountID not yet implemented!");
-            YAAI.setAccountID(form_name,accountId);
+            YAAI.setBeanID(form_name,'accounts',accountId);
         }
         else {
             alert("Error updating related Account");
@@ -677,29 +699,39 @@ var YAAI = {
         }
     },
     
-    refreshContactView : function (callboxid, entry){
+    refreshSingleMatchView : function (callboxid, entry){
         
-        var singlematchingcontact = $('#callbox_'+callboxid).find('.singlematchingcontact');
-        
-        //check if a single contacts match has had changes - must do this here because using SugarCRMs function we lose control of the callboxid that initated the callback
-        if(entry['contacts'].length == 1 && singlematchingcontact.is(':visible')){
-           
-           //check on id, because name could be duplicate
-           var old_contact_id = $('#callbox_'+callboxid).find('.contact_id').attr('href').substr(-36);
-           var new_contact_id = entry['contacts'][0]['contact_id'];
-           var old_company_id = $('#callbox_'+callboxid).find('.company_id').attr('href') == undefined ? null : $('#callbox_'+callboxid).find('.company_id').attr('href').substr(-36)
-           var new_company_id = entry['contacts'][0]['company_id'];
+        var singlematching = $('#callbox_'+callboxid).find('.singlematching');
 
-           if(old_contact_id != new_contact_id || old_company_id != new_company_id){
-               YAAI.refreshSingleMatchingContact(callboxid, entry);
-               YAAI.log('Refreshing ' + callboxid);
-           }
+        // 1 Match --> 1 Match Different Contact or Account
+        //check if a single contacts match has had changes - must do this here because using SugarCRMs function we lose control of the callboxid that initated the callback
+        if( (entry['contacts'].length == 1 || entry['accounts'].length == 1) && singlematching.is(':visible')){
+
+            // TODO REFACTOR
+            if( entry['contacts'].length == 1 ) {
+                   //check on id, because name could be duplicate
+               var old_contact_id = $('#callbox_'+callboxid).find('.contact_id').attr('href').substr(-36);
+               var new_contact_id = entry['contacts'][0]['contact_id'];
+               var old_company_id = $('#callbox_'+callboxid).find('.company_id').attr('href') == undefined ? null : $('#callbox_'+callboxid).find('.company_id').attr('href').substr(-36)
+               var new_company_id = entry['contacts'][0]['company_id'];
+               if(old_contact_id != new_contact_id || old_company_id != new_company_id){
+                   YAAI.refreshSingleMatchingContact(callboxid, entry);
+                   YAAI.log('Refreshing ' + callboxid);
+               }
+            }
+            // Account 1 --> 1 case
+            else {
+                var old_company_id = $('#callbox_'+callboxid).find('.company').attr('href').substr(-36);
+                var new_company_id = entry['accounts'][0]['company_id'];
+                if(old_company_id != new_company_id){
+                    YAAI.refreshSingleMatchingAccount(callboxid, entry);
+                    YAAI.log('Refreshing ' + callboxid);
+                }
+            }
         }
         
-        //see if a multiple contacts match has been selected to one contact or a no contact match has been selected to one contact
-        if(entry['contacts'].length == 1 && singlematchingcontact.is(':hidden') ){  
-            YAAI.refreshSingleMatchingContact(callboxid, entry);
-            
+        // MULTIPLE OR NO MATCH --> Single case
+        if( (entry['contacts'].length == 1  || entry['accounts'].length == 1) && singlematching.is(':hidden') ){
             //remove the dropdown menu
             // TODO: BR Make this configurable...
             //$('#callbox_'+callboxid).find('.callbox_action').hide();
@@ -709,23 +741,42 @@ var YAAI = {
             
             $('#callbox_'+callboxid).find('.nomatchingcontact').hide();
             $('#callbox_'+callboxid).find('.multiplematchingcontacts').hide();
-            $('#callbox_'+callboxid).find('.singlematchingcontact').show();
+            $('#callbox_'+callboxid).find('.multiplematchingaccounts').hide();
+            $('#callbox_'+callboxid).find('.singlematching').show();  // <-- this is common to Account and Contact
+
+            if( entry['contacts'].length == 1) {
+                YAAI.refreshSingleMatchingContact(callboxid, entry);
+            }
+            else {
+                YAAI.refreshSingleMatchingAccount(callboxid,entry);
+            }
         }
     },
     
     refreshSingleMatchingContact : function(callboxid, entry){
+        $('#callbox_'+callboxid).find('.singlematchingcontact').show();
         $('#callbox_'+callboxid).find('.singlematchingcontact td a.contact_id').attr('href', 'index.php?module=Contacts&action=DetailView&record='+entry['contacts'][0]['contact_id']);
         $('#callbox_'+callboxid).find('.singlematchingcontact td span.call_contacts').text(entry['contacts'][0]['contact_full_name']); 
         
         //check if new contact has an account
         if(entry['contacts'][0]['company_id'] == null){
-            $('#callbox_'+callboxid).find('.singlematchingcontact td a.company').hide();
+            $('#callbox_'+callboxid).find('.singlematching td a.company').hide();
         }else{
-            $('#callbox_'+callboxid).find('.singlematchingcontact td a.company').attr('href', 'index.php?module=Accounts&action=DetailView&record='+entry['contacts'][0]['company_id']);
-            $('#callbox_'+callboxid).find('.singlematchingcontact td a.company').text(entry['contacts'][0]['company']);
-            $('#callbox_'+callboxid).find('.singlematchingcontact td a.company').show();
+            $('#callbox_'+callboxid).find('.singlematching td a.company').attr('href', 'index.php?module=Accounts&action=DetailView&record='+entry['contacts'][0]['company_id']);
+            $('#callbox_'+callboxid).find('.singlematching td a.company').text(entry['contacts'][0]['company']);
+            $('#callbox_'+callboxid).find('.singlematching td a.company').show();
         }
     },
+
+refreshSingleMatchingAccount : function(callboxid, entry){
+        $('#callbox_'+callboxid).find('.singlematchingcontact').hide();
+        $('#callbox_'+callboxid).find('.singlematchingcontact td a.contact_id').hide();
+
+        $('#callbox_'+callboxid).find('.singlematching td a.company').attr('href', 'index.php?module=Accounts&action=DetailView&record='+entry['accounts'][0]['company_id']);
+        $('#callbox_'+callboxid).find('.singlematching td a.company').text(entry['accounts'][0]['company']);
+        $('#callbox_'+callboxid).find('.singlematching td a.company').show();
+    },
+
 
 
 
@@ -742,7 +793,7 @@ var YAAI = {
             }
             else if( event.shiftKey != 0 ) {
                 YAAI.saveMemo(call_record_id, phone_number, direction);
-            //return false; // Returning false prevents return from adding a break.
+                //return false; // Returning false prevents return from adding a break.
             }
         }
 
@@ -769,9 +820,14 @@ var YAAI = {
 
         return context;
     },
-    setupHandlebarsContextForMultipleMatchingCase : function(callboxid, context, entry){
-        
-        context['contacts'] = entry['contacts'];
+    setupHandlebarsContextForMultipleMatchingCase : function(callboxid, context, entry, bean_type){
+        if( bean_type == "accounts" ) {
+            context['accounts'] = entry['accounts'];
+        }
+        else {
+            context['contacts'] = entry['contacts'];
+        }
+
         Handlebars.registerHelper('each', function(context, options) {
             if(typeof context != "undefined"){
                 var ret = "";

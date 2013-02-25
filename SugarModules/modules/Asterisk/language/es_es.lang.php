@@ -55,7 +55,8 @@ $mod_strings = array ( 'YAAI' => array(
 
     // Added in v2.2
     'ASTERISKLBL_DURATION'         => 'Duracion',
-    'ASTERISKLBL_SELECTCONTACT'    => 'Seleccionar contacto',
+    'ASTERISKLBL_SELECTCONTACT'    => 'Seleccionar Contacto',
+    'ASTERISKLBL_SELECTACCOUNT'    => 'Seleccionar Cuenta',
     'ASTERISKLBL_MULTIPLE_MATCHES' => 'Multiples coincidencias',
     'ASTERISKLBL_CALLERID'         => 'CallerID',
 
@@ -77,10 +78,10 @@ $mod_strings = array ( 'YAAI' => array(
     'SAVE'                          => 'Guardar',
     'ASTERISKLBL_USER_EXT'         => 'Ext de usuario',
     'ASTERISKLBL_INBOUND_EXT'      => 'Ext entrante',
-    'RELATE_TO_CONTACT'            => 'Relacionar to Contact',
-    'RELATE_TO_ACCOUNT'            => 'Relacionar to Cuenta',
-    'CREATE_NEW_ACCOUNT'           => 'Crear New Cuenta',
-    'CREATE_NEW_CONTACT'           => 'Crear New Contact',
+    'RELATE_TO_CONTACT'            => 'Relacionar Contacto',
+    'RELATE_TO_ACCOUNT'            => 'Relacionar Cuenta',
+    'CREATE_NEW_ACCOUNT'           => 'Crear Cuenta',
+    'CREATE_NEW_CONTACT'           => 'Crear Contacto',
     'BLOCK_NUMBER'                 => 'Bloquear Número',
 )
 );
