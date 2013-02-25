@@ -16,9 +16,9 @@ function program1(depth0,data) {
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.contact_id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1) + "  />\n                                <a class=\"multiplecontacts\" title=\"";
-  foundHelper = helpers.contact_full_name;
+  foundHelper = helpers.company;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.contact_full_name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  else { stack1 = depth0.company; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1) + "\" href=\"index.php?module=Contacts&action=DetailView&record=";
   foundHelper = helpers.contact_id;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
@@ -27,6 +27,32 @@ function program1(depth0,data) {
   foundHelper = helpers.contact_full_name;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.contact_full_name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1) + "</a>\n                            </p>\n                            ";
+  return buffer;}
+
+function program3(depth0,data) {
+  
+  var buffer = "", stack1, foundHelper;
+  buffer += "\n                            <p class=\"select_contact\" id=\"account_";
+  foundHelper = helpers.company_id;
+  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.company_id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1) + "\">\n                                <input type=\"radio\" name=\"accountSelect\"  value=";
+  foundHelper = helpers.company_id;
+  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.company_id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1) + "  />\n                                <a class=\"multipleaccounts\" title=\"";
+  foundHelper = helpers.contact_full_name;
+  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.contact_full_name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1) + "\" href=\"index.php?module=Accounts&action=DetailView&record=";
+  foundHelper = helpers.company_id;
+  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.company_id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1) + "\">";
+  foundHelper = helpers.company;
+  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.company; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1) + "</a>\n                            </p>\n                            ";
   return buffer;}
 
@@ -55,6 +81,15 @@ function program1(depth0,data) {
   stack2 = {};
   stack1 = helpers.each.call(depth0, stack1, {hash:stack2,inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n                        </td>\n                    </tr>\n                    <tr class=\"multiplematchingaccounts\">\n                        <td colspan=\"2\">\n                            <b>";
+  foundHelper = helpers.select_account_label;
+  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.select_account_label; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1) + "</b>\n                            ";
+  stack1 = depth0.accounts;
+  stack2 = {};
+  stack1 = helpers.each.call(depth0, stack1, {hash:stack2,inverse:self.noop,fn:self.program(3, program3, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\n                        </td>\n                    </tr>\n                    <tr class=\"singlematchingcontact\">\n                        <td>";
   foundHelper = helpers.name_label;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
@@ -67,7 +102,7 @@ function program1(depth0,data) {
   foundHelper = helpers.full_name;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.full_name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1) + "</span>\n                            </a>\n                            <button class=\"unrelate_contact\"></button>\n                        </td>\n                    </tr>\n                    <tr class=\"singlematching\">\n                        <td>";
+  buffer += escapeExpression(stack1) + "</span>\n                            </a>\n                            <!-- <button class=\"unrelate_contact\"></button> -->\n                        </td>\n                    </tr>\n                    <tr class=\"singlematching\">\n                        <td>";
   foundHelper = helpers.company_label;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.company_label; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
