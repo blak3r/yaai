@@ -250,17 +250,58 @@ var YAAI = {
     bindActionDropdown : function(callboxid,entry){
         YAAI.log("Binding Action Dropdown for "+ callboxid);
 
-        // TODO Remove line below... for debugging
-        YAAI.log("Looking for button: " + $('#callbox_'+callboxid).find('.callbox_action').button().length );
-
          $('#callbox_'+callboxid).find('.callbox_action').button({
                 icons: {
                     primary: "ui-icon-flag",
                     secondary: "ui-icon-triangle-1-s"
                 },
                 text: false
-            }).show();
+            }).show().on("click",function() {
+                 alert("hi" + callboxid);
+                 YAAI.log( $("#dropdown-1_callbox_"+callboxid).length + " was found?");
+                 YAAI.log( $("#dropdown-1_"+callboxid).length + " was found?");
+                 $("#dropdown-1_callbox_"+callboxid).css('left','746px');   // <--- this doesn't work...
+                 $("#dropdown-1_callbox_"+callboxid).css('top','631px');
+                 $("#dropdown-1_callbox_"+callboxid).css('display','block');
+             });
 
+
+        // Here we show them all...
+        if( window.yaai_relate_to_contact_enabled ) {
+            $("#dropdown-1_callbox_"+callboxid+" ul.ul_relate_to_contact").show();
+            $("#dropdown-1_callbox_"+callboxid+" ul a.relate_to_contact").on("click", entry, function() {
+                YAAI.openContactRelatePopup(entry)
+            });
+        }
+
+        if( window.yaai_relate_to_account_enabled ) {
+            YAAI.log("  Adding Relate to Account");
+            $("#dropdown-1_callbox_"+callboxid+" ul.ul_relate_to_account").show();
+            $("#dropdown-1_callbox_"+callboxid+" ul a.relate_to_account").on("click", entry, function() {
+                YAAI.openAccountRelatePopup(entry);
+            });
+        }
+
+        if( window.yaai_create_new_contact_enabled ) {
+            YAAI.log("  Adding Create New Contact");
+            $("#dropdown-1_callbox_"+callboxid+" ul.ul_create_new_contact").show();
+            $("#dropdown-1_callbox_"+callboxid+" ul a.create_contact").on("click", entry, function() {
+                YAAI.createContact(entry)
+            });
+        }
+
+        if( window.yaai_block_button_enabled ) {
+            YAAI.log("  Adding Block Button Enabled");
+            $("#dropdown-1_callbox_"+callboxid+" ul.ul_block_number").show();
+            $("#dropdown-1_callbox_"+callboxid+" ul a.block_number").on("click", {
+                entry: entry,
+                callboxid: callboxid
+            }, function() {
+                YAAI.showBlockNumberDialog(callboxid, entry)
+            });
+        }
+
+        /*
         if( window.yaai_relate_to_contact_enabled ) {
             YAAI.log("  Adding Relate to Contact");
             // TODO Remove line below... for debugging
@@ -299,6 +340,7 @@ var YAAI = {
                 YAAI.showBlockNumberDialog(callboxid, entry)
             });
         }
+        */
     },
 
     bindTransferButton : function(callboxid, entry){

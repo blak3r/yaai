@@ -207,9 +207,15 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
 
 .ui-button .ui-icon.ui-icon-transfer { background: url('../images/call_transfer-blue.png') no-repeat 0 0px; background-size:16px 16px; }
 .ui-button .ui-icon.ui-icon-custom-phone { background-image: url('../images/dialpad-grid.png'); }
-
-
 .ui-button .ui-icon.ui-icon-custom-unrelate { background-image: url('../images/unrelate-call-icon.png'); }
+
+.multiplematchingcontacts, .multiplematchingaccounts, .singlematchingcontact, .nomatchingcontact, .singlematching {
+    display: none;
+}
+
+.ul_create_new_contact, .ul_relate_to_account, .ul_relate_to_contact, .ul_block_call {
+    display: none;
+}
 
 .dropdown-menu {
 	font: 14px sans-serif;

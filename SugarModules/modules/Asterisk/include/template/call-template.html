@@ -7,8 +7,9 @@
     </div>
     <div class="control_panel">
         <button class="transfer_panel"></button>
-        <button class="operator_panel"></button> 
-        <button class="callbox_action" data-dropdown="#dropdown-1_{{callbox_id}}"></button>
+        <button class="operator_panel"></button>
+        <!--<button class="callbox_action" data-dropdown="#dropdown-1_{{callbox_id}}"></button>-->
+        <button class="callbox_action"></button>
     </div>
     <div class="callboxcontent">  
         <div class="asterisk_info">
@@ -109,8 +110,14 @@
         </fieldset>
     </form>
 </div>
-<div id="dropdown-1_{{callbox_id}}" class="dropdown-menu has-tip">
-    <ul>
-    </ul>
+<div id="dropdown-1_{{callbox_id}}" class="dropdown-menu has-tip" style="display: none;"> <!-- left: 746px; top: 631px; display: block; -->
+   <ul>
+        <!-- TODO replace with modstrings... -->
+        <li class="ul_relate_to_contact"><a href="#" class="relate_to_contact">Relate to Contact</a></li>
+        <li class="ul relate_to_account"><a href="#" class="relate_to_account">Relate to Account</a></li>
+        <li class="ul create_contact"><a href="#" class="create_contact">Create New Contact</a></li>
+        <li class="ul block_number"><a href="#" class="block_number">Block Number</a></li>
+   </ul>
+</div>
 </div>
 
