@@ -504,7 +504,7 @@ while (true) {
 						$query = "SELECT * FROM asterisk_log WHERE channel like '%" . $e['ConnectedLineNum'] . "%' AND callerID = '" . $tmpCallerID . "'";
                         $result = mysql_checked_query($query);
                         while ($pd = mysql_fetch_array($result)) {
-                            callinize_push("207", $tmpCallerID,$pd['call_record_id']); // FIXME
+                            callinize_push("207", $tmpCallerID,$pd['call_record_id'], $e['ConnectedLineNum'] ); // FIXME
                         }
                         */
                     } else {
@@ -1172,9 +1172,10 @@ exit(0);
      * @param $inboundExtension - this is the cell phone number to send push notification to
      * @param $phone_number - this is the number of the person calling.
      * @param $call_record_id - record id of the call.
+     * @param $cell_number - is the phone number who's being called.
      * @return bool
      */
-    function callinize_push($inboundExtension,$phone_number, $call_record_id)
+    function callinize_push($inboundExtension,$phone_number, $call_record_id, $cell_number)
     {
         global $sugar_config;
         global $last_push_time;
@@ -1198,10 +1199,10 @@ exit(0);
                 $beanType = $assoSugarObject['type'];
             }
             // FIXME doesn't handle multiple matching contacts right now.
-            logLine(" Details: " . $call_record_id . " " . $beanID . " " . $beanType . " " . $inboundExtension);
+            logLine(" Details:  callId:" . $call_record_id . " beanId:" . $beanID . " " . $beanType . " x" . $inboundExtension . " targetPhone: " . $cell_number);
 
             // GET Contact Info
-            $sql = "select contacts.*, accounts.name from contacts join accounts_contacts on contacts.id = accounts_contacts.contact_id join accounts on accounts_contacts.account_id = accounts.id where contacts.id = '$beanID'";
+            $sql = "select contacts.*, accounts.name from contacts left join accounts_contacts on contacts.id = accounts_contacts.contact_id left join accounts on accounts_contacts.account_id = accounts.id where contacts.id = '$beanID'";
             $queryResult = mysql_checked_query($sql);
             if ($queryResult === FALSE) {
                 logLine("! Contact lookup failed");
@@ -1216,31 +1217,39 @@ exit(0);
 
             $c = array();
             $c['caller_name'] = $row['first_name'] . " " . $row['last_name'];
-            $c['caller_account'] = $row['name'];
+            $c['caller_account'] = empty($row['name']) ? $row['department'] : $row['account'];  // TODO remove department here.
             $c['caller_description'] = $row['description'];
             $c['caller_title'] = $row['title'];
             $c['crm_id'] = $row['id'];
             $c['call_record_id'] = $call_record_id;
             $c['caller_phone'] = $phone_number;
-            $c['push_to_phone'] = $inboundExtension;
+            $c['push_to_phone'] = $cell_number;
+            $c['inbound_extension'] = $inboundExtension;
 
-            if( !empty($row['first_name']) ) {
-                $pushMessage = "x$inboundExtension: {$row['first_name']} {$row['last_name']},{$row['title']}\n{$row['name']}\nLead\n{$row['description']}";
+            if( !empty($row['last_name']) ) {
+                $pushMessage = "x$inboundExtension: {$row['first_name']} {$row['last_name']},{$row['title']}\n{$c['caller_account']}\n{$row['description']}";
+                $c['contact_count'] = 1;
             }
             else {
                 require_once 'include/opencnam.php';
                 $opencnam = new opencnam($sugar_config['asterisk_opencnam_account_sid'], $sugar_config['asterisk_opencnam_auth_token']);
+                mt_start();
                 $callerid = $opencnam->fetch($phone_number);
+                logLine("OpenCNAM took: " . mt_get());
                 $callerIdInfo = "";
                 if( !empty($callerid) ) {
                     $callerIdInfo = "CallerID: " . $callerid;
                 }
                 $pushMessage = "x$inboundExtension: Not in CRM\n" . $callerIdInfo;
+                $c['contact_count'] = 0;
             }
             $c['message'] = $pushMessage;
 
             $parse = new ParseBackendWrapper();
-            $parse->customCodeMethod('send_push', $c);
+            $add_call_resp = $parse->customCodeMethod('add_call', $c);
+            logLine("Add Call Response: " . $add_call_resp);
+            $send_push_resp = $parse->customCodeMethod('send_push', $c);
+            logLine("Send Push Response: " . $send_push_resp);
     }
     else {
         logLine("Callinize Push Surpressed... last push was $duration secs ago");
