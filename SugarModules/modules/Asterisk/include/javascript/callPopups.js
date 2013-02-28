@@ -126,7 +126,11 @@ var YAAI = {
                 phone_number_label: entry['mod_strings']['CALL_DESCRIPTION_PHONE_NUMBER'],
                 duration_label: entry['mod_strings']['ASTERISKLBL_DURATION'],
                 block_label: entry['mod_strings']['BLOCK'],
-                save_label: entry['mod_strings']['SAVE']
+                save_label: entry['mod_strings']['SAVE'],
+                block_number_label : entry['mod_strings']['BLOCK_NUMBER'],
+                create_new_contact_label : entry['mod_strings']['CREATE_NEW_CONTACT'],
+                relate_to_contact_label : entry['mod_strings']['RELATE_TO_CONTACT'],
+                relate_to_account_label : entry['mod_strings']['RELATE_TO_ACCOUNT']
             };
 
             var bean_module = 'contacts';
@@ -257,18 +261,19 @@ var YAAI = {
                 },
                 text: false
             }).show().on("click",function() {
-                 alert("hi" + callboxid);
-                 YAAI.log( $("#dropdown-1_callbox_"+callboxid).length + " was found?");
-                 YAAI.log( $("#dropdown-1_"+callboxid).length + " was found?");
+
+                 //YAAI.log( $("#dropdown-1_callbox_"+callboxid).length + " was found?");
+                 //YAAI.log( $("#dropdown-1_"+callboxid).length + " was found?");
                  $("#dropdown-1_callbox_"+callboxid).css('left','746px');   // <--- this doesn't work...
                  $("#dropdown-1_callbox_"+callboxid).css('top','631px');
                  $("#dropdown-1_callbox_"+callboxid).css('display','block');
+                 //$("#dropdown-1_callbox_"+callboxid).css('z-index','99999');
              });
 
 
         // Here we show them all...
         if( window.yaai_relate_to_contact_enabled ) {
-            $("#dropdown-1_callbox_"+callboxid+" ul.ul_relate_to_contact").show();
+            $("#dropdown-1_callbox_"+callboxid+" ul li.li_relate_to_contact").show();
             $("#dropdown-1_callbox_"+callboxid+" ul a.relate_to_contact").on("click", entry, function() {
                 YAAI.openContactRelatePopup(entry)
             });
@@ -276,7 +281,7 @@ var YAAI = {
 
         if( window.yaai_relate_to_account_enabled ) {
             YAAI.log("  Adding Relate to Account");
-            $("#dropdown-1_callbox_"+callboxid+" ul.ul_relate_to_account").show();
+            $("#dropdown-1_callbox_"+callboxid+" ul li.li_relate_to_account").show();
             $("#dropdown-1_callbox_"+callboxid+" ul a.relate_to_account").on("click", entry, function() {
                 YAAI.openAccountRelatePopup(entry);
             });
@@ -284,7 +289,7 @@ var YAAI = {
 
         if( window.yaai_create_new_contact_enabled ) {
             YAAI.log("  Adding Create New Contact");
-            $("#dropdown-1_callbox_"+callboxid+" ul.ul_create_new_contact").show();
+            $("#dropdown-1_callbox_"+callboxid+" ul li.li_create_new_contact").show();
             $("#dropdown-1_callbox_"+callboxid+" ul a.create_contact").on("click", entry, function() {
                 YAAI.createContact(entry)
             });
@@ -292,7 +297,7 @@ var YAAI = {
 
         if( window.yaai_block_button_enabled ) {
             YAAI.log("  Adding Block Button Enabled");
-            $("#dropdown-1_callbox_"+callboxid+" ul.ul_block_number").show();
+            $("#dropdown-1_callbox_"+callboxid+" ul li.li_block_number").show();
             $("#dropdown-1_callbox_"+callboxid+" ul a.block_number").on("click", {
                 entry: entry,
                 callboxid: callboxid

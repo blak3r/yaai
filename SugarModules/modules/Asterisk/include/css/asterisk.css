@@ -213,7 +213,7 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
     display: none;
 }
 
-.ul_create_new_contact, .ul_relate_to_account, .ul_relate_to_contact, .ul_block_call {
+.li_create_new_contact, .li_relate_to_account, .li_relate_to_contact, .li_block_call {
     display: none;
 }
 

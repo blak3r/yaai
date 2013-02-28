@@ -103,7 +103,7 @@ class AsteriskJS {
             }
 
             echo '<script src="custom/modules/Asterisk/include/javascript/jquery.fancybox.js" type="text/javascript" ></script>';
-            echo '<script src="custom/modules/Asterisk/include/javascript/jquery.dropdown.js" type="text/javascript" ></script>';
+            //echo '<script src="custom/modules/Asterisk/include/javascript/jquery.dropdown.js" type="text/javascript" ></script>';
             
             //JS YAAI
             
