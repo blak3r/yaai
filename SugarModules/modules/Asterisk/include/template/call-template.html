@@ -11,7 +11,15 @@
         <!--<button class="callbox_action" data-dropdown="#dropdown-1_{{callbox_id}}"></button>-->
         <button class="callbox_action"></button>
     </div>
-    <div class="callboxcontent">  
+    <div id="dropdown-1_{{callbox_id}}" class="dropdown-menu has-tip dropdown-hidden"> <!-- left: 746px; top: 631px; display: block; -->
+        <ul>
+            <li class="ul_relate_to_contact"><a href="#" class="relate_to_contact">{{relate_to_contact_label}}</a></li>
+            <li class="ul_relate_to_account"><a href="#" class="relate_to_account">{{relate_to_account_label}}</a></li>
+            <li class="ul_create_contact"><a href="#" class="create_contact">{{create_new_contact_label}}</a></li>
+            <li class="ul_block_number"><a href="#" class="block_number">{{block_number_label}}</a></li>
+        </ul>
+    </div>
+    <div class="callboxcontent">
         <div class="asterisk_info">
             <h4 class="call_type">{{call_type}}</h4>
             <div>
@@ -109,14 +117,6 @@
             </p>        
         </fieldset>
     </form>
-</div>
-<div id="dropdown-1_{{callbox_id}}" class="dropdown-menu has-tip dropdown-hidden"> <!-- left: 746px; top: 631px; display: block; -->
-   <ul>
-        <li class="ul_relate_to_contact"><a href="#" class="relate_to_contact">{{relate_to_contact_label}}</a></li>
-        <li class="ul_relate_to_account"><a href="#" class="relate_to_account">{{relate_to_account_label}}</a></li>
-        <li class="ul_create_contact"><a href="#" class="create_contact">{{create_new_contact_label}}</a></li>
-        <li class="ul_block_number"><a href="#" class="block_number">{{block_number_label}}</a></li>
-   </ul>
 </div>
 </div>
 
