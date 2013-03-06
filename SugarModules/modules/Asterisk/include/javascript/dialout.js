@@ -38,9 +38,10 @@
 $(document).ready(function()
 {
     //.asterisk_phoneNumber is the deprecated v1.x class
-	$('.phone,#phone_work,#phone_other,#phone_mobile,.asterisk_phoneNumber,#phone_mobile_span').each(function()
+	$('.phone,#phone_work,#phone_other,#phone_mobile,.asterisk_phoneNumber').each(function()
 	{
-		var phoneNr = $.trim($(this).text());
+		var phoneNr = $(this).text();
+        phoneNr = $.trim(phoneNr); // IE needs trim on separate line.
 
         // Regex searches the inner html to see if a child element has phone class,
         // this prevents a given number having more then one click to dial icon.
@@ -52,23 +53,27 @@ $(document).ready(function()
 			if (!contactId)
 			{
 				contactId = $('input[name="mass[]"]', $(this).parents('tr:first')).attr('value');
-			}
-
-			if( AST_UserExtention ) {
-				$(this).append('&nbsp;&nbsp;<img title="Extension Configured for Click To Dial is: ' + AST_UserExtention + '" src="custom/modules/Asterisk/include/call_active.gif" class="asterisk_placeCall" value="anrufen" style="cursor: pointer;"/>&nbsp;');
+			}		
+			
+			if( window.yaai_user_extension ) {
+				$(this).append('&nbsp;&nbsp;<img title="Extension Configured for Click To Dial is: ' + window.yaai_user_extension + '" src="custom/modules/Asterisk/include/images/call_active.gif" class="asterisk_placeCall" value="anrufen" style="cursor: pointer;"/>&nbsp;');	
 			}
 			else {
-				$(this).append('&nbsp;&nbsp;<img title="No extension configured!  Go to user preferences to set your extension" src="custom/modules/Asterisk/include/call_noextset.gif" class="asterisk_placeCall" value="anrufen" style="cursor: pointer;"/>&nbsp;');
+				$(this).append('&nbsp;&nbsp;<img title="No extension configured!  Go to user preferences to set your extension" src="custom/modules/Asterisk/include/images/call_noextset.gif" class="asterisk_placeCall" value="anrufen" style="cursor: pointer;"/>&nbsp;');	
 			}
-
+			
 			$('.asterisk_placeCall', this).click(function()
 			{
-				// alert("phoneNr : "+phoneNr+" , contactId: "+contactId);
 				var call = $.get('index.php?entryPoint=AsteriskCallCreate',
 					{phoneNr : phoneNr, contactId: contactId},
 					function(data){
+                      console.log("CreateCall Action Response: " + data);
+                      if( data.indexOf('Error') != -1 || data.indexOf("ERROR") != -1 ) {
+                          alert("Click to Dial Failed:\n\n------------\n" + data + "\n------------\n");  // Shows error message on ClickToDial failure.
+                      }
 					  call = null;
 					});
+
 				// Wait for 5 seconds
 				setTimeout(function()
 				{
@@ -77,7 +82,7 @@ $(document).ready(function()
 				    {
 				  	    call.abort();
 				    };
-				}, 10000);
+				}, 20000);
 			});
 		}
 	});

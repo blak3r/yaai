@@ -34,7 +34,7 @@
 
 if(!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point');
 
-$mod_strings = array ( 
+$mod_strings = array('YAAI' => array (
 
    	'ASTERISKLBL_COMING_IN' 		=>	'Eingehender Anruf',
 	'ASTERISKLBL_GOING_OUT' 		=>	'Ausgehender Anruf',
@@ -47,7 +47,6 @@ $mod_strings = array (
 	'ASTERISKLBL_NAME' 			=>	'Name',
 	'ASTERISKLBL_COMPANY' 		=>	'Firma',
 
-
 	'REQUESTED' 			=>	'Rufaufbau',
 	'PROCEEDING' 			=>	'Rufaufbau',
 	'RINGBACK' 				=>	'Warten auf Antwort',
@@ -55,8 +54,32 @@ $mod_strings = array (
 	'RINGING' 				=>	'Klingelt',
 	'CONNECTED' 			=>	'Verbunden',
 	'DIAL' 					=>	'Klingelt',
+    'HANGUP'                =>  'Hangup', // TODO Translate
 
-   );
+    // Added in v2.2
+	'ASTERISKLBL_DURATION'         => 'Duration',
+	'ASTERISKLBL_SELECTCONTACT'    => 'Select Contact',
+	'ASTERISKLBL_MULTIPLE_MATCHES' => 'Multiple Matches',
+	'ASTERISKLBL_CALLERID'         => 'CallerID',
 
+    // For asteriskLogger.php SOAP call entries
+	'CALL_AUTOMATIC_RECORD'         => '** Automatic record **',
+	'CALL_IN_LIMBO'                 => 'In Limbo',
+	'CALL_STATUS_HELD'              => 'Held',
+	'CALL_STATUS_MISSED'            => 'Missed',
+	'CALL_NAME_CALL'                => 'CALL',
+	'CALL_NAME_MISSED'              => 'Missed Call',
+	'CALL_DESCRIPTION_CALLER_ID'    => 'Caller ID',
+	'CALL_DESCRIPTION_MISSED'       => 'Missed/failed call',
 
-   
+    // V3 Additions
+    'CALL_DESCRIPTION_PHONE_NUMBER' => 'Phone Number',
+    'CREATE'                        => 'Create',
+    'RELATE_TO'                     => 'Relate',
+    'BLOCK'                         => 'Block',
+    'SAVE'                          => 'Save Memo',
+    'ASTERISKLBL_USER_EXT'         => 'User Ext',
+    'ASTERISKLBL_INBOUND_EXT'      => 'Inbound Ext',
+  )
+  );
+

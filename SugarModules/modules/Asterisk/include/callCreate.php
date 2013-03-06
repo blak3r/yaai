@@ -52,6 +52,7 @@ require_once ('log4php/LoggerManager.php');
 
 $GLOBALS['log'] = LoggerManager::getLogger('SugarCRM');
 
+
 // get the Asterisk Detail from the Configuration
 $server = $sugar_config['asterisk_host'];
 $port = (int)$sugar_config['asterisk_port'];
@@ -69,6 +70,7 @@ $context = $sugar_config['asterisk_context'];
 //$cUser->retrieve($_SESSION['authenticated_user_id']);
 //$extension 	= $cUser->asterisk_ext_c;
 
+
 // Use first extension in the list when multiple extensions linked to the account.
 $extensionsArray = explode(',', $current_user->asterisk_ext_c);
 $extension = $extensionsArray[0];
@@ -82,34 +84,37 @@ $extension = $extensionsArray[0];
 preg_match('/([^#]*)(#+)([^#]*)/',$sugar_config['asterisk_dialout_channel'],$matches);
 $channel = $matches[1] . $extension . $matches[3];
 
-logLine("[CallCreate.php] Creating Call, channel for originate command is: $channel\n");
-												
+logLine("Creating Call, channel for originate command is: $channel\n");
+
+//format Phone Number
+$number = $_REQUEST['phoneNr'];
+$prefix = $sugar_config['asterisk_prefix'];
+$number = str_replace("+", "00", $number);
+$number = str_replace(array("(", ")", " ", "-", "/", "."), "", $number);
+$number = $prefix.$number;
+echo "Originate Params: Number: $number, Channel: $channel, Context: $context, Exten: $number...\n";
+
+
 $socket = fsockopen($server, $port, $errno, $errstr, 20);
 	
 	if (!$socket) {
-		echo "Unable to open socket connection to initiate call.  Error #$errno: $errstr <br>\n";
+		echo "errstr ($errno) <br>\n";
 				
-	} else { 
+	} else {
+
+//    $result = ReadResponse($socket);
+//    echo "AMI Header: " . $result;
+
 	// log on to Asterisk
 	fputs($socket, "Action: Login\r\n"); 
-	fputs($socket, $Username); 
+	fputs($socket, $Username);
 	fputs($socket, $Secret);
+    fputs($socket, "Events: off\r\n");
 	fputs($socket, "\r\n");	
-	$result = fgets($socket,128);
-	echo("Login Response: " . $result);
-	logLine("[CreateCall.php] Login Result: $result\n");
-	
-	//format Phone Number
-	$number = $_REQUEST['phoneNr'];
-	$prefix = $sugar_config['asterisk_prefix'];
-	$number = str_replace("+", "00", $number);
-	$number = str_replace(array("(", ")", " ", "-", "/", "."), "", $number);
-	$number = $prefix.$number;
-	
-	echo "Originate Params: Number: $number, Channel: $channel, Context: $context, Exten: $number...\n";
-	
-	
-	
+	$result = ReadResponse($socket);
+	echo("Login Response: " . $result . "\n");
+
+
 	// dial number
 	fputs($socket, "Action: originate\r\n");		
 	fputs($socket, "Channel: ". $channel ."\r\n");	
@@ -117,23 +122,73 @@ $socket = fsockopen($server, $port, $errno, $errstr, 20);
 	fputs($socket, "Exten: " . $number . "\r\n");		
 	fputs($socket, "Priority: 1\r\n");		
 	fputs($socket, "Callerid:" . $_REQUEST['phoneNr'] ."\r\n");	
-	fputs($socket, "Variable: CALLERID(number)=" . $extension . "\r\n");
+	fputs($socket, "Variable: CALLERID(number)=" . $extension . "\r\n\r\n");
+
+    // You will not get an originate response unless you wait for the phone to be answered... so it's impractical to wait.
+    // but, if there is a permission issue it will fail almost immediately with permission denied.
+    $result = ReadResponse($socket, 10000000);
+    echo "Originate Response: " . $result . "\n";
+
 	fputs($socket, "Action: Logoff\r\n\r\n");
 	fputs($socket, "\r\n");	
 	
-	$result = fgets($socket,128);
-	echo("Originate/Logout Response: " . $result);
-	
+	$result = ReadResponse($socket);
+	echo("Logout Response: " . $result);
+
+    gitimg_log("click-to-dial");
+
 	//var_dump($result);
 	//var_dump($channel);
 	//var_dump($context);
 	//var_dump($number);
-	sleep(1);
+	//sleep(1);
 	
 	// close socket
 	fclose($socket);
-	}
+}
 
+
+/**
+ * Read the socket response
+ *
+ * @param object $socket Socket
+ * @param int $timeout in uS, default is 500000 (1/2 a second)
+ *
+ * @return array Array of socket responses
+ */
+function ReadResponse($socket, $timeout = 500000) {
+    $retVal = '';
+
+    // Sets timeout to 1 1/2 a second
+    /*
+
+    $chars = 15;
+    while(($buffer = stream_get_line($socket)) !== false) {
+        $retVal .= $buffer;
+    }
+    */
+    stream_set_timeout($socket, 0, $timeout);
+    while (($buffer = fgets($socket, 20)) !== false) {
+        $retVal .= $buffer;
+    }
+
+    return $retVal;
+}
+
+/**
+ * Performs an async get request (doesn't wait for response)
+ * Note: One limitation of this approach is it will not work if server does any URL rewriting
+ */
+function gitimg_log($event) {
+    $host = "gitimg.com";
+    $path = "/rs/track/blak3r/yaai-stats/$event/increment";
+    $fp = fsockopen($host,80, $errno, $errstr, 30);
+    $out = "GET " . $path . " HTTP/1.1\r\n";
+    $out.= "Host: " . $host . "\r\n";
+    $out.= "Connection: Close\r\n\r\n";
+    fwrite($fp, $out);
+    fclose($fp);
+}
 
 /**
  * Another var_dump() alternative, for debugging use.

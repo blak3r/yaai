@@ -33,7 +33,7 @@
  */
 if(!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point');
 
-$mod_strings = array (
+$mod_strings = array ( 'YAAI' => array(
 
    	'ASTERISKLBL_COMING_IN' 		=>	'Incoming call',
 	'ASTERISKLBL_GOING_OUT' 		=>	'Outgoing call',
@@ -46,19 +46,20 @@ $mod_strings = array (
 	'ASTERISKLBL_NAME' 			=>	'Name',
 	'ASTERISKLBL_COMPANY' 		=>	'Account',
 
-	'REQUESTED' 			=>	'Proceeding',
+	'REQUESTED' 			=>	'Requested',
 	'PROCEEDING' 			=>	'Proceeding',
 	'RINGBACK' 				=>	'Waiting for Answer',
-	'INCOMING' 				=>	'Ringing',
+	'INCOMING' 				=>	'Incoming',
 	'RINGING' 				=>	'Ringing',
 	'CONNECTED' 			=>	'Connected',
 	'DIAL'					=>  'Ringing',
-	'HANGUP'                =>  'Finished',
+	'HANGUP'                =>  'Hangup',
 
     // Added in v2.2
 	'ASTERISKLBL_DURATION'         => 'Duration',
 	'ASTERISKLBL_SELECTCONTACT'    => 'Select Contact',
-	'ASTERISKLBL_MULTIPLE_MATCHES' => "Multiple Matches",
+    'ASTERISKLBL_SELECTACCOUNT'    => 'Select Account',   // V3.2
+	'ASTERISKLBL_MULTIPLE_MATCHES' => 'Multiple Matches',
 	'ASTERISKLBL_CALLERID'         => 'CallerID',
 
     // For asteriskLogger.php SOAP call entries
@@ -70,8 +71,23 @@ $mod_strings = array (
 	'CALL_NAME_MISSED'              => 'Missed Call',
 	'CALL_DESCRIPTION_CALLER_ID'    => 'Caller ID',
 	'CALL_DESCRIPTION_MISSED'       => 'Missed/failed call',
-	'CALL_DESCRIPTION_PHONE_NUMBER' => 'Phone Number'
 
-   );
+    // V3 Additions
+    'CALL_DESCRIPTION_PHONE_NUMBER' => 'Phone',
+    'CREATE'                        => 'Create',
+    'RELATE_TO'                     => 'Relate',
+    'BLOCK'                         => 'Block',
+    'SAVE'                          => 'Save Memo',
+    'ASTERISKLBL_USER_EXT'         => 'User Ext',
+    'ASTERISKLBL_INBOUND_EXT'      => 'Inbound Ext',
+    'RELATE_TO_CONTACT'            => 'Relate to Contact',
+    'RELATE_TO_ACCOUNT'            => 'Relate to Account',
+    'CREATE_NEW_ACCOUNT'           => 'Create New Account',
+    'CREATE_NEW_CONTACT'           => 'Create New Contact',
+    'BLOCK_NUMBER'                 => 'Block Number',
+
+
+  )
+  );
 
 ?>

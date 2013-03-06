@@ -44,4 +44,6 @@ $mod_strings['LBL_ASTERISK_USERMANUAL'] = 'User Manual';
 $mod_strings['LBL_ASTERISK_USERMANUAL_DESC'] = 'Links to the online documentation for this project';
 $mod_strings['LBL_ASTERISK_MAILINGLIST'] = 'Mailing List';
 $mod_strings['LBL_ASTERISK_MAILINGLIST_DESC'] = 'Sign up and be informed of updates to this module';
+$mod_strings['LBL_ASTERISK_FAKECALL'] = 'Fake Call';
+$mod_strings['LBL_ASTERISK_FAKECALL_DESC'] = 'Test utility to create calls for testing call popups without needing to make a real call.';
 ?>
