@@ -62,7 +62,7 @@ $onClickLocation="window.location=index.php?module=Configurator&action=asterisk_
 ?>
 <br /><br />
 
-<img src="https://gitimg.com/blak3r/yaai-stats/Install-3.2/track">
+<img src="https://gitimg.com/blak3r/yaai-stats/Install-3.3/track">
 <img src="http://www.blakerobertson.com/ext/yaai-postinstall-logo-26.png" alt="YAAI Logo" style="margin-right:-5px"><br>
 <span style="font-size: 1.6em;"><strong>Please review the documentation!  There are several additional steps that must be taken.</strong></span>
 <br /><span style="font-size: 1.3em;">The User Guide can be found on the Project website here: <a href="https://github.com/blak3r/yaai/wiki/User-Manual">https://github.com/blak3r/yaai/wiki/User-Manual</a>.  Please note the fairly comprehensive troubleshooting section at the end of the manual.</span>

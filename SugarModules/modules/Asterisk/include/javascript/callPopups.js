@@ -254,7 +254,7 @@ var YAAI = {
     bindActionDropdown : function(callboxid,entry){
         YAAI.log("Binding Action Dropdown for "+ callboxid);
 
-        var dropdownDiv = dropdownDiv;
+        var dropdownDiv = "#dropdown-1_callbox_"+callboxid;
 
          $('#callbox_'+callboxid).find('.callbox_action').button({
                 icons: {
@@ -265,7 +265,7 @@ var YAAI = {
          })
          .show()
          .on("click",function() {
-             $().slideDown("fast");
+             $(dropdownDiv).slideDown("fast");
              $(dropdownDiv).css( "margin-left", "50px");
          })
          .on("mouseleave", function () {
