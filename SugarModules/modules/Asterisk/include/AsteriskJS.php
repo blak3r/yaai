@@ -90,7 +90,7 @@ QUERY8;
 				echo '<script type="text/javascript">AST_PollRate = ' . $pollRate . ';</script>';
 			}
 			if($GLOBALS['current_user']->asterisk_outbound_c == '1') {
-			   echo '<script> AST_UserExtention = ' . $userExt . ';</script>';
+			   echo '<script> AST_UserExtention = \'' . $userExt . '\';</script>';
 			   echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/dialout.js"></script>';
 			 }
 
