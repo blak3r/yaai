@@ -40,14 +40,17 @@ function action_ringing() {
     $phone_number = $_REQUEST['phone_number'];
     $GLOBALS['log']->fatal($phone_number);
 
+    // For me in EST... I get timestamps off by 300 mins unless I uncomment the line below.  Not sure if that might affect other stuff sugar is doing though.
+    //$GLOBALS['current_user']->db->query("SET time_zone='+00:00'");
+
     $GLOBALS['current_user']->db->query(
-            "INSERT INTO asterisk_log (call_record_id, asterisk_id, callstate, callerID, channel, remote_channel, timestamp_call, direction, user_extension, inbound_extension) 
+    "INSERT INTO asterisk_log (call_record_id, asterisk_id, callstate, callerID, channel, remote_channel, timestamp_call, direction, user_extension, inbound_extension)
             VALUES ('{$new_id}', '{$asterisk_id}', 'Ringing', '{$phone_number}', '{$extension}', 'SIP/flowroute-00000023', FROM_UNIXTIME({$time}), 'I', '{$extension_four_digit}', '{$extension_four_digit}')"
     );
             
     $GLOBALS['current_user']->db->query(
             "INSERT INTO calls (id, direction, status) 
-             VALUES ('{$new_id}', 'I', 'Planned')"
+             VALUES ('{$new_id}', 'I', 'Held')"
             );
     
     $call_setup_data = array();
