@@ -41,14 +41,18 @@ require_once 'parse.php';
 //
 // Debug flags
 //
+$dial_events_log = 'c:/sugarcrm/htdocs/dial_events_log.html';
 $mysql_loq_queries = 0;
 $mysql_log_results = 0;
 $verbose_log = 0;
 $log_memory_usage = 0;
-$memory_usage_log_file = "c:\mem_usage.csv";
+$memory_usage_log_file = "c:/mem_usage.csv";
 $memory_usage_log_frequency_secs = 10*60;
 $last_memory_log_entry = "";
 $last_push_time=0;
+
+dev_clearDialEventsLog();
+
 
 // All Sugar timestamps are UTC
 date_default_timezone_set('UTC');
@@ -406,7 +410,7 @@ while (true) {
                 //
                 // Call Event
                 //
-                if (($e['Event'] == 'Dial' && $e['SubEvent'] != 'End') ||
+                if (($e['Event'] == 'Dial' && $e['SubEvent'] == 'Begin') ||
                     ($e['Event'] == 'Join' && !empty($e['Queue'])))
                 {
                     purgeExpiredEventsFromDb(); // clears out db of old events... also called when timeouts occcur
@@ -499,6 +503,23 @@ while (true) {
                         deleteCall($callRecordId);
                         logLine("INTERNAL call detected, Deleting Call Record $callRecordId\n");
 
+							// FIXME Delete this!  Trying to visualize internal call for RingGroups
+                        /*
+							$userExtension = extractExtensionNumberFromChannel($eDestination);
+                            $inboundExtension = NULL;
+                            if (!empty($e['Queue']) ) {
+                                $inboundExtension = $e['Queue'];
+                            }
+                            else {
+                                // Extract from eDestination
+                                $inboundExtension = extractExtensionNumberFromChannel($eDestination);
+                            }
+							$query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestamp_call, asterisk_dest_id,user_extension,inbound_extension) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s','%s','%s')", AMI_getUniqueIdFromEvent($e), $callRecordId, $eDestination, $eChannel, 'Dial', 'X', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $e['DestUniqueID'], $userExtension, $inboundExtension);
+                            $callDirection = 'Inbound';
+                            logLine("INTERNAL FIXME REMOVE state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
+							mysql_checked_query($query);
+                        */
+
 						// HERE We detect if this is the outbound call to a cell phone...
                         /*
 						$query = "SELECT * FROM asterisk_log WHERE channel like '%" . $e['ConnectedLineNum'] . "%' AND callerID = '" . $tmpCallerID . "'";
@@ -512,10 +533,15 @@ while (true) {
                         if (preg_match($asteriskMatchInternal, $eChannel) && !preg_match($asteriskMatchInternal, $eDestination)) {
                             $userExtension = extractExtensionNumberFromChannel($eChannel);
                             $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestamp_call,user_extension) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s')", $e['DestUniqueID'], $callRecordId, $eChannel, $eDestination, 'NeedID', 'O', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $userExtension);
+                            dev_logString("Insert Outbound");
                             $callDirection = 'Outbound';
                             logLine("OUTBOUND state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
                         } else if (!preg_match($asteriskMatchInternal, $eChannel)) {
                             $userExtension = extractExtensionNumberFromChannel($eDestination);
+                            if( $e['Event'] == 'Join' && !empty($e['Queue'])) {
+                                $userExtension = $e['Queue'];
+                            }
+
                             $inboundExtension = NULL;
                             if (!empty($e['Queue']) ) {
                                 $inboundExtension = $e['Queue'];
@@ -528,41 +554,16 @@ while (true) {
 
                             $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestamp_call, asterisk_dest_id,user_extension,inbound_extension) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s','%s','%s')", AMI_getUniqueIdFromEvent($e), $callRecordId, $eDestination, $eChannel, 'Dial', 'I', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $e['DestUniqueID'], $userExtension, $inboundExtension);
                             $callDirection = 'Inbound';
+                            dev_logString("Insert Inbound");
                             logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
 
 							//FIXME REENABLE
-                            //callinize_push($inboundExtension,$tmpCallerID, $callRecordId);
+                            if( $inboundExtension == "211" || $inboundExtension == "52") {
+                                // TODO Fix
+                                callinize_push($inboundExtension,$tmpCallerID, $callRecordId, "+14102152497");
+                            }
                         }
                         mysql_checked_query($query);
-
-
-                        //Asterisk Manager 1.0
-                          /* if(eregi($asteriskMatchInternal, $e['Source']))
-                          {
-                          $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestamp_call) VALUES('%s','%s','%s','%s','%s','%s',%s)",
-                          $e['DestUniqueID'],
-                          $callRecordId,
-                          $e['Source'],
-                          'NeedID',
-                          'O',
-                          $tmpCallerID,
-                          FROM_UNIXTIME('.time().')
-                          );
-                          $callDirection = 'Outbound';
-                          }
-                          else{
-                          $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, CallerID, timestamp_call) VALUES('%s','%s','%s','%s','%s','%s',%s)",
-                          $e['SrcUniqueID'],
-                          $callRecordId,
-                          $eDestination,
-                          'Dial',
-                          'I',
-                          $tmpCallerID,
-                          FROM_UNIXTIME('.time().')
-                          );
-                          $callDirection = 'Inbound';
-                          }
-                          mysql_checked_query($query); */
 
                         //
                         // Update CALL record with direction...
@@ -608,8 +609,10 @@ while (true) {
                 // Obviously, we need to take only one of them....
                 //
                 // Asterisk Manager 1.1
-                if ($e['Event'] == 'Hangup') {
+                /*$e['Event'] == 'Hangup'*/
+                if ($e['Event'] == 'Dial' && $e['SubEvent'] == 'End')  {
                     $id = AMI_getUniqueIdFromEvent($e);
+                    logLine(" In DialEnd... $id");
                     $query = "SELECT direction,bean_module,bean_id,user_extension,inbound_extension FROM asterisk_log WHERE asterisk_dest_id = '$id' OR asterisk_id = '$id'";
                     $result = mysql_checked_query($query);
                     $direction = mysql_fetch_array($result);
@@ -630,8 +633,9 @@ while (true) {
                             // update entry in asterisk_log...
                             //
                             $rawData = $callRecord['bitter']; // raw data from asterisk_log
-                            $query = sprintf("UPDATE asterisk_log SET callstate='%s', timestamp_hangup=%s, hangup_cause=%d, hangup_cause_txt='%s' WHERE asterisk_id='%s'", //asterisk_dest_id was asterisk_id
-                                    'Hangup', 'FROM_UNIXTIME(' . time() . ')', $e['Cause'], $e['Cause-txt'], $id);
+                            $query = sprintf("UPDATE asterisk_log SET callstate='%s', timestamp_hangup=%s WHERE asterisk_id='%s'", //asterisk_dest_id was asterisk_id
+                                    'Hangup', 'FROM_UNIXTIME(' . time() . ')', $id);
+                            dev_logString("Hungup $id");
                             $updateResult = mysql_checked_query($query);
                             if ($updateResult) {
                                 $assignedUser = findUserIdFromChannel($rawData['channel']);
@@ -815,15 +819,19 @@ while (true) {
                         //
                         // Fetch associated call record
                         //
-                        $callRecord = findCallByAsteriskDestId($id);
+                        //$callRecord = findCallByAsteriskDestId($id);
+                        $callRecord = findCallByAsteriskId($id);
+
                         if ($callRecord) {
 
                             //
                             // update entry in asterisk_log...
                             //
                             $rawData = $callRecord['bitter']; // raw data from asterisk_log
-                            $query = sprintf("UPDATE asterisk_log SET callstate='%s', timestamp_hangup=%s, hangup_cause=%d, hangup_cause_txt='%s', answered='%s' WHERE asterisk_dest_id='%s'", //asterisk_dest_id was asterisk_id
-                                    'Hangup', 'FROM_UNIXTIME(' . time() . ')', $e['Cause'], $e['Cause-txt'], was_call_answered($id), $id);
+                            // 2013 - march removed hangup_cause=%d, hangup_cause_txt='%s'
+                            $query = sprintf("UPDATE asterisk_log SET callstate='%s', timestamp_hangup=%s, answered='%s' WHERE asterisk_id='%s'", //asterisk_dest_id was asterisk_id
+                                    'Hangup', 'FROM_UNIXTIME(' . time() . ')', was_call_answered($id), $id);
+                            dev_logString("Hungup Inbound $id");
                             $updateResult = mysql_checked_query($query);
                             if ($updateResult) {
                                 $assignedUser = findUserIdFromChannel($rawData['channel']);
@@ -880,6 +888,7 @@ while (true) {
                                     }
 
                                     logLine(" Adding INBOUND Missed (or Failed) Call, id=$id, call_id = " . $callRecord['sweet']['id'] . "\n");
+                                    dev_logString(" Adding INBOUND Missed (or Failed) Call, id=$id, call_id = " . $callRecord['sweet']['id'] . "\n");
                                 }
 
 
@@ -994,7 +1003,7 @@ while (true) {
                             } // End Inbound Case
                             // In case of multiple extensions when a call is not answered, every extensions produces a failed call record,
                             // this will keep the first of those records but delete the rest. (LIMIT 1,999999999999 in query returns all but first match.)
-                            $query = "SELECT asterisk_id FROM asterisk_log WHERE asterisk_dest_id='$id'";
+                            $query = "SELECT asterisk_id FROM asterisk_log WHERE asterisk_id='$id'";
                             $result = mysql_checked_query($query);
                             $result_id = mysql_fetch_array($result);
                             logLine("Cleaning up Failed Calls part1, asterisk_id = " . $result_id['asterisk_id'] . "\n");
@@ -1008,7 +1017,10 @@ while (true) {
 
                                 if (mysql_affected_rows() > 0) {
                                     logLine("Cleaning up Failed Calls part2, DELETED call_record_id = {$call_record_id['call_record_id']}\n");
+                                    // TODO Change this to Delete Call
                                     $query = "DELETE FROM calls_cstm WHERE id_c='{$call_record_id['call_record_id']}'";
+                                    dev_logString("Deleting Call Rec: " . $call_record_id['call_record_id'] );
+
                                     mysql_checked_query($query);
                                 }
                                 //$total_result = mysql_fetch_array($rq);
@@ -1021,33 +1033,32 @@ while (true) {
                 //Asterisk Manager 1.1
                 if ($e['Event'] == 'Bridge') {
                     logLine("DEBUG: Entered Bridge");
-                    $query = "SELECT direction FROM asterisk_log WHERE asterisk_id='" . $e['Uniqueid2'] . "' OR asterisk_dest_id='" . $e['Uniqueid2'] . "'";
+                    $query = "SELECT direction, callstate FROM asterisk_log WHERE asterisk_id='" . $e['Uniqueid2'] . "' OR asterisk_dest_id='" . $e['Uniqueid2'] . "'";
                     $result = mysql_checked_query($query);
                     $direction = mysql_fetch_array($result);
-                    if ($direction['direction'] == "I") {
-                        $callDirection = "Inbound";
-                    } else {
-                        $callDirection = "Outbound";
-                    }
-                    if ($callDirection == "Inbound") {
-                        logLine("DEBUG: bridge inbound, updating the Link state");
-                        // Inbound bridge event
-                        $query = "UPDATE asterisk_log SET callstate='Connected', timestamp_link=FROM_UNIXTIME(" . time() . ") WHERE asterisk_dest_id='" . $e['Uniqueid1'] . "' OR asterisk_dest_id='" . $e['Uniqueid2'] . "'";
-                        $rc = mysql_checked_query($query);
-                        // $query = "UPDATE asterisk_log SET callstate='Connected', timestamp_link=FROM_UNIXTIME(".time().") WHERE asterisk_id='" . $e['Uniqueid2'] . "'";
-                        // $record = mysql_query($query);
-                        // to delete all the extra inbound records created by the hangup event.
-                        $id1 = $e['Uniqueid1'];
-                        $id2 = $e['Uniqueid2'];
-                        $query = "SELECT call_record_id FROM asterisk_log WHERE asterisk_id='" . $id1 . "' AND asterisk_dest_id!='" . $id2 . "'";
-                        $result = mysql_checked_query($query);
-                        while ($call_rec_id = mysql_fetch_array($result)) {
-                            logLine("Deleting Call Record: " . $call_rec_id['call_record_id']);
-                            deleteCall($call_rec_id['call_record_id']);
+                    if( $direction['callstate'] != "Connected" ) {
+                        if ($direction['direction'] == "I") {
+                            $callDirection = "Inbound";
+                            logLine("DEBUG: bridge inbound, updating the Link state");
+                            // Inbound bridge event
+                            $query = "UPDATE asterisk_log SET callstate='Connected', timestamp_link=FROM_UNIXTIME(" . time() . ") WHERE asterisk_dest_id='" . $e['Uniqueid1'] . "' OR asterisk_dest_id='" . $e['Uniqueid2'] . "'";
+                            dev_logString("Set callState = Connected IBC");
+                            $rc = mysql_checked_query($query);
+
+                            // Delete all the extra inbound records
+                            $id1 = $e['Uniqueid1'];
+                            $id2 = $e['Uniqueid2'];
+                            $query = "SELECT call_record_id FROM asterisk_log WHERE asterisk_id='" . $id1 . "' AND asterisk_dest_id!='" . $id2 . "'";
+                            $result = mysql_checked_query($query);
+                            while ($call_rec_id = mysql_fetch_array($result)) {
+                                logLine("Deleting Call Record: " . $call_rec_id['call_record_id']);
+                                deleteCall($call_rec_id['call_record_id']);
+                            }
+                        } else if($direction['direction'] == "O") {
+                            $query = "UPDATE asterisk_log SET callstate='Connected', timestamp_link=FROM_UNIXTIME(" . time() . ") WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
+                            dev_logString("Set callState = Connected OBC");
+                            $rc = mysql_checked_query($query);
                         }
-                    } else {
-                        $query = "UPDATE asterisk_log SET callstate='Connected', timestamp_link=FROM_UNIXTIME(" . time() . ") WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
-                        $rc = mysql_checked_query($query);
                     }
 
                     // Here we add support for complicated Ring Groups such as x1 ---> 615 ---> 710,722,735
@@ -1071,6 +1082,7 @@ while (true) {
                                 $theId = $result_id['id'];
                                 $userExtension = extractExtensionNumberFromChannel($chan2);
                                 $query = "UPDATE asterisk_log SET channel='$chan2', user_extension='$userExtension' WHERE id='$theId'";
+                                dev_logString("RG Bridge Set Channel of $theId to $chan2");
                                 logLine("UPDATE QUERY: $query\n");
                                 mysql_checked_query($query);
                             } else {
@@ -1097,9 +1109,11 @@ while (true) {
                             logLine(" Queue-Bridge Detected changing the channel to: {$e['Channel2']}\n");
                             $result_id = mysql_fetch_array($result);
                             $chan2 = $e['Channel2'];
+                            $user_device = extractUserDeviceFromChannel($e['Channel2']);
                             $theId = $result_id['id'];
                             $userExtension = extractExtensionNumberFromChannel($chan2);
-                            $query = "UPDATE asterisk_log SET channel='$chan2, user_extension='$userExtension'' WHERE id='$theId'";
+                            $query = "UPDATE asterisk_log SET channel='$chan2', user_extension='$userExtension', user_device='$user_device' WHERE id='$theId'";
+                            dev_logString("Queue-Bridge Set Channel to $chan2 for $theId\n");
                             logLine("Queue UPDATE QUERY: $query\n");
                             mysql_checked_query($query);
                         } else {
@@ -1216,16 +1230,29 @@ exit(0);
             $body = json_encode($row);
 
             $c = array();
+
+            // Actions
+            $c['action'] = 'add';
+            $c['send_push'] = 'true';
+
+            // Organization Credentials
+            $c['organization_name'] =  $sugar_config['asterisk_callinize_username'];
+            $c['organization_secret'] = $sugar_config['asterisk_callinize_password'];
+
+
+            // Call Table Stuff
             $c['caller_name'] = $row['first_name'] . " " . $row['last_name'];
             $c['caller_account'] = empty($row['name']) ? $row['department'] : $row['account'];  // TODO remove department here.
             $c['caller_description'] = $row['description'];
             $c['caller_title'] = $row['title'];
             $c['crm_id'] = $row['id'];
             $c['call_record_id'] = $call_record_id;
-            $c['caller_phone'] = $phone_number;
-            $c['push_to_phone'] = $cell_number;
+            $c['caller_phone'] = $phone_number;  // e164 TODO
+            $c['push_to_phone'] = $cell_number; // e164 TODO
             $c['inbound_extension'] = $inboundExtension;
+            $c['handsetPhoneNumber'] = $cell_number; // e164 me
 
+            // Creates the message for the push notification
             if( !empty($row['last_name']) ) {
                 $pushMessage = "x$inboundExtension: {$row['first_name']} {$row['last_name']},{$row['title']}\n{$c['caller_account']}\n{$row['description']}";
                 $c['contact_count'] = 1;
@@ -1233,9 +1260,10 @@ exit(0);
             else {
                 require_once 'include/opencnam.php';
                 $opencnam = new opencnam($sugar_config['asterisk_opencnam_account_sid'], $sugar_config['asterisk_opencnam_auth_token']);
+                logLine(getTimeStamp() . " opencnam Start");
                 mt_start();
                 $callerid = $opencnam->fetch($phone_number);
-                logLine("OpenCNAM took: " . mt_get());
+                logLine(getTimeStamp() . " OpenCNAM took: " . mt_end());
                 $callerIdInfo = "";
                 if( !empty($callerid) ) {
                     $callerIdInfo = "CallerID: " . $callerid;
@@ -1245,11 +1273,16 @@ exit(0);
             }
             $c['message'] = $pushMessage;
 
+
+            logLine( print_r($c, true) );
             $parse = new ParseBackendWrapper();
-            $add_call_resp = $parse->customCodeMethod('add_call', $c);
+            $add_call_resp = $parse->customCodeMethod('manage_calls', $c);
+            //$add_call_resp = $parse->customCodeMethod('add_call', $c);
             logLine("Add Call Response: " . $add_call_resp);
-            $send_push_resp = $parse->customCodeMethod('send_push', $c);
-            logLine("Send Push Response: " . $send_push_resp);
+
+
+            //$send_push_resp = $parse->customCodeMethod('send_push', $c);
+            //logLine("Send Push Response: " . $send_push_resp);
     }
     else {
         logLine("Callinize Push Surpressed... last push was $duration secs ago");
@@ -1314,21 +1347,126 @@ function getTimestamp() {
 
 function dumpEvent(&$event) {
     // Skip 'Newexten' events - there just toooo many of 'em || For Asterisk manager 1.1 i choose to ignore another stack of events cause the log is populated with useless events
+    $eventType = $event['Event'];
 
-    if ($event['Event'] === 'Newexten' || $event['Event'] == 'UserEvent' || $event['Event'] == 'AGIExec' || $event['Event'] == 'Newchannel' || $event['Event'] == 'Newstate' || $event['Event'] == 'ExtensionStatus') {
-        LogLine("! AMI Event '" . $event['Event'] . " suppressed.\n");
+    // Not surpressing new channel
+    // $eventType == 'Newchannel' ||
+    if ($eventType == 'Newexten' || $eventType == 'UserEvent' || $eventType == 'AGIExec' ||  $eventType == 'Newstate' || $eventType == 'ExtensionStatus') {
+        logLine("! AMI Event '" . $eventType . " suppressed.\n");
+        
+		if( $eventType == 'Newexten') {
+			dumpEventHelper($event, "c:/newexten.log");
+		}
         return;
     }
 
-    $eventType = $event['Event'];
-
-    logLine(getTimeStamp() . "\n");
-    logLine("! --- Event -----------------------------------------------------------\n");
-    foreach ($event as $eventKey => $eventValue) {
-        logLine(sprintf("! %20s --> %-50s\n", $eventKey, $eventValue));
+	switch($eventType) {
+        case "Dial":    dev_DialPrinter($event); break;
+        case "Bridge":  dev_BridgePrinter($event); break;
+        case "Join":    dev_JoinPrinter($event); break;
+        case "Hangup":  dev_HangupPrinter($event); break;
+        case "Newchannel": dev_NewChannelPrinter($event); break;
     }
-    logLine("! ---------------------------------------------------------------------\n");
+
+    dumpEventHelper($event);
 }
+
+function dumpEventHelper(&$event, $logFile = "default" ) {
+    logLine(getTimeStamp() . "\n", $logFile);
+    logLine("! --- Event -----------------------------------------------------------\n",$logFile);
+    foreach ($event as $eventKey => $eventValue) {
+        logLine(sprintf("! %20s --> %-50s\n", $eventKey, $eventValue),$logFile);
+    }
+    logLine("! ---------------------------------------------------------------------\n", $logFile);
+}
+
+function dev_DialPrinter(&$e) {
+	dev_GenericEventPrinter("Dial", $e['SubEvent'], $e['UniqueID'], $e['DestUniqueID'], $e['Channel'], $e['Destination'], $e["CallerIDNum"], $e['DialString']);
+}
+
+function dev_BridgePrinter(&$e) {
+   dev_GenericEventPrinter("Bridge", $e['Bridgestate'], $e['Uniqueid1'], $e['Uniqueid2'], $e['Channel1'], $e['Channel2'], $e["CallerID1"], $e['CallerID2']);
+}
+
+function dev_JoinPrinter(&$e) {
+    dev_GenericEventPrinter("Join", $e['Position'], $e['Uniqueid'], "--", $e['Channel'], "--", $e["CallerIDNum"], $e['Queue']);
+}
+
+function dev_HangupPrinter(&$e) {
+    dev_GenericEventPrinter("Hangup", $e['Cause'], $e['Uniqueid'], '--', $e['Channel'], '--', $e["CallerIDNum"], $e['ConnectedLineNum']);
+}
+
+function dev_NewChannelPrinter(&$e) {
+    dev_GenericEventPrinter("NewChan", $e['ChannelStateDesc'], $e['Uniqueid'], '--', $e['Channel'], '--', $e["CallerIDNum"], $e['Exten']);
+}
+
+function dev_logString($str) {
+    global $dial_events_log;
+    logLine( $str, $dial_events_log);
+}
+
+function dev_clearDialEventsLog() {
+    global $dial_events_log;
+    $fp = fopen($dial_events_log, 'w');
+    $theHtml = <<<HTML_HEAD
+<html><head></head><body>
+<div style="font-family: monospaced;">
+
+HTML_HEAD;
+
+    fclose($fp);
+}
+
+
+
+function dev_GenericEventPrinter($arg1, $arg2, $arg3, $arg4, $arg5, $arg6, $arg7, $arg8) {
+    global $dial_events_log;
+    if( !empty($dial_events_log) ) {
+        $s = getTimeStamp() . " ";
+        $s .= str_pad($arg1, 8, " ", STR_PAD_BOTH);
+        $s .= str_pad($arg2, 6, " ", STR_PAD_BOTH);
+        $s .= str_pad($arg3, 16, " ", STR_PAD_BOTH);
+        $s .= str_pad($arg4, 16, " ", STR_PAD_BOTH);
+        $s .= str_pad($arg5, 55, " ", STR_PAD_BOTH);
+        $s .= str_pad($arg6, 55, " ", STR_PAD_BOTH);
+        $s .= str_pad($arg7, 17, " ", STR_PAD_BOTH);
+        $s .= str_pad($arg8, 20, " ", STR_PAD_BOTH);
+        logLine( $s, $dial_events_log . ".txt");
+
+        $s = '<div style="font-size:90%;white-space:nowrap;"><span style="font-family:monospace;">' . date('[H:i:s]') . "</span>";
+
+        $s .= colorize(str_pad($arg1, 8, "_", STR_PAD_BOTH));
+        $s .= colorize(str_pad($arg2, 6, "_", STR_PAD_BOTH));
+        $s .= colorize(str_pad($arg3, 16, "_", STR_PAD_BOTH));
+        $s .= colorize(str_pad($arg4, 16, "_", STR_PAD_BOTH));
+        $s .= colorize(str_pad($arg5, 55, "_", STR_PAD_BOTH));
+        $s .= colorize(str_pad($arg6, 55, "_", STR_PAD_BOTH));
+        $s .= colorize(str_pad($arg7, 17, "_", STR_PAD_BOTH));
+        $s .= colorize(str_pad($arg8, 20, "_", STR_PAD_BOTH));
+        $s = preg_replace("/_/", "&nbsp;", $s);
+        $s =
+        logLine( $s ."</div>", $dial_events_log);
+    }
+
+}
+
+/**
+ * Takes a string, does a md5 hash of it to get a random color, then sets background to white or black to enhance readability.
+ * @param $str
+ * @return string
+ */
+function colorize($str) {
+    $hash = md5($str);
+    $forecolor = substr($hash,0,6);
+    $backcolor = "FFFFFF";
+    if( hexdec($forecolor) > hexdec("CCCCCC") ) {
+        //$backcolor = "000000";
+    }
+
+    return "<span style=\"font-family:monospace;color: #$forecolor;background-color:$backcolor\">$str</span>";
+}
+
+
 
 /**
  * Removes a call record from the database.
@@ -1338,10 +1476,16 @@ function deleteCall($callRecordId) {
     // NOTE: there is one other place in this file that Delete's a call, so if this code is ever refactored
     // to use SOAP, be sure to refactor that one.
     $query = "DELETE FROM calls WHERE id='$callRecordId'";
-    $rc = mysql_checked_query($query);
-    $query = "DELETE FROM calls_cstm WHERE id='$callRecordId'";
-    mysql_checked_query($query);
-    return $rc;
+    if( mysql_checked_query_returns_affected_rows_count($query) > 0 ) {
+        dev_logString("Deleted " . mysql_affected_rows() . " rows from calls");
+        $query = "DELETE FROM calls_cstm WHERE id='$callRecordId'";
+        mysql_checked_query($query);
+    }
+
+    $query = "DELETE FROM asterisk_log WHERE call_record_id='$callRecordId'";
+    if( mysql_checked_query_returns_affected_rows_count($query) > 0 ) {
+        dev_logString("Deleted " . mysql_affected_rows() . " rows from asterisk_log");
+    }
 }
 
 //
@@ -1373,7 +1517,7 @@ function findCallByAsteriskId($asteriskId) {
             'session' => $soapSessionId,
             'module_name' => 'Calls',
             'id' => $callRecId
-                ));
+        ));
         $resultDecoded = decode_name_value_list($soapResult['entry_list'][0]['name_value_list']);
         // echo ("# ** Soap call successfull, dumping result ******************************\n");
         // var_dump($soapResult);
@@ -1383,12 +1527,14 @@ function findCallByAsteriskId($asteriskId) {
         //
         // also store raw sql data in case we need it later...
         //
-        return array(
-            'bitter' => $row,
-            'sweet' => $resultDecoded
-        );
+        if( !empty($resultDecoded['id'] ) ){
+            return array(
+                'bitter' => $row,
+                'sweet' => $resultDecoded
+            );
+        }
     }
-    logLine("! Warning, results set was empty!\n");
+    logLine("! Warning, results set was empty\n");
     return FALSE;
 }
 
@@ -1419,9 +1565,10 @@ function findCallByAsteriskDestId($asteriskDestId) {
             'module_name' => 'Calls',
             'id' => $callRecId
                 ));
+
         $resultDecoded = decode_name_value_list($soapResult['entry_list'][0]['name_value_list']);
 
-// echo ("# ** Soap call successfull, dumping result ******************************\n");
+        // echo ("# ** Soap call successfull, dumping result ******************************\n");
         // var_dump($soapResult);
         if ($verbose_logging) {
             var_dump($resultDecoded);
@@ -1431,10 +1578,12 @@ function findCallByAsteriskDestId($asteriskDestId) {
         //
         // also store raw sql data in case we need it later...
         //
-        return array(
-            'bitter' => $row,
-            'sweet' => $resultDecoded
-        );
+        if( !empty($resultDecoded['id'] ) ){
+            return array(
+                'bitter' => $row,
+                'sweet' => $resultDecoded
+            );
+        }
     }
     logLine("! Warning, FindCallByAsteriskDestId results set was empty!\n");
     return FALSE;
@@ -1715,7 +1864,7 @@ function findAccountForContact($aContactId) {
 }
 
 /**
- * prints soap result info
+ * prints soap result info.  Known ISSUE: Can't use this for get_entry method.... it doesn't return result_count
  * Returns true if results were returned, FALSE if an error or no results are returned.
  *
  * @param $soapResult
@@ -1783,6 +1932,19 @@ function findUserIdFromChannel($channel) {
     }
 
     return $assignedUser;
+}
+
+/**
+ * attempts to find the "device" which is either the extension number or remote phone number if calling an external number
+ * @param $channel
+ * @return mixed
+ */
+function extractUserDeviceFromChannel($channel) {
+    if( preg_match('/Local\/(.+?)@.+/', $channel, $matches ) ){
+        return $matches[1];
+    }
+    logLine(" !WARNING: wasn't able to extract the user device from channel : $channel");
+    return $matches[0]; // If we get here we probably need to add more cases.
 }
 
 //
@@ -1926,6 +2088,15 @@ function mysql_checked_query($aQuery) {
     return $sqlResult;
 }
 
+/**
+ * Method is equivalent to calling mysql_affected_rows( mysql_checked_query($query));
+ * @param $query
+ */
+function mysql_checked_query_returns_affected_rows_count($query){
+    mysql_checked_query($query);
+    return mysql_affected_rows();
+}
+
 // mt_get: returns the current microtime
 function mt_get(){
     global $mt_time;
@@ -1968,10 +2139,12 @@ function logLine($str, $logFile = "default") {
         $str = $str . "\n";
     }
 
-    print($str);
+    if( $logFile == "default") {
+        print($str);
+    }
 
 // if logging is enabled.
-    if (!empty($sugar_config['asterisk_log_file'])) {
+    if (!empty($sugar_config['asterisk_log_file']) && !empty($logFile)) {
         if( $logFile == "default" ) {
             $myFile = $sugar_config['asterisk_log_file'];
         }
@@ -2043,9 +2216,12 @@ function markdown_indent($str, $indent = " ") {
  */
 function AMI_getUniqueIdFromEvent($event) {
     if (isset($event['UniqueID'])) {
-        return $event['UniqueID'];
+        return $event['UniqueID']; // Dial Event Style, others too maybe
     } else if (isset($event['Uniqueid'])) {
-        return $event['Uniqueid'];
+        return $event['Uniqueid']; // Hangup Event Style, others too maybe
+    }
+    else if (isset($event['UniqueId'])) {
+        return $event['UniqueId']; // As far as I know this is never used in AMI added just in case
     }
     return NULL;
 }

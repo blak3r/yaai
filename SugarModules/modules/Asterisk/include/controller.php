@@ -488,7 +488,6 @@ function build_item_list($result_set, $current_user, $mod_strings) {
             'is_hangup' => $state == $mod_strings['YAAI']['HANGUP'],
             'call_record_id' => $row['call_record_id'],
             'phone_number' => $phone_number,
-            'asterisk_name' => $row['callerName'],
             'timestamp_call' => $row['timestamp_call'],
             'title' => get_title($contacts, $phone_number, $state, $mod_strings),
             'contacts' => $contacts,

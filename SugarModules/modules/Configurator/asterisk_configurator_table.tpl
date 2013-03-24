@@ -544,6 +544,41 @@
 
 <TD>&nbsp;</TD><TD>&nbsp;</TD> </tr>
 
+<TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h3>Callinize</h3></TD></tr>
+
+
+<TR>
+
+    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_CALLINIZE_USERNAME}
+      {if !empty($MOD.LBL_ASTERISK_CALLINIZE_USERNAME_DESC)}
+          [<a href="#" title="{$MOD.LBL_ASTERISK_CALLINIZE_USERNAME_DESC}">?</a>]:
+      {/if}
+    </td>
+    <td width="25%" class="dataField">
+    {if empty($config.asterisk_callinize_username )}
+        {assign var='asterisk_callinize_username' value=$asterisk_config.asterisk_callinize_username}
+    {else}
+        {assign var='asterisk_callinize_username' value=$config.asterisk_callinize_username}
+    {/if}
+        <input type='textbox' name='asterisk_callinize_username' size="45" value='{$asterisk_callinize_username}'>
+    </td>
+
+    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_CALLINIZE_PASSWORD}
+      {if !empty($MOD.LBL_ASTERISK_CALLINIZE_PASSWORD_DESC)}
+          [<a href="#" title="{$MOD.LBL_ASTERISK_CALLINIZE_PASSWORD_DESC}">?</a>]:
+      {/if}
+    </td>
+    <td width="25%" class="dataField">
+    {if empty($config.asterisk_callinize_password )}
+        {assign var='asterisk_callinize_password' value=$asterisk_config.asterisk_callinize_password}
+    {else}
+        {assign var='asterisk_callinize_password' value=$config.asterisk_callinize_password}
+    {/if}
+        <input type='textbox' name='asterisk_callinize_password' size="45" value='{$asterisk_callinize_password}'>
+    </td>
+
+
+
 <TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h3>Phone Fields</h3></TD></tr>
 
 
