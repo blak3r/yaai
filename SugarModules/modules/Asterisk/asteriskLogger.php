@@ -562,6 +562,15 @@ while (true) {
                                 // TODO Fix
                                 callinize_push($inboundExtension,$tmpCallerID, $callRecordId, "+14102152497");
                             }
+                            else if( $inboundExtension == "213") {
+                                // TODO Fix
+                                callinize_push($inboundExtension,$tmpCallerID, $callRecordId, "+14153435295");
+                            }
+							else if( $inboundExtension == "215") {
+                                // TODO Fix
+                                callinize_push($inboundExtension,$tmpCallerID, $callRecordId, "+14153435295");
+                            }
+
                         }
                         mysql_checked_query($query);
 
@@ -1195,10 +1204,11 @@ exit(0);
         global $last_push_time;
         $now_time = time();
         $duration = abs($last_push_time - $now_time);
-        if( strlen($inboundExtension) < 4 && $duration > 30) {
+        if( strlen($inboundExtension) < 4 && $duration > 10) {
             $last_push_time = time();
-            logLine("### Callinize START ####");
-            logLine("Last Push was $duration secs ago");
+            logLine(getTimeStamp() . "### Callinize START ####");
+            logLine(getTimeStamp() . "Last Push was $duration secs ago");
+			mt_start();
 
             $assocAccount = findSugarAccountByPhoneNumber($phone_number);
             if ($assocAccount != FALSE) {
@@ -1225,6 +1235,8 @@ exit(0);
             else {
                 $row = mysql_fetch_assoc($queryResult);
             }
+			
+			$dur_search = mt_end();
 
             // TODO Finalize exactly what we let the backend handle... $body below is all the contact info.
             $body = json_encode($row);
@@ -1236,26 +1248,29 @@ exit(0);
             $c['send_push'] = 'true';
 
             // Organization Credentials
-            $c['organization_name'] =  $sugar_config['asterisk_callinize_username'];
-            $c['organization_secret'] = $sugar_config['asterisk_callinize_password'];
+            $c['organizationName'] =  $sugar_config['asterisk_callinize_username'];
+            $c['organizationSecret'] = $sugar_config['asterisk_callinize_password'];
 
 
             // Call Table Stuff
-            $c['caller_name'] = $row['first_name'] . " " . $row['last_name'];
-            $c['caller_account'] = empty($row['name']) ? $row['department'] : $row['account'];  // TODO remove department here.
-            $c['caller_description'] = $row['description'];
-            $c['caller_title'] = $row['title'];
-            $c['crm_id'] = $row['id'];
-            $c['call_record_id'] = $call_record_id;
-            $c['caller_phone'] = $phone_number;  // e164 TODO
-            $c['push_to_phone'] = $cell_number; // e164 TODO
-            $c['inbound_extension'] = $inboundExtension;
-            $c['handsetPhoneNumber'] = $cell_number; // e164 me
+            $c['callerName'] = $row['first_name'] . " " . $row['last_name'];
+            $c['callerAccountName'] = empty($row['name']) ? $row['department'] : $row['name'];  // TODO remove department here.
+            $c['callerShortInfo'] = $row['description'];
+			//$c['callerLongInfo'] = 
+			$c['callerEmailAddress'] = "todo@todotown.com";
+            $c['callerTitle'] = $row['title'];
+            $c['callerCrmId'] = $row['id'];
+            $c['crmCallRecordId'] = $call_record_id;
+            $c['callerPhone'] = $phone_number;  // e164 TODO
+            $c['userPhone'] = $cell_number; // e164 TODO
+            $c['inboundExtension'] = $inboundExtension;
+            //$c['provider'] = "parse";
 
             // Creates the message for the push notification
-            if( !empty($row['last_name']) ) {
+            if( !empty($row['first_name']) ) {
                 $pushMessage = "x$inboundExtension: {$row['first_name']} {$row['last_name']},{$row['title']}\n{$c['caller_account']}\n{$row['description']}";
-                $c['contact_count'] = 1;
+                $c['contactCount'] = 1;
+				$dur_opencnam = "N/A";
             }
             else {
                 require_once 'include/opencnam.php';
@@ -1263,26 +1278,33 @@ exit(0);
                 logLine(getTimeStamp() . " opencnam Start");
                 mt_start();
                 $callerid = $opencnam->fetch($phone_number);
-                logLine(getTimeStamp() . " OpenCNAM took: " . mt_end());
+				$dur_opencnam = mt_end();
+                logLine(getTimeStamp() . " OpenCNAM took: " . $dur_opencnam);
                 $callerIdInfo = "";
                 if( !empty($callerid) ) {
                     $callerIdInfo = "CallerID: " . $callerid;
                 }
                 $pushMessage = "x$inboundExtension: Not in CRM\n" . $callerIdInfo;
-                $c['contact_count'] = 0;
+                $c['contactCount'] = 0;
             }
             $c['message'] = $pushMessage;
-
-
+			mt_start();
+			$sleep = (4.5-$dur_search)*1000000;
+			usleep($sleep);
+			$dur_sleep = mt_end();
             logLine( print_r($c, true) );
             $parse = new ParseBackendWrapper();
+            mt_start();
+			
+		
             $add_call_resp = $parse->customCodeMethod('manage_calls', $c);
+			$dur_parse = mt_end();
+            dev_logString("Callinize push took " . $dur_parse . "s response: " . $add_call_resp );
             //$add_call_resp = $parse->customCodeMethod('add_call', $c);
-            logLine("Add Call Response: " . $add_call_resp);
-
-
+            logLine(getTimeStamp() . " Add Call Response: " . $add_call_resp . "\nTook: $dur_parse");
             //$send_push_resp = $parse->customCodeMethod('send_push', $c);
             //logLine("Send Push Response: " . $send_push_resp);
+			logLine(getTimeStamp() . " Callinize Timing: search: $dur_search opencnam: $dur_opencnam parse: $dur_parse  delay=$dur_sleep");
     }
     else {
         logLine("Callinize Push Surpressed... last push was $duration secs ago");
