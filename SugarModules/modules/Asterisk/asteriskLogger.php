@@ -41,7 +41,7 @@ require_once 'parse.php';
 //
 // Debug flags
 //
-$dial_events_log = 'c:/sugarcrm/htdocs/dial_events_log.html';
+$dial_events_log = 'c:/sugarcrm/htdocs/dial_events_log_ast1.html';
 $mysql_loq_queries = 0;
 $mysql_log_results = 0;
 $verbose_log = 0;
@@ -532,7 +532,7 @@ while (true) {
                         //Asterisk Manager 1.1 (If the call is internal, this will be skipped)
                         if (preg_match($asteriskMatchInternal, $eChannel) && !preg_match($asteriskMatchInternal, $eDestination)) {
                             $userExtension = extractExtensionNumberFromChannel($eChannel);
-                            $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestamp_call,user_extension) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s')", $e['DestUniqueID'], $callRecordId, $eChannel, $eDestination, 'NeedID', 'O', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $userExtension);
+                            $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestamp_call,user_extension) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s')", AMI_getUniqueIdFromEvent($e)/*BR: In an attempt to make Dial End work for Outbound calls switching this over to use Unique ID... I have no idea why DestId was used originally... TBD $e['DestUniqueID']*/, $callRecordId, $eChannel, $eDestination, 'NeedID', 'O', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $userExtension);
                             dev_logString("Insert Outbound");
                             $callDirection = 'Outbound';
                             logLine("OUTBOUND state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
@@ -562,13 +562,17 @@ while (true) {
                                 // TODO Fix
                                 callinize_push($inboundExtension,$tmpCallerID, $callRecordId, "+14102152497");
                             }
-                            else if( $inboundExtension == "213") {
+                            else if( $inboundExtension == "216") {
                                 // TODO Fix
                                 callinize_push($inboundExtension,$tmpCallerID, $callRecordId, "+14153435295");
                             }
 							else if( $inboundExtension == "215") {
                                 // TODO Fix
                                 callinize_push($inboundExtension,$tmpCallerID, $callRecordId, "+14153435295");
+                            }
+                            else if( $inboundExtension == "217") {
+                                // TODO Fix
+                                callinize_push($inboundExtension,$tmpCallerID, $callRecordId, "+12026883230");
                             }
 
                         }
@@ -816,7 +820,7 @@ while (true) {
                                             'value' => $assignedUser
                                         )
                                     )
-                                        ));
+                                ));
                             }
                         } else {
                             logLine("[$id] FAILED TO FIND A CALL (note: there are two hangups per call, so this might not be an error)\n");
@@ -1035,14 +1039,14 @@ while (true) {
                                 //$total_result = mysql_fetch_array($rq);
                                 //var_dump($total_result);
                             }
-                        }
+                        } // End if callRecordId
                     } // End if INBOUND hangup event
                 }// End of HangupEvent.
                 // success
                 //Asterisk Manager 1.1
                 if ($e['Event'] == 'Bridge') {
                     logLine("DEBUG: Entered Bridge");
-                    $query = "SELECT direction, callstate FROM asterisk_log WHERE asterisk_id='" . $e['Uniqueid2'] . "' OR asterisk_dest_id='" . $e['Uniqueid2'] . "'";
+                    $query = "SELECT direction, callstate FROM asterisk_log WHERE asterisk_id='" . $e['Uniqueid2'] . "' OR asterisk_dest_id='" . $e['Uniqueid2'] . "'" . " OR asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_dest_id='" . $e['Uniqueid1'] . "'"; // Second half of this is for outgoing
                     $result = mysql_checked_query($query);
                     $direction = mysql_fetch_array($result);
                     if( $direction['callstate'] != "Connected" ) {
@@ -1248,8 +1252,8 @@ exit(0);
             $c['send_push'] = 'true';
 
             // Organization Credentials
-            $c['organizationName'] =  $sugar_config['asterisk_callinize_username'];
-            $c['organizationSecret'] = $sugar_config['asterisk_callinize_password'];
+            $c['organizationId'] =  $sugar_config['asterisk_callinize_api_organizationId'];
+            $c['organizationSecret'] = $sugar_config['asterisk_callinize_api_organizationSecret'];
 
 
             // Call Table Stuff
@@ -1265,6 +1269,8 @@ exit(0);
             $c['userPhone'] = $cell_number; // e164 TODO
             $c['inboundExtension'] = $inboundExtension;
             //$c['provider'] = "parse";
+
+            logLine( print_r($row,true) );
 
             // Creates the message for the push notification
             if( !empty($row['first_name']) ) {
@@ -1288,10 +1294,14 @@ exit(0);
                 $c['contactCount'] = 0;
             }
             $c['message'] = $pushMessage;
-			mt_start();
-			$sleep = (4.5-$dur_search)*1000000;
-			usleep($sleep);
-			$dur_sleep = mt_end();
+            $c['searchTime'] = intval($dur_search*1000);
+
+            // Moved delay to parse
+			//mt_start();
+			//$sleep = (4.5-$dur_search)*1000000;
+			//usleep($sleep);
+			//$dur_sleep = mt_end();
+            $dur_sleep = 0;
             logLine( print_r($c, true) );
             $parse = new ParseBackendWrapper();
             mt_start();
@@ -1327,7 +1337,8 @@ function purgeExpiredEventsFromDb() {
     $calls_expire_time = date('Y-m-d H:i:s', time() - ($popupsExpireMins * 60) );
     $five_hours_ago = date('Y-m-d H:i:s', time() - 5 * 60 * 60);
 
-    $query = " DELETE FROM asterisk_log WHERE (uistate = 'Closed') OR ( timestamp_hangup is not NULL AND '$calls_expire_time' > timestamp_hangup ) OR ('$five_hours_ago' > timestamp_call )";
+    // BR: 2013-04-30 fixed bug where closing the call popup before the call was over the duration would potentially not get set right.
+    $query = " DELETE FROM asterisk_log WHERE (uistate = 'Closed' AND timestamp_hangup is not NULL) OR ( timestamp_hangup is not NULL AND '$calls_expire_time' > timestamp_hangup ) OR ('$five_hours_ago' > timestamp_call )";
     $delResult = mysql_checked_query($query);
     $rowsDeleted = mysql_affected_rows();
    // logLine("DEBUG: $query");

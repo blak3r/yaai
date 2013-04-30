@@ -48,8 +48,8 @@ $config_meta['asterisk_create_new_contact_enabled'] = array('default' => '1', 's
 //$config_meta['asterisk_window_height'] = array('default' => '', 'section'=>'Popup UI');
 
 
-$config_meta['asterisk_callinize_username'] = array('default' => '', 'section'=>'Callinize');
-$config_meta['asterisk_callinize_password'] = array('default' => '', 'section'=>'Callinize');
+$config_meta['asterisk_callinize_api_organizationId'] = array('default' => '', 'section'=>'Callinize');
+$config_meta['asterisk_callinize_api_organizationSecret'] = array('default' => '', 'section'=>'Callinize');
 
 
 $config_meta['asterisk_contact_phone_fields'] = array('default' => 'phone_work,phone_home,phone_mobile,phone_other,assistant_phone', 'section' => 'Phone Fields');
