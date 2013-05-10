@@ -1259,7 +1259,8 @@ exit(0);
             // Call Table Stuff
             $c['callerName'] = $row['first_name'] . " " . $row['last_name'];
             $c['callerAccountName'] = empty($row['name']) ? $row['department'] : $row['name'];  // TODO remove department here.
-            $c['callerShortInfo'] = $row['description'];
+            $c['callerShortInfo'] = $row['description']; // TODO change this to be the last note logged.
+			$c['callerDescription'] = $row['description'];
 			//$c['callerLongInfo'] = 
 			$c['callerEmailAddress'] = "todo@todotown.com";
             $c['callerTitle'] = $row['title'];
