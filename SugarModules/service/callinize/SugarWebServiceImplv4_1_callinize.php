@@ -28,8 +28,7 @@
 				//$retVal['data'] = '';
 			}
 			else {
-				// TODO Validate OID is valid
-		
+
 $selectQry = <<<ENDSELECT
 select * from cl_customerlicense
 left join cl_customerlicense_cstm on cl_customerlicense.id = cl_customerlicense_cstm.id_c

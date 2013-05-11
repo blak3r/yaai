@@ -18,3 +18,4 @@ copyToDir.*
 .DS_Store
 /nbproject/private/
 ca-bundle-mozilla.crt
+mampCopy.sh
