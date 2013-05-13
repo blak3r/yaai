@@ -594,11 +594,10 @@
      *
      * @param array $innerResultSet Results from function fetch_contacts_associated_to_phone_number
      * @param object $current_user Global current_user object - allows db access
-     * @param array $row Results from database call in build_item_list
      *
      * @return array Returns contacts
      */
-    function get_accounts($innerResultSet, $current_user) {
+    function convert_account_rows_to_simple_array($innerResultSet, $current_user) {
         $accounts = array();
 
         while ($accountRow = $current_user->db->fetchByAssoc($innerResultSet)) {
@@ -677,7 +676,7 @@
     function find_contacts($phone_number, $callRow, $current_user) {
         $innerResultSet = find_contacts_db_query($phone_number, $callRow, $current_user);
         //logLine("pre get_contacts", "c:/controller.log");
-        $contacts = convert_contactrows_to_simple_array($innerResultSet, $current_user, $callRow);
+        $contacts = convert_contact_rows_to_simple_array($innerResultSet, $current_user, $callRow);
         //logLine("post get_contacts", "c:/controller.log");
 
         return $contacts;
@@ -690,7 +689,7 @@
      * @param object $current_user Global current_user object - allows db access
      * @return array Returns contacts
      */
-    function convert_contactrows_to_simple_array($innerResultSet, $current_user) {
+    function convert_contact_rows_to_simple_array($innerResultSet, $current_user) {
         $contacts = array();
 
         while ($contactRow = $current_user->db->fetchByAssoc($innerResultSet)) {
@@ -707,7 +706,14 @@
         return $contacts;
     }
 
-    function find_contacts_db_query($phoneToFind, $callRow, $current_user) {
+/**
+ * @param $phoneToFind
+ * @param $callRow - allows for optimization when called through getCalls, set to null if using externally.
+ * @param $current_user
+ * @return mixed
+ * @deprecated - use find_beans_db_query instead.
+ */
+function find_contacts_db_query($phoneToFind, $callRow, $current_user) {
         global $sugar_config;
 
         $phoneToFind = ltrim($phoneToFind, '0');
@@ -756,6 +762,130 @@
             return $current_user->db->query($queryContact, false);
         }
     }
+
+
+
+/**
+ * Takes a result set and creates a simple array object.
+ *
+ * @param string $moduleName set to "accounts", "leads", or "contacts"
+ * @param array $innerResultSet Results from function find_beans_db_query
+ * @param object $current_user Global current_user object - allows db access
+ * @return array Returns contacts
+ */
+function convert_bean_to_simple_array($moduleName, $innerResultSet, $current_user) {
+    $beans = array();
+
+    print "converting...\n";
+
+    while ($beanRow = $current_user->db->fetchByAssoc($innerResultSet)) {
+        print "NEW ROW...\n";
+        $parentName = '';
+        $parentId = '';
+        $parentModule = '';
+        if( !empty($beanRow['account_name']) ) {
+            $parentName = $beanRow['account_name'];
+            $parentId = $beanRow['account_id'];
+            $parentModule = "Accounts";
+        }
+
+        $bean = array(
+            'bean_module' => $moduleName,
+            'bean_id' => $beanRow['bean_id'],
+            'bean_name' => $beanRow['first_name'] . " " . $beanRow['last_name'],
+            'bean_description' => $beanRow['description'],
+            'parent_name' => $parentName,
+            'parent_module' => $parentModule,
+            'parent_id' => $parentId,
+        );
+
+        $beans[] = $bean;
+    }
+
+    return $beans;
+}
+
+
+/**
+ * Searches a module for the phone number
+ *
+ * @param $module examples, "contacts", "accounts", "leads"
+ * @param $moduleFields is a comma delimited list.  "phone_work,phone_office,phone_custom_c"
+ * @param $phoneToFind
+ * @param $callRow - allows for optimization when called through getCalls, set to null if using externally.
+ * @param $current_user
+ * @return mixed
+ */
+function find_beans_db_query($module, $moduleFields, $phoneToFind, $callRow, $current_user) {
+    global $sugar_config;
+
+    $module = strtolower($module);
+
+    $phoneToFind = ltrim($phoneToFind, '0');
+    $phoneToFind = preg_replace('/\D/', '', $phoneToFind); // Removes and non digits such as + chars.
+
+    if (preg_match('/([0-9]{' . $sugar_config['asterisk_digits_to_match'] . '})$/', $phoneToFind, $matches)) {
+        $phoneToFind = $matches[1];
+    }
+
+    if (strlen($phoneToFind) > 5) {
+
+        // TODO if module isn't contacts check to see if there is a relation to accounts.
+        $accountSelectFields = "";
+        $accountJoins = "";
+        if( $module == "contacts") {
+            $accountSelectFields = ", a.name as account_name, account_id";
+            $accountJoins =  " left join accounts_$module ac on (c.id=ac.contact_id) and (ac.deleted='0' OR ac.deleted is null)"
+                           . " left join accounts a on (ac.account_id=a.id) and (a.deleted='0' or a.deleted is null)";
+        }
+
+        $joinCstm = "";
+
+        // if _c is in the field list, we assume that a _cstm table must exist.
+        if( preg_match('/\B_c\b/', $moduleFields ) ) {
+            $joinCstm = " left join {$module}_cstm on (c.id = {$module}_cstm.id_c) ";
+        }
+
+
+        // REMOVED: phone_work, phone_home, phone_mobile, phone_other,
+        $selectPortion = "SELECT c.id as bean_id, first_name, last_name " . $accountSelectFields
+            . " FROM $module c "
+            . $joinCstm
+            . $accountJoins;
+
+        if (!empty($callRow['bean_id']) && $callRow['bean_module'] == $module) {
+            //logLine("Quick where query\n", "c:/controller.log");
+            $wherePortion = " WHERE c.id='{$callRow['bean_id']}' and c.deleted='0'";
+        }
+        // We only do this expensive query if it's not already set!
+        else {
+            //logLine("Performing Expensive where query\n", "c:/callListener.txt");
+
+            $phoneFields = array();
+            // Here we add any custom contact fields.
+            if( !empty($moduleFields)) {
+                $customPhoneFields = explode(',', $moduleFields );
+                foreach ($customPhoneFields as $currCol) {
+                    array_push($phoneFields, sql_replace_phone_number($currCol, $phoneToFind) );
+                }
+            }
+
+            $phoneFieldsWherePortion = implode(' OR ', $phoneFields);
+
+            $wherePortion = " WHERE (" . $phoneFieldsWherePortion . ") and c.deleted='0'";
+            // logLine("Where == " . $wherePortion, "c:/callListener.txt");
+        }
+
+        $queryContact = $selectPortion . $wherePortion;
+        $logQuery = preg_replace('/\r/','', $queryContact);
+        $logQuery = preg_replace('/\n/',' ', $logQuery);
+        print "Query: " . $logQuery . "\n\n";
+        //logLine("QUERY: $logQuery\n","c:/callListener.txt");
+        return $current_user->db->query($queryContact, false);
+    }
+}
+
+
 
     /**
      * returns a formatted string for inserting into a WHERE clause.

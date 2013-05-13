@@ -3,6 +3,7 @@
     if(!defined('sugarEntry'))define('sugarEntry', true);
 
     require_once('service/v4_1/SugarWebServiceImplv4_1.php');
+    require_once('custom/modules/Asterisk/include/callinize_db.php');
 
     class SugarWebServiceImplv4_1_custom extends SugarWebServiceImplv4_1
     {
@@ -11,9 +12,17 @@
          *
          * @param string $session
          * @return string $session - false if invalid.
+         *    'bean_module' = "contacts", "leads" or "accounts"
+         *    'bean_id' =
+         *    'bean_name' = name
+         *    'bean_description',
+         *    'bean_email',
+         *    'parent_module' = "accounts"...
+         *    'parent_id'
+         *    'parent_name' == Leads can put company name here... note: parent_module should be set to leads, and parent_id is also leads.
          *
          */
-        function get_license($session, $oid)
+        function get_beans_with_phone_number($session, $phone_number)
         {
             $GLOBALS['log']->info('Begin: SugarWebServiceImplv4_1_custom->example_method');
             $error = new SoapError();
@@ -28,25 +37,8 @@
 				//$retVal['data'] = '';
 			}
 			else {
-
-$selectQry = <<<ENDSELECT
-select * from cl_customerlicense
-left join cl_customerlicense_cstm on cl_customerlicense.id = cl_customerlicense_cstm.id_c
-join cl_customerlicense_accounts_c on cl_customerlicense.id = cl_customerlicense_accounts_c.cl_customerlicense_accountscl_customerlicense_ida
-join accounts on cl_customerlicense_accounts_c.cl_customerlicense_accountsaccounts_idb = accounts.id
-join accounts_cstm on accounts.id = accounts_cstm.id_c
-where accounts_cstm.alertus_oid_c = "$oid"
-ENDSELECT;
-
-				$results = $GLOBALS['db']->query($selectQry);
-
-				while($row = $GLOBALS['db']->fetchByAssoc($results) ) {
-					$retVal = $row;
-					//$retVal['data'] = $row;
-					//$retVal['status'] = 'Successful';
-					//$retVal = json_encode($row);
-				}
-			}
+                $retVal =  find_contacts($phone_number,null,$GLOBALS['current_user'] );
+          	}
 
 			
             return $retVal;//$session . " oid: " . $oid;
