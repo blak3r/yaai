@@ -465,7 +465,7 @@ while (true) {
                     // Regex only matches the outbound case since in the inbound case the CallerIDNum variable is set properly.
                     // Note: this cases also seems to happen on the INTERNAL inbound call events to Ring Groups which is harmless.
                     if (!empty($e['Dialstring'])) {
-                        if (preg_match("/(.*?\/)(\d+)/", $e['Dialstring'], $ds_matches)) {
+                        if (preg_match("/(.*?\/)N?(\d+)/", $e['Dialstring'], $ds_matches)) {
                             $tmpCallerID = $ds_matches[2];
                             logLine(" CallerID set from Dialstring to: " . $tmpCallerID);
                         }
@@ -1271,9 +1271,9 @@ function purgeExpiredEventsFromDb() {
 
     $calls_expire_time = date('Y-m-d H:i:s', time() - ($popupsExpireMins * 60) );
     $five_hours_ago = date('Y-m-d H:i:s', time() - 5 * 60 * 60);
-
-    $query = " DELETE FROM asterisk_log WHERE (uistate = 'Closed') OR ( timestamp_hangup is not NULL AND '$calls_expire_time' > timestamp_hangup ) OR ('$five_hours_ago' > timestamp_call )";
-    $delResult = mysql_checked_query($query);
+    // BR: 2013-04-30 fixed bug where closing the call popup before the call was over the duration would potentially not get set right.
+    $query = " DELETE FROM asterisk_log WHERE (uistate = 'Closed' AND timestamp_hangup is not NULL) OR ( timestamp_hangup is not NULL AND '$calls_expire_time' > timestamp_hangup ) OR ('$five_hours_ago' > timestamp_call )";
+    mysql_checked_query($query);
     $rowsDeleted = mysql_affected_rows();
    // logLine("DEBUG: $query");
     if( $rowsDeleted > 0 ) {
