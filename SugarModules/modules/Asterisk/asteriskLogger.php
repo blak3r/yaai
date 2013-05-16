@@ -477,7 +477,7 @@ while (true) {
 
                         // If Call ID is blocked it comes in as "<unknown>"
                         if( $tmpCallerID == "<unknown>") {
-                            $tmpCallerID == "BLOCKED";
+                            $tmpCallerID = "BLOCKED";
                         }
 
                         logLine(" CallerID set from ConnectedLineNum to $tmpCallerID");
