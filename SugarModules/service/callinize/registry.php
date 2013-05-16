@@ -7,7 +7,7 @@
         protected function registerFunction()
         {
             parent::registerFunction();
-            $this->serviceClass->registerFunction('get_license', array('session'=>'xsd:string', 'oid'=>'xsd:string'), array('return'=>'xsd:string'));
+            $this->serviceClass->registerFunction('get_beans', array('session'=>'xsd:string', 'phone_number'=>'xsd:string'), array('return'=>'xsd:string'));
         }
     }
 

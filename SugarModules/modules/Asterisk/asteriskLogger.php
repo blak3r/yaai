@@ -469,7 +469,7 @@ while (true) {
                     // Regex only matches the outbound case since in the inbound case the CallerIDNum variable is set properly.
                     // Note: this cases also seems to happen on the INTERNAL inbound call events to Ring Groups which is harmless.
                     if (!empty($e['Dialstring'])) {
-                        if (preg_match("/(.*?\/)(\d+)/", $e['Dialstring'], $ds_matches)) {
+                        if (preg_match("/(.*?\/)N?(\d+)/", $e['Dialstring'], $ds_matches)) {
                             $tmpCallerID = $ds_matches[2];
                             logLine(" CallerID set from Dialstring to: " . $tmpCallerID);
                         }
