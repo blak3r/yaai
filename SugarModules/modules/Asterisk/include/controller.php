@@ -664,7 +664,7 @@ function fetch_accounts_associated_to_phone_number($phoneToFind, $row, $current_
         $phoneToFind = $matches[1];
     }
 
-    if (strlen($phoneToFind) > 5) {
+    if (strlen($phoneToFind) > 5 && !empty($sugar_config['asterisk_account_phone_fields']) ) {
 
         // TODO fix the join so that account is optional... I think just add INNER
         // REMOVED: phone_work, phone_home, phone_mobile, phone_other,

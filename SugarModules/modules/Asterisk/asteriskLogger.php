@@ -1467,6 +1467,11 @@ function findSugarAccountByPhoneNumber($origPhoneNumber) {
     global $soapClient, $soapSessionId, $sugar_config;
     logLine("# +++ find AccountByPhoneNumber($origPhoneNumber)\n");
 
+    if( empty($sugar_config['asterisk_account_phone_fields']) ) {
+        logLine("  Account Phone Fields are ignored.  Returning...");
+        return FALSE;
+    }
+
     $aPhoneNumber = preg_replace('/\D/', '', $origPhoneNumber); // removes everything that isn't a digit.
     if (preg_match('/([0-9]{' . $sugar_config['asterisk_digits_to_match'] . '})$/', $aPhoneNumber, $matches)) {
         $aPhoneNumber = $matches[1];
@@ -1522,6 +1527,11 @@ function findSugarAccountByPhoneNumber($origPhoneNumber) {
 function findSugarObjectByPhoneNumber($aPhoneNumber) {
     global $soapClient, $soapSessionId, $sugar_config;
     logLine("### +++ find ContactByPhoneNumber($aPhoneNumber)\n");
+
+    if( empty($sugar_config['asterisk_contact_phone_fields']) ) {
+        logLine("  Contact Phone Fields are ignored.  Returning...");
+        return FALSE;
+    }
 
     // Add if phonenumber .length == 10
     $searchPattern = $aPhoneNumber;
