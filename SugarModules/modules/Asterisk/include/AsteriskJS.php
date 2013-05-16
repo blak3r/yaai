@@ -50,76 +50,83 @@ class AsteriskJS {
 
         if ((!isset($_REQUEST['sugar_body_only']) || $_REQUEST['sugar_body_only'] != true) && $_REQUEST['action'] != 'modulelistmenu' &&
              $_REQUEST['action'] != "favorites" && $_REQUEST['action'] != 'Popup' && empty($_REQUEST['to_pdf']) &&
-            (!empty($_REQUEST['module']) && $_REQUEST['module'] != 'ModuleBuilder') && empty($_REQUEST['to_csv']) && $_REQUEST['action'] != 'Login'
-            && $_REQUEST['module'] != 'Timesheets') {
+            (!empty($_REQUEST['module']) && $_REQUEST['module'] != 'ModuleBuilder') && empty($_REQUEST['to_csv']) && $_REQUEST['action'] != 'Login' &&
+            $_REQUEST['module'] != 'Timesheets') {
 
-            $yaaiDevMode = $GLOBALS['sugar_config']['asterisk_yaai_dev'];
+            if(!empty( $GLOBALS['current_user']->asterisk_ext_c) &&
+               (($GLOBALS['current_user']->asterisk_inbound_c == '1') || ($GLOBALS['current_user']->asterisk_outbound_c == '1')))
+            {
+                $yaaiDevMode = $GLOBALS['sugar_config']['asterisk_yaai_dev'];
 
-            $poll_rate = !empty($GLOBALS['sugar_config']['asterisk_listener_poll_rate']) ? $GLOBALS['sugar_config']['asterisk_listener_poll_rate'] : "10000";
-            $user_extension = !empty($GLOBALS['current_user']->asterisk_ext_c) ? $GLOBALS['current_user']->asterisk_ext_c : "Not Configured!";
-            $current_user_id = $GLOBALS['current_user']->id;
-            $fop_user = $GLOBALS['current_user']->asterisk_fop_user_c;
-            $fop_pass = $GLOBALS['current_user']->asterisk_fop_pass_c;
-            $fop_url = "";
-            if( !empty($GLOBALS['sugar_config']['asterisk_fop_url'])) {
-                $fop_url = $GLOBALS['sugar_config']['asterisk_fop_url'];
+                $poll_rate = !empty($GLOBALS['sugar_config']['asterisk_listener_poll_rate']) ? $GLOBALS['sugar_config']['asterisk_listener_poll_rate'] : "10000";
+                $user_extension = !empty($GLOBALS['current_user']->asterisk_ext_c) ? $GLOBALS['current_user']->asterisk_ext_c : "Not Configured!";
+                $current_user_id = $GLOBALS['current_user']->id;
+                $fop_user = $GLOBALS['current_user']->asterisk_fop_user_c;
+                $fop_pass = $GLOBALS['current_user']->asterisk_fop_pass_c;
+                $fop_url = "";
+                if( !empty($GLOBALS['sugar_config']['asterisk_fop_url'])) {
+                    $fop_url = $GLOBALS['sugar_config']['asterisk_fop_url'];
+                }
+                $fop_enabled = !empty($fop_url) ? 1 : 0;
+
+                //JS Global Variables
+                echo '<script type="text/javascript">window.yaai_dev = ' . $GLOBALS['sugar_config']['asterisk_yaai_dev'] . ';</script>';
+                echo '<script type="text/javascript">window.yaai_debug = ' . $GLOBALS['sugar_config']['asterisk_yaai_debug'] . ';</script>';
+                echo '<script type="text/javascript">window.yaai_poll_rate = ' . $poll_rate . ';</script>';
+                echo '<script type="text/javascript">window.yaai_user_extension = ' . "'$user_extension'" . ';</script>';
+                echo '<script type="text/javascript">window.yaai_current_user_id = ' . "'$current_user_id'" . ';</script>';
+                echo '<script type="text/javascript">window.yaai_fop_user = "' . $fop_user . '";</script>';
+                echo '<script type="text/javascript">window.yaai_fop_pass = "' . $fop_pass . '";</script>';
+                echo '<script type="text/javascript">window.yaai_fop_url= "' . $fop_url . '";</script>';
+                echo '<script type="text/javascript">window.yaai_fop_enabled= ' . $fop_enabled . ';</script>';
+                echo '<script type="text/javascript">window.yaai_show_transfer_button= ' . $GLOBALS['sugar_config']['asterisk_transfer_button_enabled'] . ';</script>';
+                echo '<script type="text/javascript">window.yaai_relate_to_account_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_account_enabled'] . ';</script>';
+                echo '<script type="text/javascript">window.yaai_relate_to_contact_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_contact_enabled'] . ';</script>';
+                echo '<script type="text/javascript">window.yaai_create_new_contact_enabled = ' . $GLOBALS['sugar_config']['asterisk_create_new_contact_enabled'] . ';</script>';
+                echo '<script type="text/javascript">window.yaai_block_button_enabled = ' . $GLOBALS['sugar_config']['asterisk_block_button_enabled'] . ';</script>';
+
+                echo '<script type="text/javascript"> if (!window.console) console = {log: function() {}}; </script>'; // Prevents bug in IE (See Issue #108)
+
+
+                //JS Third-Party Libraries
+                if( preg_match("/^6\.[1-4]/",$GLOBALS['sugar_version']) ) {
+                    echo '<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>';
+                    echo '<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js" type="text/javascript"></script>';
+                }
+
+                if( $yaaiDevMode ) {
+                    // This version includes the compiler and the non compiled template
+                    echo '<script src="https://github.com/downloads/wycats/handlebars.js/handlebars-1.0.rc.1.js"></script>';
+                    $template = file_get_contents( "custom/modules/Asterisk/include/template/call-template.html" );
+                    echo '<script id="handlebars-dev-template" type="text/x-handlebars-template">' . $template . '</script>';
+                }
+                else {
+                    echo '<script src="http://cloud.github.com/downloads/wycats/handlebars.js/handlebars.runtime-1.0.rc.1.js"></script>';
+                    echo '<script src="custom/modules/Asterisk/include/template/call-template.tmpl"></script>';
+                }
+
+                echo '<script src="custom/modules/Asterisk/include/javascript/jquery.fancybox.js" type="text/javascript" ></script>';
+                //echo '<script src="custom/modules/Asterisk/include/javascript/jquery.dropdown.js" type="text/javascript" ></script>';
+
+                //JS YAAI
+                if($GLOBALS['current_user']->asterisk_inbound_c == '1') {
+                    echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/callPopups.js"></script>';
+                }
+                if($GLOBALS['current_user']->asterisk_outbound_c == '1') {
+                    echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/dialout.js"></script>';
+                }
+
+                //CSS Third-Party Libraries
+                echo '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/redmond/jquery-ui.css" />';
+                echo '<link rel="stylesheet" type="text/css" href="custom/modules/Asterisk/include/css/jquery.fancybox.css" media="screen" />';
+
+                //CSS YAAI
+
+                echo '<link rel="stylesheet" type="text/css" media="all" href="custom/modules/Asterisk/include/css/asterisk.css" />';
+                echo '<!--[if lte IE 7]>';
+                echo '<link type="text/css" rel="stylesheet" media="all" href="custom/modules/Asterisk/include/css/screen_ie.css" />';
+                echo '<![endif]-->';
             }
-            $fop_enabled = !empty($fop_url) ? 1 : 0;
-
-            //JS Global Variables
-            echo '<script type="text/javascript">window.yaai_dev = ' . $GLOBALS['sugar_config']['asterisk_yaai_dev'] . ';</script>';
-            echo '<script type="text/javascript">window.yaai_debug = ' . $GLOBALS['sugar_config']['asterisk_yaai_debug'] . ';</script>';
-            echo '<script type="text/javascript">window.yaai_poll_rate = ' . $poll_rate . ';</script>';
-            echo '<script type="text/javascript">window.yaai_user_extension = ' . "'$user_extension'" . ';</script>';
-            echo '<script type="text/javascript">window.yaai_current_user_id = ' . "'$current_user_id'" . ';</script>';
-            echo '<script type="text/javascript">window.yaai_fop_user = "' . $fop_user . '";</script>';
-            echo '<script type="text/javascript">window.yaai_fop_pass = "' . $fop_pass . '";</script>';
-            echo '<script type="text/javascript">window.yaai_fop_url= "' . $fop_url . '";</script>';
-            echo '<script type="text/javascript">window.yaai_fop_enabled= ' . $fop_enabled . ';</script>';
-            echo '<script type="text/javascript">window.yaai_show_transfer_button= ' . $GLOBALS['sugar_config']['asterisk_transfer_button_enabled'] . ';</script>';
-            echo '<script type="text/javascript">window.yaai_relate_to_account_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_account_enabled'] . ';</script>';
-            echo '<script type="text/javascript">window.yaai_relate_to_contact_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_contact_enabled'] . ';</script>';
-            echo '<script type="text/javascript">window.yaai_create_new_contact_enabled = ' . $GLOBALS['sugar_config']['asterisk_create_new_contact_enabled'] . ';</script>';
-            echo '<script type="text/javascript">window.yaai_block_button_enabled = ' . $GLOBALS['sugar_config']['asterisk_block_button_enabled'] . ';</script>';
-
-            echo '<script type="text/javascript"> if (!window.console) console = {log: function() {}}; </script>'; // Prevents bug in IE (See Issue #108)
-
-
-            //JS Third-Party Libraries
-            if( preg_match("/^6\.[1-4]/",$GLOBALS['sugar_version']) ) {
-                echo '<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>';
-                echo '<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js" type="text/javascript"></script>';
-            }
-
-            if( $yaaiDevMode ) {
-                // This version includes the compiler and the non compiled template
-                echo '<script src="https://github.com/downloads/wycats/handlebars.js/handlebars-1.0.rc.1.js"></script>';
-                $template = file_get_contents( "custom/modules/Asterisk/include/template/call-template.html" );
-                echo '<script id="handlebars-dev-template" type="text/x-handlebars-template">' . $template . '</script>';
-            }
-            else {
-                echo '<script src="http://cloud.github.com/downloads/wycats/handlebars.js/handlebars.runtime-1.0.rc.1.js"></script>';
-                echo '<script src="custom/modules/Asterisk/include/template/call-template.tmpl"></script>';
-            }
-
-            echo '<script src="custom/modules/Asterisk/include/javascript/jquery.fancybox.js" type="text/javascript" ></script>';
-            //echo '<script src="custom/modules/Asterisk/include/javascript/jquery.dropdown.js" type="text/javascript" ></script>';
-            
-            //JS YAAI
-            
-            echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/callPopups.js"></script>';
-            echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/dialout.js"></script>';
-
-            //CSS Third-Party Libraries
-            echo '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/redmond/jquery-ui.css" />';
-            echo '<link rel="stylesheet" type="text/css" href="custom/modules/Asterisk/include/css/jquery.fancybox.css" media="screen" />';
-            
-            //CSS YAAI
-            
-            echo '<link rel="stylesheet" type="text/css" media="all" href="custom/modules/Asterisk/include/css/asterisk.css" />';
-            echo '<!--[if lte IE 7]>';
-            echo '<link type="text/css" rel="stylesheet" media="all" href="custom/modules/Asterisk/include/css/screen_ie.css" />';
-            echo '<![endif]-->';
         }
     }
 
