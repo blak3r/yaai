@@ -1473,7 +1473,7 @@ function findSugarAccountByPhoneNumber($origPhoneNumber) {
     }
 
     if( strlen($aPhoneNumber) < 5 ) {
-        logLine("Phone number is too short, CallerID is most likely blocked" );
+        logLine("Phone number is invalid/too short, CallerID is most likely blocked" );
         return FALSE;
     }
 
@@ -1560,6 +1560,11 @@ function findSugarObjectByPhoneNumber($aPhoneNumber) {
     $aPhoneNumber = preg_replace('/\D/', '', $aPhoneNumber); // removes everything that isn't a digit.
     if (preg_match('/([0-9]{' . $sugar_config['asterisk_digits_to_match'] . '})$/', $aPhoneNumber, $matches)) {
         $aPhoneNumber = $matches[1];
+    }
+
+    if( strlen($aPhoneNumber) < 5 ) {
+        logLine("Phone number is too short, CallerID is most likely blocked" );
+        return FALSE;
     }
 
     $regje = preg_replace('/(\d)/', '$1\[^\\d\]*', $aPhoneNumber);
