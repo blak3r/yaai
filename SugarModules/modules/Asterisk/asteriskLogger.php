@@ -474,6 +474,12 @@ while (true) {
                     // Fix for issue on some asterisk 1.8 boxes where CallerId on click to dial is not set. See https://github.com/blak3r/yaai/issues/75
                     if ($tmpCallerID == '<unknown>' && !empty($e['ConnectedLineNum'])) {
                         $tmpCallerID = trim($e['ConnectedLineNum']);
+
+                        // If Call ID is blocked it comes in as "<unknown>"
+                        if( $tmpCallerID == "<unknown>") {
+                            $tmpCallerID == "BLOCKED";
+                        }
+
                         logLine(" CallerID set from ConnectedLineNum to $tmpCallerID");
                     }
 
@@ -1457,16 +1463,18 @@ function decode_name_value_list(&$nvl) {
 //
 // Attempt to find a Sugar Account with a matching phone number.
 //
-function findSugarAccountByPhoneNumber($aPhoneNumber) {
+function findSugarAccountByPhoneNumber($origPhoneNumber) {
     global $soapClient, $soapSessionId, $sugar_config;
-    logLine("# +++ find AccountByPhoneNumber($aPhoneNumber)\n");
+    logLine("# +++ find AccountByPhoneNumber($origPhoneNumber)\n");
 
-    // Add if phonenumber .length == 10
-    $searchPattern = $aPhoneNumber;
-
-    $aPhoneNumber = preg_replace('/\D/', '', $aPhoneNumber); // removes everything that isn't a digit.
+    $aPhoneNumber = preg_replace('/\D/', '', $origPhoneNumber); // removes everything that isn't a digit.
     if (preg_match('/([0-9]{' . $sugar_config['asterisk_digits_to_match'] . '})$/', $aPhoneNumber, $matches)) {
         $aPhoneNumber = $matches[1];
+    }
+
+    if( strlen($aPhoneNumber) < 5 ) {
+        logLine("Phone number is too short, CallerID is most likely blocked" );
+        return FALSE;
     }
 
     $regje = preg_replace('/(\d)/', '$1\[^\\d\]*', $aPhoneNumber);
