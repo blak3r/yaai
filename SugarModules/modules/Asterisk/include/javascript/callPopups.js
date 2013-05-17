@@ -176,6 +176,10 @@ var YAAI = {
 
             YAAI.bindActionDropdown(callboxid,entry);
 
+           if( this.showTransferButton ) {
+               this.bindTransferButton(callboxid,entry);
+           }
+
             //bind user actions
             YAAI.bindCheckCallBoxInputKey(callboxid, entry['call_record_id'], entry['phone_number'], entry['direction']);
             //YAAI.fop2 ? YAAI.bindOperatorPanel(callboxid) : YAAI.bindTransferButton(callboxid, entry);
@@ -365,12 +369,14 @@ var YAAI = {
                 primary: 'ui-icon-transfer',
                 secondary: null
             }
-        }).on("click", function(){
+        }).on("click", function() {
                 YAAI.showTransferMenu(entry);
-            }).show();
+        });
     },
-
-    unbindTransferButton : function(callboxid, entry) {
+    showTransferButton : function(callboxid,entry) {
+        $('#callbox_'+callboxid).find('.transfer_panel').show();
+    },
+    hideTransferButton : function(callboxid, entry) {
         $('#callbox_'+callboxid).find('.transfer_panel').hide();
     },
 
@@ -912,11 +918,11 @@ refreshSingleMatchingAccount : function(callboxid, entry){
 
     setTransferButton : function(callboxid, entry ) {
         if( entry['is_hangup'] ) {
-            this.unbindTransferButton(callboxid,entry);
+            this.hideTransferButton(callboxid,entry);
         }
         else {
             if( this.showTransferButton ) {
-                this.bindTransferButton(callboxid,entry);
+                this.showTransferButton(callboxid,entry);
             }
         }
     },
@@ -945,7 +951,6 @@ refreshSingleMatchingAccount : function(callboxid, entry){
 	
         $.cookie('callbox_minimized', cookieVal);
     },
-    
     checkMinimizeCookie : function (callboxid){
         // Check by looking at the cookie to see if it should be minimized or not.
         var minimizedCallBoxes = new Array();
