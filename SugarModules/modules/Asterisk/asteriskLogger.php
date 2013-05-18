@@ -465,7 +465,7 @@ while (true) {
                     // Regex only matches the outbound case since in the inbound case the CallerIDNum variable is set properly.
                     // Note: this cases also seems to happen on the INTERNAL inbound call events to Ring Groups which is harmless.
                     if (!empty($e['Dialstring'])) {
-                        if (preg_match("/(.*?\/)(\d+)/", $e['Dialstring'], $ds_matches)) {
+                        if (preg_match("/(.*?\/)N?(\d+)/", $e['Dialstring'], $ds_matches)) {
                             $tmpCallerID = $ds_matches[2];
                             logLine(" CallerID set from Dialstring to: " . $tmpCallerID);
                         }
@@ -474,6 +474,12 @@ while (true) {
                     // Fix for issue on some asterisk 1.8 boxes where CallerId on click to dial is not set. See https://github.com/blak3r/yaai/issues/75
                     if ($tmpCallerID == '<unknown>' && !empty($e['ConnectedLineNum'])) {
                         $tmpCallerID = trim($e['ConnectedLineNum']);
+
+                        // If Call ID is blocked it comes in as "<unknown>"
+                        if( $tmpCallerID == "<unknown>") {
+                            $tmpCallerID = "BLOCKED";
+                        }
+
                         logLine(" CallerID set from ConnectedLineNum to $tmpCallerID");
                     }
 
@@ -1271,9 +1277,9 @@ function purgeExpiredEventsFromDb() {
 
     $calls_expire_time = date('Y-m-d H:i:s', time() - ($popupsExpireMins * 60) );
     $five_hours_ago = date('Y-m-d H:i:s', time() - 5 * 60 * 60);
-
-    $query = " DELETE FROM asterisk_log WHERE (uistate = 'Closed') OR ( timestamp_hangup is not NULL AND '$calls_expire_time' > timestamp_hangup ) OR ('$five_hours_ago' > timestamp_call )";
-    $delResult = mysql_checked_query($query);
+    // BR: 2013-04-30 fixed bug where closing the call popup before the call was over the duration would potentially not get set right.
+    $query = " DELETE FROM asterisk_log WHERE (uistate = 'Closed' AND timestamp_hangup is not NULL) OR ( timestamp_hangup is not NULL AND '$calls_expire_time' > timestamp_hangup ) OR ('$five_hours_ago' > timestamp_call )";
+    mysql_checked_query($query);
     $rowsDeleted = mysql_affected_rows();
    // logLine("DEBUG: $query");
     if( $rowsDeleted > 0 ) {
@@ -1457,16 +1463,23 @@ function decode_name_value_list(&$nvl) {
 //
 // Attempt to find a Sugar Account with a matching phone number.
 //
-function findSugarAccountByPhoneNumber($aPhoneNumber) {
+function findSugarAccountByPhoneNumber($origPhoneNumber) {
     global $soapClient, $soapSessionId, $sugar_config;
-    logLine("# +++ find AccountByPhoneNumber($aPhoneNumber)\n");
+    logLine("# +++ find AccountByPhoneNumber($origPhoneNumber)\n");
 
-    // Add if phonenumber .length == 10
-    $searchPattern = $aPhoneNumber;
+    if( empty($sugar_config['asterisk_account_phone_fields']) ) {
+        logLine("  Account Phone Fields are ignored.  Returning...");
+        return FALSE;
+    }
 
-    $aPhoneNumber = preg_replace('/\D/', '', $aPhoneNumber); // removes everything that isn't a digit.
+    $aPhoneNumber = preg_replace('/\D/', '', $origPhoneNumber); // removes everything that isn't a digit.
     if (preg_match('/([0-9]{' . $sugar_config['asterisk_digits_to_match'] . '})$/', $aPhoneNumber, $matches)) {
         $aPhoneNumber = $matches[1];
+    }
+
+    if( strlen($aPhoneNumber) < 5 ) {
+        logLine("Phone number is invalid/too short, CallerID is most likely blocked" );
+        return FALSE;
     }
 
     $regje = preg_replace('/(\d)/', '$1\[^\\d\]*', $aPhoneNumber);
@@ -1515,6 +1528,11 @@ function findSugarObjectByPhoneNumber($aPhoneNumber) {
     global $soapClient, $soapSessionId, $sugar_config;
     logLine("### +++ find ContactByPhoneNumber($aPhoneNumber)\n");
 
+    if( empty($sugar_config['asterisk_contact_phone_fields']) ) {
+        logLine("  Contact Phone Fields are ignored.  Returning...");
+        return FALSE;
+    }
+
     // Add if phonenumber .length == 10
     $searchPattern = $aPhoneNumber;
     //$searchPattern = regexify($aPhoneNumber);
@@ -1552,6 +1570,11 @@ function findSugarObjectByPhoneNumber($aPhoneNumber) {
     $aPhoneNumber = preg_replace('/\D/', '', $aPhoneNumber); // removes everything that isn't a digit.
     if (preg_match('/([0-9]{' . $sugar_config['asterisk_digits_to_match'] . '})$/', $aPhoneNumber, $matches)) {
         $aPhoneNumber = $matches[1];
+    }
+
+    if( strlen($aPhoneNumber) < 5 ) {
+        logLine("Phone number is too short, CallerID is most likely blocked" );
+        return FALSE;
     }
 
     $regje = preg_replace('/(\d)/', '$1\[^\\d\]*', $aPhoneNumber);

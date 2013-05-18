@@ -176,6 +176,10 @@ var YAAI = {
 
             YAAI.bindActionDropdown(callboxid,entry);
 
+           if( this.showTransferButton ) {
+               this.bindTransferButton(callboxid,entry);
+           }
+
             //bind user actions
             YAAI.bindCheckCallBoxInputKey(callboxid, entry['call_record_id'], entry['phone_number'], entry['direction']);
             //YAAI.fop2 ? YAAI.bindOperatorPanel(callboxid) : YAAI.bindTransferButton(callboxid, entry);
@@ -282,33 +286,35 @@ var YAAI = {
 
 
         // Here we show them all...
+
         if( window.yaai_relate_to_contact_enabled ) {
-            $(dropdownDiv+" ul li.li_relate_to_contact").show();
-            $(dropdownDiv+" ul a.relate_to_contact").on("click", entry, function() {
+            YAAI.log("  Adding Relate to Contact");
+            $(dropdownDiv+" ul li.ul_relate_to_contact").show();
+            $(dropdownDiv+" ul li a.relate_to_contact").on("click", entry, function() {
                 YAAI.openContactRelatePopup(entry)
             });
         }
 
         if( window.yaai_relate_to_account_enabled ) {
             YAAI.log("  Adding Relate to Account");
-            $(dropdownDiv+" ul li.li_relate_to_account").show();
-            $(dropdownDiv+" ul a.relate_to_account").on("click", entry, function() {
+            $(dropdownDiv+" ul li.ul_relate_to_account").show();
+            $(dropdownDiv+" ul li a.relate_to_account").on("click", entry, function() {
                 YAAI.openAccountRelatePopup(entry);
             });
         }
 
         if( window.yaai_create_new_contact_enabled ) {
-            YAAI.log("  Adding Create New Contact");
-            $(dropdownDiv+" ul li.li_create_new_contact").show();
-            $(dropdownDiv+" ul a.create_contact").on("click", entry, function() {
-                YAAI.createContact(entry)
+            YAAI.log("  Adding Create New Contact " + dropdownDiv+" ul li.li_create_new_contact");
+            $(dropdownDiv+" ul li.ul_create_contact").show();
+            $(dropdownDiv+" ul li a.create_contact").on("click", entry, function() {
+                YAAI.createContact(entry);
             });
         }
 
         if( window.yaai_block_button_enabled ) {
             YAAI.log("  Adding Block Button Enabled");
-            $(dropdownDiv+" ul li.li_block_number").show();
-            $(dropdownDiv+" ul a.block_number").on("click", {
+            $(dropdownDiv+" ul li.ul_block_number").show();
+            $(dropdownDiv+" ul li a.block_number").on("click", {
                 entry: entry,
                 callboxid: callboxid
             }, function() {
@@ -327,7 +333,6 @@ var YAAI = {
                 YAAI.openContactRelatePopup(entry)
             });
         }
-
         // TODO create
         if( window.yaai_relate_to_account_enabled ) {
             YAAI.log("  Adding Relate to Account");
@@ -364,17 +369,20 @@ var YAAI = {
                 primary: 'ui-icon-transfer',
                 secondary: null
             }
-        }).on("click", function(){
+        }).on("click", function() {
+                YAAI.log("Binding Transfer Button action");
                 YAAI.showTransferMenu(entry);
-            }).show();
+        });
     },
-
-    unbindTransferButton : function(callboxid, entry) {
+    showTransferButton : function(callboxid,entry) {
+        $('#callbox_'+callboxid).find('.transfer_panel').show();
+    },
+    hideTransferButton : function(callboxid, entry) {
         $('#callbox_'+callboxid).find('.transfer_panel').hide();
     },
 
     bindOperatorPanel : function(callboxid){ 
-        
+        YAAI.log("Binding FOP Panel");
         $('#callbox_'+callboxid).find('.operator_panel').button({
             icons: {
                 primary: 'ui-icon-custom-phone', 
@@ -911,11 +919,11 @@ refreshSingleMatchingAccount : function(callboxid, entry){
 
     setTransferButton : function(callboxid, entry ) {
         if( entry['is_hangup'] ) {
-            this.unbindTransferButton(callboxid,entry);
+            this.hideTransferButton(callboxid,entry);
         }
         else {
             if( this.showTransferButton ) {
-                this.bindTransferButton(callboxid,entry);
+                this.showTransferButton(callboxid,entry);
             }
         }
     },
@@ -944,7 +952,6 @@ refreshSingleMatchingAccount : function(callboxid, entry){
 	
         $.cookie('callbox_minimized', cookieVal);
     },
-    
     checkMinimizeCookie : function (callboxid){
         // Check by looking at the cookie to see if it should be minimized or not.
         var minimizedCallBoxes = new Array();

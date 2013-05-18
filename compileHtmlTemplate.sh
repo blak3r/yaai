@@ -1,0 +1,1 @@
+/usr/local/share/npm/lib/node_modules/handlebars/bin/handlebars SugarModules/modules/Asterisk/include/template/call-template.html -f SugarModules/modules/Asterisk/include/template/call-template.tmpl

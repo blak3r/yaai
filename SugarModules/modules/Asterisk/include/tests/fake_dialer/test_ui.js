@@ -45,7 +45,7 @@ var FakeDialer = {
                 console.log(phone_number);
                 //create contacts
                 if($('#radio :radio:checked').val() >= 1){
-                    var contacts = FakeDialer.action_create_contacts(phone_number);
+                    var contacts = FakeDialer.action_create_contacts(phone_number, $('#radio :radio:checked').val() );
                     if(contacts['contact_1']){call_data['contact_1'] = contacts['contact_1']}
                     if(contacts['contact_2']){call_data['contact_2'] = contacts['contact_2']}
                 }
@@ -131,7 +131,7 @@ var FakeDialer = {
                 async:false,
                 data: {
                     action: 'create_contacts',
-                    contacts: $('#radio :radio:checked').val(),
+                    contacts: $('input[name=radio]:checked').val(),
                     phone_number: phone_number
                 }, 
                 type: "POST",			

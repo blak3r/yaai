@@ -35,22 +35,19 @@ function action_ringing() {
     $extension = get_extension_input();
     $extension_four_digit = get_extension_four_digit($extension);
     $new_id = get_new_call_record_id();
-    $time = get_current_server_time();
+    $gmTimestamp = gmdate("Y-m-d H:i:s");
     $asterisk_id = get_random_asterisk_id();
     $phone_number = $_REQUEST['phone_number'];
     $GLOBALS['log']->fatal($phone_number);
-
-    // For me in EST... I get timestamps off by 300 mins unless I uncomment the line below.  Not sure if that might affect other stuff sugar is doing though.
-    //$GLOBALS['current_user']->db->query("SET time_zone='+00:00'");
-
+    // Note: Can't use FROM_UNIXTIME like we do in asteriskLogger... reason is we have mysql timezone set to UTC there...
     $GLOBALS['current_user']->db->query(
-    "INSERT INTO asterisk_log (call_record_id, asterisk_id, callstate, callerID, channel, remote_channel, timestamp_call, direction, user_extension, inbound_extension)
-            VALUES ('{$new_id}', '{$asterisk_id}', 'Ringing', '{$phone_number}', '{$extension}', 'SIP/flowroute-00000023', FROM_UNIXTIME({$time}), 'I', '{$extension_four_digit}', '{$extension_four_digit}')"
+            "INSERT INTO asterisk_log (call_record_id, asterisk_id, callstate, callerID, channel, remote_channel, timestamp_call, direction, user_extension, inbound_extension) 
+            VALUES ('{$new_id}', '{$asterisk_id}', 'Ringing', '{$phone_number}', '{$extension}', 'SIP/flowroute-00000023', '{$gmTimestamp}', 'I', '{$extension_four_digit}', '{$extension_four_digit}')"
     );
             
     $GLOBALS['current_user']->db->query(
             "INSERT INTO calls (id, direction, status) 
-             VALUES ('{$new_id}', 'I', 'Held')"
+             VALUES ('{$new_id}', 'I', 'Planned')"
             );
     
     $call_setup_data = array();
@@ -81,10 +78,12 @@ function action_closed() {
 }
 
 function action_create_contacts() {
-    if (count($_REQUEST['contacts']) == 1 || count($_REQUEST['contacts']) == 2) {
-        $GLOBALS['log']->fatal('start creation of contacts');
+    if ($_REQUEST['contacts'] >= 1 ) {
+        $GLOBALS['log']->fatal('start creation of ' .  $_REQUEST['contacts'] . 'contacts');
         $phone_number = $_REQUEST['phone_number'];
         $GLOBALS['log']->fatal($phone_number);
+
+        // TODO: First check to see if there are more then one matching contacts and don't create them if they do...
 
         $results = $GLOBALS['current_user']->db->query("SELECT UUID() AS newid");
         $result = $GLOBALS['current_user']->db->fetchByAssoc($results);
@@ -93,11 +92,13 @@ function action_create_contacts() {
             INSERT INTO contacts (id, date_entered, date_modified, modified_user_id, first_name, last_name, phone_mobile) 
             VALUES ('{$new_id_jon}', NOW(), NOW(), 1,  'Jon', 'Doe', '{$phone_number}')");
 
+        $GLOBALS['log']->fatal('Created John Doe');
+
         $contact_ids = array(
             'contact_1' => $new_id_jon
         );
 
-        if (count($_REQUEST['contacts']) == 2) {
+        if ($_REQUEST['contacts'] == 2) {
             $results = $GLOBALS['current_user']->db->query("SELECT UUID() AS newid");
             $result = $GLOBALS['current_user']->db->fetchByAssoc($results);
             $new_id_jane = $result["newid"];
@@ -105,6 +106,8 @@ function action_create_contacts() {
             $insert = $GLOBALS['current_user']->db->query("
             INSERT INTO contacts (id, date_entered, date_modified, modified_user_id, first_name, last_name, phone_mobile) 
             VALUES ('{$new_id_jane}', NOW(), NOW(), 1,  'Jane', 'Doe', '{$phone_number}')");
+
+            $GLOBALS['log']->fatal('Created Jan Doe');
 
             $contact_ids['contact_2'] = $new_id_jane;
         }

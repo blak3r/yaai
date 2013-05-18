@@ -13,6 +13,20 @@
 </head>
 <body>
 
+<H2>Call Simulator</H2>
+
+This tool can be helpful to see what happens when a call would come in.  If this tool works, but real calls don't, then this typically means asteriskLogger
+isn't generating events. This tool was created by the developers to simulate call cases easier without having to make real calls.
+<P>
+Instructions: click the add call button.  Enter the extension it should go to and the inbound phone number it should be coming from.  Then, when the box
+shows up allowing you to drag the icon.  You must go from ringing -> connected --> Hangup --> Closed (Don't skip steps).
+<P>
+The matching contacts setting create the number of contacts specified.  A temporary contact will be created named John Doe and Jane Doe (if 2 is selected).
+These contacts will be deleted once you get to the "Closed" stage.
+<P>
+To simply see what will happen when someone calls you from a given number, leave it at 0.
+<BR>
+<P>
 <button id="add_call">Add Call</button>
 
 <div id="main">
@@ -51,9 +65,9 @@
         <input type="text" name="phone_number" id="phone_number" class="text ui-widget-content ui-corner-all" />
     
     <div id="radio" style="text-align:center;">
-        <p>Matching Contacts</p>
-        <input type="radio" id="radio1" name="radio" value="0" /><label for="radio1">0</label>
-        <input type="radio" id="radio2" name="radio" value="1" checked="checked" /><label for="radio2">1</label>
+        <p>Matching Contacts (if 1 or 2 is selected temporary Contacts will be added)</p>
+        <input type="radio" id="radio1" name="radio" value="0" checked="checked"  /><label for="radio1">0</label>
+        <input type="radio" id="radio2" name="radio" value="1"/><label for="radio2">1</label>
         <input type="radio" id="radio3" name="radio" value="2" /><label for="radio3">>=2</label>
     </div>
     </fieldset>
