@@ -370,6 +370,7 @@ var YAAI = {
                 secondary: null
             }
         }).on("click", function() {
+                YAAI.log("Binding Transfer Button action");
                 YAAI.showTransferMenu(entry);
         });
     },
@@ -381,7 +382,7 @@ var YAAI = {
     },
 
     bindOperatorPanel : function(callboxid){ 
-        
+        YAAI.log("Binding FOP Panel");
         $('#callbox_'+callboxid).find('.operator_panel').button({
             icons: {
                 primary: 'ui-icon-custom-phone', 
