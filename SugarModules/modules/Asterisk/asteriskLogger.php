@@ -1244,8 +1244,14 @@ exit(0);
             }
             else {
                 $row = mysql_fetch_assoc($queryResult);
+				
+				$emailSql = "select email_addresses.email_address from email_addr_bean_rel left join email_addresses on email_addr_bean_rel.email_address_id = email_addresses.id where email_addr_bean_rel.bean_id = '" . $row['id'] . "'";
+				logLine("Email SQL: " . $emailSql);
+				$queryEmailResult = mysql_checked_query($emailSql);
+				$emailRow = mysql_fetch_assoc($queryEmailResult);
             }
 			
+
 			$dur_search = mt_end();
 
             // TODO Finalize exactly what we let the backend handle... $body below is all the contact info.
@@ -1268,7 +1274,7 @@ exit(0);
             $c['callerShortInfo'] = $row['description']; // TODO change this to be the last note logged.
 			$c['callerDescription'] = $row['description'];
 			//$c['callerLongInfo'] = 
-			$c['callerEmailAddress'] = "todo@todotown.com";
+			$c['callerEmail'] =  $emailRow['email_address'];//"todo@todotown.com";
             $c['callerTitle'] = $row['title'];
             $c['callerCrmId'] = $row['id'];
             $c['crmCallRecordId'] = $call_record_id;
