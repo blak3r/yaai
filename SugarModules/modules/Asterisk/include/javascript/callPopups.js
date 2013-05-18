@@ -274,6 +274,9 @@ var YAAI = {
          })
          .on("mouseleave", function () {
             setTimeout(hidepanel, 600);
+         })
+         .on("mouseenter",function() {
+            $(dropdownDiv).css( "margin-left", "50px"); // Needed in ie8 only...
          });
 
         $(dropdownDiv).mouseleave(function() { setTimeout(hidepanel, 600); });
