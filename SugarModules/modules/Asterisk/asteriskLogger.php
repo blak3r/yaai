@@ -46,7 +46,7 @@ $mysql_loq_queries = 0;
 $mysql_log_results = 0;
 $verbose_log = 0;
 $log_memory_usage = 0;
-$memory_usage_log_file = "c:/mem_usage.csv";
+$memory_usage_log_file = "c:\mem_usage.csv";
 $memory_usage_log_frequency_secs = 10*60;
 $last_memory_log_entry = "";
 $last_push_time=0;
@@ -478,6 +478,12 @@ while (true) {
                     // Fix for issue on some asterisk 1.8 boxes where CallerId on click to dial is not set. See https://github.com/blak3r/yaai/issues/75
                     if ($tmpCallerID == '<unknown>' && !empty($e['ConnectedLineNum'])) {
                         $tmpCallerID = trim($e['ConnectedLineNum']);
+
+                        // If Call ID is blocked it comes in as "<unknown>"
+                        if( $tmpCallerID == "<unknown>") {
+                            $tmpCallerID = "BLOCKED";
+                        }
+
                         logLine(" CallerID set from ConnectedLineNum to $tmpCallerID");
                     }
 
@@ -1340,7 +1346,7 @@ function purgeExpiredEventsFromDb() {
 
     // BR: 2013-04-30 fixed bug where closing the call popup before the call was over the duration would potentially not get set right.
     $query = " DELETE FROM asterisk_log WHERE (uistate = 'Closed' AND timestamp_hangup is not NULL) OR ( timestamp_hangup is not NULL AND '$calls_expire_time' > timestamp_hangup ) OR ('$five_hours_ago' > timestamp_call )";
-    $delResult = mysql_checked_query($query);
+    mysql_checked_query($query);
     $rowsDeleted = mysql_affected_rows();
    // logLine("DEBUG: $query");
     if( $rowsDeleted > 0 ) {
@@ -1551,7 +1557,7 @@ function findCallByAsteriskId($asteriskId) {
             'session' => $soapSessionId,
             'module_name' => 'Calls',
             'id' => $callRecId
-        ));
+                ));
         $resultDecoded = decode_name_value_list($soapResult['entry_list'][0]['name_value_list']);
         // echo ("# ** Soap call successfull, dumping result ******************************\n");
         // var_dump($soapResult);
@@ -1561,14 +1567,12 @@ function findCallByAsteriskId($asteriskId) {
         //
         // also store raw sql data in case we need it later...
         //
-        if( !empty($resultDecoded['id'] ) ){
-            return array(
-                'bitter' => $row,
-                'sweet' => $resultDecoded
-            );
-        }
+        return array(
+            'bitter' => $row,
+            'sweet' => $resultDecoded
+        );
     }
-    logLine("! Warning, results set was empty\n");
+    logLine("! Warning, results set was empty!\n");
     return FALSE;
 }
 
@@ -1599,10 +1603,9 @@ function findCallByAsteriskDestId($asteriskDestId) {
             'module_name' => 'Calls',
             'id' => $callRecId
                 ));
-
         $resultDecoded = decode_name_value_list($soapResult['entry_list'][0]['name_value_list']);
 
-        // echo ("# ** Soap call successfull, dumping result ******************************\n");
+// echo ("# ** Soap call successfull, dumping result ******************************\n");
         // var_dump($soapResult);
         if ($verbose_logging) {
             var_dump($resultDecoded);
@@ -1612,12 +1615,10 @@ function findCallByAsteriskDestId($asteriskDestId) {
         //
         // also store raw sql data in case we need it later...
         //
-        if( !empty($resultDecoded['id'] ) ){
-            return array(
-                'bitter' => $row,
-                'sweet' => $resultDecoded
-            );
-        }
+        return array(
+            'bitter' => $row,
+            'sweet' => $resultDecoded
+        );
     }
     logLine("! Warning, FindCallByAsteriskDestId results set was empty!\n");
     return FALSE;
@@ -1640,16 +1641,23 @@ function decode_name_value_list(&$nvl) {
 //
 // Attempt to find a Sugar Account with a matching phone number.
 //
-function findSugarAccountByPhoneNumber($aPhoneNumber) {
+function findSugarAccountByPhoneNumber($origPhoneNumber) {
     global $soapClient, $soapSessionId, $sugar_config;
-    logLine("# +++ find AccountByPhoneNumber($aPhoneNumber)\n");
+    logLine("# +++ find AccountByPhoneNumber($origPhoneNumber)\n");
 
-    // Add if phonenumber .length == 10
-    $searchPattern = $aPhoneNumber;
+    if( empty($sugar_config['asterisk_account_phone_fields']) ) {
+        logLine("  Account Phone Fields are ignored.  Returning...");
+        return FALSE;
+    }
 
-    $aPhoneNumber = preg_replace('/\D/', '', $aPhoneNumber); // removes everything that isn't a digit.
+    $aPhoneNumber = preg_replace('/\D/', '', $origPhoneNumber); // removes everything that isn't a digit.
     if (preg_match('/([0-9]{' . $sugar_config['asterisk_digits_to_match'] . '})$/', $aPhoneNumber, $matches)) {
         $aPhoneNumber = $matches[1];
+    }
+
+    if( strlen($aPhoneNumber) < 5 ) {
+        logLine("Phone number is invalid/too short, CallerID is most likely blocked" );
+        return FALSE;
     }
 
     $regje = preg_replace('/(\d)/', '$1\[^\\d\]*', $aPhoneNumber);
@@ -1698,6 +1706,11 @@ function findSugarObjectByPhoneNumber($aPhoneNumber) {
     global $soapClient, $soapSessionId, $sugar_config;
     logLine("### +++ find ContactByPhoneNumber($aPhoneNumber)\n");
 
+    if( empty($sugar_config['asterisk_contact_phone_fields']) ) {
+        logLine("  Contact Phone Fields are ignored.  Returning...");
+        return FALSE;
+    }
+
     // Add if phonenumber .length == 10
     $searchPattern = $aPhoneNumber;
     //$searchPattern = regexify($aPhoneNumber);
@@ -1735,6 +1748,11 @@ function findSugarObjectByPhoneNumber($aPhoneNumber) {
     $aPhoneNumber = preg_replace('/\D/', '', $aPhoneNumber); // removes everything that isn't a digit.
     if (preg_match('/([0-9]{' . $sugar_config['asterisk_digits_to_match'] . '})$/', $aPhoneNumber, $matches)) {
         $aPhoneNumber = $matches[1];
+    }
+
+    if( strlen($aPhoneNumber) < 5 ) {
+        logLine("Phone number is too short, CallerID is most likely blocked" );
+        return FALSE;
     }
 
     $regje = preg_replace('/(\d)/', '$1\[^\\d\]*', $aPhoneNumber);

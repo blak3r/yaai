@@ -285,6 +285,7 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
 	padding: 0;
 	margin: 0;
 	line-height: 18px;
+    display: none;
 }
 
 .dropdown-menu LI > A,

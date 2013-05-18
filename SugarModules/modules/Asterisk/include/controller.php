@@ -60,9 +60,6 @@ switch ($_REQUEST['action']) {
     case "get_calls" :
         getCalls($mod_strings, $GLOBALS['current_user']);
         break;
-    case "test" :
-        hi();
-        break;
     default :
         echo "undefined action";
         break;
