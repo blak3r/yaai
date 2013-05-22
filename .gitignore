@@ -5,7 +5,6 @@
 *.pnps
 copyFromLiveSystem.*
 copyToLiveSystem.*
-copyToDir.*
 *wrong_16.png
 *cnamTest
 *unused_icons*
@@ -18,3 +17,4 @@ copyToDir.*
 .DS_Store
 /nbproject/private/
 ca-bundle-mozilla.crt
+mampCopy.sh

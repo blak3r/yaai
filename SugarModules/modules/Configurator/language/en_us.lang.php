@@ -122,8 +122,8 @@ $mod_strings['LBL_ASTERISK_FILTERED_CALL_STATES'] = 'Filtered Call States';
 $mod_strings['LBL_ASTERISK_WINDOW_HEIGHT'] = 'Custom Window Height';
 
 //$mod_strings['LBL_ASTERISK_SECTIONHDR_CALLINIZE'] = '&nbsp;&nbsp;Callinize is a mobile phone app which provides caller information even when on your mobile phone.  See <a href="www.callinize.com">www.callinize.com</a> for more information.';
-$mod_strings['LBL_ASTERISK_CALLINIZE_USERNAME'] = 'Callinize Username';
-$mod_strings['LBL_ASTERISK_CALLINIZE_PASSWORD'] = 'Callinize Password';
+$mod_strings['LBL_ASTERISK_CALLINIZE_API_ORGANIZATIONID'] = 'Callinize API Organization Id';
+$mod_strings['LBL_ASTERISK_CALLINIZE_API_ORGANIZATIONSECRET'] = 'Callinize API Organization Secret';
 
 $mod_strings['LBL_ASTERISK_CONTACT_PHONE_FIELDS'] = "Contact Phone Fields";
 $mod_strings['LBL_ASTERISK_CONTACT_PHONE_FIELDS_DESC'] = "These are the phone fields that will be searched when trying to find matching contacts.  If you've created your own custom fields, you can add them to the list here.  Be sure to add: Comma separated field names and no spaces.";

@@ -1,0 +1,10 @@
+
+
+Approach 1 -- Move all phone numbers to a particular relations table and search that way.
+Approach 2 -- Search for modules in priority order... Accounts, Contacts, Leads, Custom
+
+
+The callPopups...
+-- Best would be best to give all the options...
+
+Need an automated method for rest method.
