@@ -171,7 +171,7 @@ $sql_connection = mysql_connect($sugar_config['dbconfig']['db_host_name'], $suga
 $sql_db = mysql_select_db($sugar_config['dbconfig']['db_name']);
 // Prune asterisk_log
 // Note only use this for development
-//mysql_query('DELETE FROM asterisk_log');
+// mysql_query('DELETE FROM asterisk_log');
 // Set all MySQL dates to UTC
 mysql_query("SET time_zone='+00:00'");
 purgeExpiredEventsFromDb();
@@ -302,7 +302,7 @@ if ($argc > 1 && $argv[1] == "test") {
 }
 
 
-// BR: Added this while loop to keep loging in to AMI if asterisk goes down.
+// BR: Added this while loop to keep logging in to AMI if asterisk goes down.
 while (true) {
 
     /*
@@ -381,7 +381,7 @@ while (true) {
     // Keep a loop going to read the socket and parse the resulting commands.
     // Apparently there is no good way to detect if socket is still alive???
     // This is my hack... if we fail 60 times in a row we reconnect to manager...
-    // I suspect that fgets will return very quickly if socket error has occurrs
+    // I suspect that fgets will return very quickly if socket error has occurs
     // So, it'll reach 60 very quickly and then force relogin.
     // Otherwise, every hour it'll just relogin.
     // Perhaps you can check socket error some other way then socket_read?
@@ -632,7 +632,7 @@ while (true) {
                 if ($e['Event'] == 'Dial' && $e['SubEvent'] == 'End')  {
                     $id = AMI_getUniqueIdFromEvent($e);
                     logLine(" In DialEnd... $id");
-                    $query = "SELECT direction,bean_module,bean_id,user_extension,inbound_extension FROM asterisk_log WHERE asterisk_dest_id = '$id' OR asterisk_id = '$id'";
+                    $query = "SELECT call_record_id,direction,bean_module,bean_id,user_extension,inbound_extension FROM asterisk_log WHERE asterisk_dest_id = '$id' OR asterisk_id = '$id'";
                     $result = mysql_checked_query($query);
                     $direction = mysql_fetch_array($result);
                     //var_dump($direction);
@@ -641,7 +641,16 @@ while (true) {
                     } else {
                         $callDirection = "Outbound";
                     }
-                    if ($callDirection == "Outbound") { //Outbound callhandling
+
+                    //logLine( print_r($direction,true) );
+                    /** FIXME: Add guard expression here to make sure this feature is enabled **/
+                    if( empty($direction['user_extension'] ) ||
+                        !findUserByAsteriskExtension($direction['user_extension']))
+                    {
+                        logLine("  ## Deleting callid = " . $direction['call_record_id'] . " because it didn't match any user extension");
+                        deleteCall( $direction['call_record_id']);
+                    }
+                    else if ($callDirection == "Outbound") { //Outbound callhandling
                         //
                         // Fetch associated call record
                         //
@@ -1180,8 +1189,8 @@ while (true) {
         // TODO Find a better way to check the connection. I think on Shared Hosting Servers mysql_ping might be disabled which causes this to always reconnect.
         if (!mysql_ping($sql_connection)) {
             //here is the major trick, you have to close the connection (even though its not currently working) for it to recreate properly.
-            logLine("__MySQL connection lost, reconnecting__\n");
             mysql_close($sql_connection);
+            logLine("__MySQL connection lost, reconnecting__\n");
             $sql_connection = mysql_connect($sugar_config['dbconfig']['db_host_name'], $sugar_config['dbconfig']['db_user_name'], $sugar_config['dbconfig']['db_password']);
             $sql_db = mysql_select_db($sugar_config['dbconfig']['db_name']);
         }
@@ -1515,11 +1524,11 @@ function colorize($str) {
 
 
 /**
- * Removes a call record from the database.
+ * Removes a call record from the sugarcrm as well as asterisk_log table.
  * @param $callRecordId - Call Record ID. Note: param is assumed to be sanitized.
  */
 function deleteCall($callRecordId) {
-    // NOTE: there is one other place in this file that Delete's a call, so if this code is ever refactored
+    // NOTE: there is one other place in this file that Deletes a call, so if this code is ever refactored
     // to use SOAP, be sure to refactor that one.
     $query = "DELETE FROM calls WHERE id='$callRecordId'";
     if( mysql_checked_query_returns_affected_rows_count($query) > 0 ) {
@@ -1976,7 +1985,6 @@ function setRelationshipBetweenCallAndBean($callRecordId, $beanType, $beanId) {
 ///
 function findUserIdFromChannel($channel) {
     global $userGUID;
-    $assignedUser = $userGUID; // Use logged in user as fallback
 
     $asteriskExt = extractExtensionNumberFromChannel($channel);
 
