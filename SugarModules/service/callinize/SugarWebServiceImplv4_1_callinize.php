@@ -5,7 +5,7 @@
     require_once('service/v4_1/SugarWebServiceImplv4_1.php');
     require_once('custom/modules/Asterisk/include/callinize_db.php');
 
-    class SugarWebServiceImplv4_1_custom extends SugarWebServiceImplv4_1
+    class SugarWebServiceImplv4_1_callinize extends SugarWebServiceImplv4_1
     {
         /*
          * Returns the session id if authenticated

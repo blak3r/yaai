@@ -18,11 +18,11 @@ then
     cp -ruv ./SugarModules/modules/Configurator $1/custom/modules/
     cp -ruv ./SugarModules/modules/Asterisk $1/custom/modules/
     cp -ruv ./SugarModules/modules/Administration $1/custom/modules/
-    cp -ruv ./SugarModules/service $1/custom/service/
+    cp -ruv ./SugarModules/service/callinize $1/custom/service/
 else
     #cp on mac doesn't have the u option (update only if newer)
     cp -rv ./SugarModules/modules/Configurator $1/custom/modules/
     cp -rv ./SugarModules/modules/Asterisk $1/custom/modules/
     cp -rv ./SugarModules/modules/Administration $1/custom/modules/
-    cp -rv ./SugarModules/service $1/custom/service/
+    cp -rv ./SugarModules/service/callinize $1/custom/service/
 fi
