@@ -272,21 +272,16 @@ var YAAI = {
              $(dropdownDiv).slideDown("fast");
              $(dropdownDiv).css( "margin-left", "50px");
          })
-         .on("mouseenter",function() {
-             $(dropdownDiv).css( "margin-left", "50px"); // Needed in ie8 only...
-         })
          .on("mouseleave", function () {
             setTimeout(hidepanel, 600);
          });
 
-
         $(dropdownDiv).mouseleave(function() { setTimeout(hidepanel, 600); });
 
         function hidepanel() {
-            // 2013-05-21: Code commented below caused issues with IE8, Safe to delete if no issues crop up with other browsers
-            //if ($(dropdownDiv).is(':hover') === false) {
+            if ($(dropdownDiv).is(':hover') === false) {
                 $(dropdownDiv).slideUp();
-            //}
+            }
         }
 
 

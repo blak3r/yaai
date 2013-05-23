@@ -74,27 +74,27 @@ function pre_install() {
 $createTableQuery =  <<<CREATETABLE
 CREATE TABLE `asterisk_log` (
 	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`is_master` TINYINT UNSIGNED NOT NULL DEFAULT '0',
 	`call_record_id` CHAR(36) NULL DEFAULT NULL,
 	`asterisk_id` VARCHAR(45) NULL DEFAULT NULL,
 	`callstate` VARCHAR(10) NULL DEFAULT NULL,
 	`uistate` VARCHAR(10) NULL DEFAULT NULL,
 	`callerID` VARCHAR(45) NULL DEFAULT NULL,
+	`callerName` VARCHAR(45) NULL DEFAULT NULL,
 	`channel` VARCHAR(30) NULL DEFAULT NULL,
 	`remote_channel` VARCHAR(30) NULL DEFAULT NULL,
 	`timestamp_call` DATETIME NULL DEFAULT NULL,
 	`timestamp_link` DATETIME NULL DEFAULT NULL,
 	`timestamp_hangup` DATETIME NULL DEFAULT NULL,
 	`direction` VARCHAR(1) NULL DEFAULT NULL,
+	`hangup_cause` INT(11) NULL DEFAULT NULL,
+	`hangup_cause_txt` VARCHAR(45) NULL DEFAULT NULL,
 	`asterisk_dest_id` VARCHAR(45) NULL DEFAULT NULL,
 	`opencnam` VARCHAR(16) NULL DEFAULT NULL,
 	`answered` TINYINT(1) NULL DEFAULT '0',
 	`user_extension` VARCHAR(16) NULL DEFAULT NULL,
-	`user_device` VARCHAR(16) NULL DEFAULT NULL,
 	`inbound_extension` VARCHAR(16) NULL DEFAULT NULL,
 	`bean_module` VARCHAR(100) NULL DEFAULT NULL,
 	`bean_id` CHAR(36) NULL DEFAULT NULL,
-	`push_sent` TINYINT NULL DEFAULT '0',
 	PRIMARY KEY (`id`),
 	INDEX `user_extension` (`user_extension`),
 	INDEX `call_record_id` (`call_record_id`),
@@ -103,7 +103,8 @@ CREATE TABLE `asterisk_log` (
 )
 COLLATE='utf8_general_ci'
 ENGINE=InnoDB
-AUTO_INCREMENT=80;
+AUTO_INCREMENT=68;
+
 CREATETABLE;
         $db->query($createTableQuery, false, "Error creating call table: " . $query);
     }

@@ -544,41 +544,6 @@
 
 <TD>&nbsp;</TD><TD>&nbsp;</TD> </tr>
 
-<TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h3>Callinize</h3></TD></tr>
-
-
-<TR>
-
-    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_CALLINIZE_API_ORGANIZATIONID}
-      {if !empty($MOD.LBL_ASTERISK_CALLINIZE_API_ORGANIZATIONID_DESC)}
-          [<a href="#" title="{$MOD.LBL_ASTERISK_CALLINIZE_API_ORGANIZATIONID_DESC}">?</a>]:
-      {/if}
-    </td>
-    <td width="25%" class="dataField">
-    {if empty($config.asterisk_callinize_api_organizationId )}
-        {assign var='asterisk_callinize_api_organizationId' value=$asterisk_config.asterisk_callinize_api_organizationId}
-    {else}
-        {assign var='asterisk_callinize_api_organizationId' value=$config.asterisk_callinize_api_organizationId}
-    {/if}
-        <input type='textbox' name='asterisk_callinize_api_organizationId' size="45" value='{$asterisk_callinize_api_organizationId}'>
-    </td>
-
-    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_CALLINIZE_API_ORGANIZATIONSECRET}
-      {if !empty($MOD.LBL_ASTERISK_CALLINIZE_API_ORGANIZATIONSECRET_DESC)}
-          [<a href="#" title="{$MOD.LBL_ASTERISK_CALLINIZE_API_ORGANIZATIONSECRET_DESC}">?</a>]:
-      {/if}
-    </td>
-    <td width="25%" class="dataField">
-    {if empty($config.asterisk_callinize_api_organizationSecret )}
-        {assign var='asterisk_callinize_api_organizationSecret' value=$asterisk_config.asterisk_callinize_api_organizationSecret}
-    {else}
-        {assign var='asterisk_callinize_api_organizationSecret' value=$config.asterisk_callinize_api_organizationSecret}
-    {/if}
-        <input type='textbox' name='asterisk_callinize_api_organizationSecret' size="45" value='{$asterisk_callinize_api_organizationSecret}'>
-    </td>
-
-
-
 <TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h3>Phone Fields</h3></TD></tr>
 
 
