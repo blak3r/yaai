@@ -298,7 +298,7 @@ if ($argc > 1 && $argv[1] == "test") {
 }
 
 
-// BR: Added this while loop to keep loging in to AMI if asterisk goes down.
+// BR: Added this while loop to keep logging in to AMI if asterisk goes down.
 while (true) {
 
     /*
@@ -377,7 +377,7 @@ while (true) {
     // Keep a loop going to read the socket and parse the resulting commands.
     // Apparently there is no good way to detect if socket is still alive???
     // This is my hack... if we fail 60 times in a row we reconnect to manager...
-    // I suspect that fgets will return very quickly if socket error has occurrs
+    // I suspect that fgets will return very quickly if socket error has occurs
     // So, it'll reach 60 very quickly and then force relogin.
     // Otherwise, every hour it'll just relogin.
     // Perhaps you can check socket error some other way then socket_read?
@@ -625,7 +625,16 @@ while (true) {
                     } else {
                         $callDirection = "Outbound";
                     }
-                    if ($callDirection == "Outbound") { //Outbound callhandling
+
+                    //logLine( print_r($direction,true) );
+                    /** FIXME: Add guard expression here to make sure this feature is enabled **/
+                    if( empty($direction['user_extension'] ) ||
+                        !findUserByAsteriskExtension($direction['user_extension']))
+                    {
+                        logLine("  ## Deleting callid = " . $direction['call_record_id'] . " because it didn't match any user extension");
+                        deleteCall( $direction['call_record_id']);
+                    }
+                    else if ($callDirection == "Outbound") { //Outbound callhandling
                         //
                         // Fetch associated call record
                         //
@@ -877,7 +886,7 @@ while (true) {
                                 } else {
                                     $callStatus = $sugar_config['asterisk_short_call_status']; // User gets to choose if they should be Missed or Held, if Missed then it leaves an open activity which has to be closed.
                                     $callName = $mod_strings['YAAI']['CALL_NAME_MISSED'];
-                                    $callDescription = "{$mod_strings['YAAI']['CALL_DESCRIPTION_MISSED']} ({$e['Cause-txt']}\n";
+                                    $callDescription = "{$mod_strings['YAAI']['CALL_DESCRIPTION_MISSED']} ({$e['Cause-txt']})\n";
                                     $callDescription .= "------------------\n";
                                     $callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['YAAI']['CALL_DESCRIPTION_PHONE_NUMBER'], $rawData['callerID']);
                                     if ($rawData['opencnam']) {
@@ -1792,7 +1801,6 @@ function setRelationshipBetweenCallAndBean($callRecordId, $beanType, $beanId) {
 ///
 function findUserIdFromChannel($channel) {
     global $userGUID;
-    $assignedUser = $userGUID; // Use logged in user as fallback
 
     $asteriskExt = extractExtensionNumberFromChannel($channel);
 
