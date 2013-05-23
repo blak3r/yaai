@@ -96,7 +96,7 @@ class AsteriskJS {
 
                 if( $yaaiDevMode ) {
                     // This version includes the compiler and the non compiled template
-                    echo '<script src="https://github.com/downloads/wycats/handlebars.js/handlebars-1.0.rc.1.js"></script>';
+                    echo '<script src="custom/modules/Asterisk/include/javascript/offlineMode/handlebars-1.0.rc.1.js"></script>';
                     $template = file_get_contents( "custom/modules/Asterisk/include/template/call-template.html" );
                     echo '<script id="handlebars-dev-template" type="text/x-handlebars-template">' . $template . '</script>';
                 }
@@ -117,7 +117,12 @@ class AsteriskJS {
                 }
 
                 //CSS Third-Party Libraries
-                echo '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/redmond/jquery-ui.css" />';
+                if( $yaaiDevMode ) {
+                    echo '<link rel="stylesheet" href="custom/modules/Asterisk/include/javascript/offlineMode/jquery-ui.css" />';
+                }else {
+                    echo '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/redmond/jquery-ui.css" />';
+                }
+
                 echo '<link rel="stylesheet" type="text/css" href="custom/modules/Asterisk/include/css/jquery.fancybox.css" media="screen" />';
 
                 //CSS YAAI

@@ -852,7 +852,7 @@ function find_beans_db_query($module, $moduleFields, $phoneToFind, $callRow, $cu
         $queryContact = $selectPortion . $wherePortion;
         $logQuery = preg_replace('/\r/','', $queryContact);
         $logQuery = preg_replace('/\n/',' ', $logQuery);
-        print "Query: " . $logQuery . "\n\n";
+        //print "Query: " . $logQuery . "\n\n";
         //logLine("QUERY: $logQuery\n","c:/callListener.txt");
         return $currentUser->db->query($queryContact, false);
     }
