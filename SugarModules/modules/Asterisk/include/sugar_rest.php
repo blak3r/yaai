@@ -31,13 +31,13 @@ class Sugar_REST {
      *		you create a seperate SugarCRM User account
      *		to make REST calls.
      */
-    private $username = "admin";
+    private $username = "";
 
     /**
      * Variable:	$password
      * Description:	The password for the $username SugarCRM account
      */
-    private $password = "adF32wjkh";
+    private $password = "";
 
 
     ////////////////////////////////////////

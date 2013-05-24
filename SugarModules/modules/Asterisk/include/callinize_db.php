@@ -705,32 +705,20 @@
         return $beans;
     }
 
-//    /**
-//     * Takes a result set and creates a simple array object.
-//     *
-//     * @param array $innerResultSet Results from function fetch_contacts_associated_to_phone_number
-//     * @param object $current_user Global current_user object - allows db access
-//     * @return array Returns contacts
-//     */
-//    function convert_contact_rows_to_simple_array($innerResultSet, $current_user) {
-//        $contacts = array();
-//
-//        while ($contactRow = $current_user->db->fetchByAssoc($innerResultSet)) {
-//            $contact = array(
-//                'contact_id' => $contactRow['contact_id'],
-//                'contact_full_name' => $contactRow['first_name'] . " " . $contactRow['last_name'],
-//                'company' => $contactRow['account_name'],
-//                'company_id' => $contactRow['account_id']
-//            );
-//
-//            $contacts[] = $contact;
-//        }
-//
-//        return $contacts;
-//    }
 
-
-
+/**
+ * Creates a web link to this record
+ * @param $moduleName
+ * @param $id
+ * @return string
+ */
+function build_link($moduleName, $id) {
+    global $sugar_config;
+    if( !empty($moduleName) && !empty($id) ) {
+        return $sugar_config['site_url'] . "/index.php?module=$moduleName&action=DetailView&record=$id";
+    }
+    return null;
+}
 
 /**
  * Takes a result set and creates a simple array object.
@@ -763,9 +751,11 @@ function convert_bean_to_simple_array($moduleName, $innerResultSet, $current_use
             'bean_id' => $beanRow['bean_id'],
             'bean_name' => $beanName,
             'bean_description' => $beanRow['bean_description'],
+            'bean_link' => build_link($moduleName, $beanRow['bean_id']),
             'parent_name' => $parentName,
             'parent_module' => $parentModule,
             'parent_id' => $parentId,
+            'parent_link' => build_link($parentName, $parentId)
         );
         // PRINT
         print "Merging in: $beanName\n";
