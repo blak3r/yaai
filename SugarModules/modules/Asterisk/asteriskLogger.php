@@ -41,7 +41,7 @@ require_once 'parse.php';
 //
 // Debug flags
 //
-$dial_events_log = 'c:/sugarcrm/htdocs/dial_events_log_ast1.html';
+$dial_events_log = '/Applications/MAMP/htdocs/dial_events.html';
 $mysql_loq_queries = 0;
 $mysql_log_results = 0;
 $verbose_log = 0;
@@ -629,7 +629,7 @@ while (true) {
                 //
                 // Asterisk Manager 1.1
                 /*$e['Event'] == 'Hangup'*/
-                if ($e['Event'] == 'Dial' && $e['SubEvent'] == 'End')  {
+                if (($e['Event'] == 'Dial' && $e['SubEvent'] == 'End') )  {
                     $id = AMI_getUniqueIdFromEvent($e);
                     logLine(" In DialEnd... $id");
                     $query = "SELECT call_record_id,direction,bean_module,bean_id,user_extension,inbound_extension FROM asterisk_log WHERE asterisk_dest_id = '$id' OR asterisk_id = '$id'";
@@ -1077,10 +1077,11 @@ while (true) {
                             // Delete all the extra inbound records
                             $id1 = $e['Uniqueid1'];
                             $id2 = $e['Uniqueid2'];
-                            $query = "SELECT call_record_id FROM asterisk_log WHERE asterisk_id='" . $id1 . "' AND asterisk_dest_id!='" . $id2 . "'";
+                            $query = "SELECT call_record_id FROM asterisk_log WHERE asterisk_id='" . $id1 . "' AND asterisk_dest_id!='" . $id2 . "' and callstate != 'Connected'"; // asterisk_dest_id part is for ring groups only i think...
                             $result = mysql_checked_query($query);
                             while ($call_rec_id = mysql_fetch_array($result)) {
                                 logLine("Deleting Call Record: " . $call_rec_id['call_record_id']);
+                                //pause(30000);
                                 deleteCall($call_rec_id['call_record_id']);
                             }
                         } else if($direction['direction'] == "O") {
@@ -1477,6 +1478,7 @@ HTML_HEAD;
 
 function dev_GenericEventPrinter($arg1, $arg2, $arg3, $arg4, $arg5, $arg6, $arg7, $arg8) {
     global $dial_events_log;
+    logLine("In printer generic");
     if( !empty($dial_events_log) ) {
         $s = getTimeStamp() . " ";
         $s .= str_pad($arg1, 8, " ", STR_PAD_BOTH);
