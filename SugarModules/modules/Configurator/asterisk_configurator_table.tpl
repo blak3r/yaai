@@ -350,6 +350,24 @@
 
 
 
+<TR>
+
+    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_ONLY_LOG_CALLS_MATCHING_USER_EXTENSION}
+      {if !empty($MOD.LBL_ASTERISK_ONLY_LOG_CALLS_MATCHING_USER_EXTENSION_DESC)}
+          [<a href="#" title="{$MOD.LBL_ASTERISK_ONLY_LOG_CALLS_MATCHING_USER_EXTENSION_DESC}">?</a>]:
+      {/if}
+    </td>
+    <td width="25%" class="dataField">
+    {if empty($config.asterisk_only_log_calls_matching_user_extension )}
+        {assign var='asterisk_only_log_calls_matching_user_extension' value=$asterisk_config.asterisk_only_log_calls_matching_user_extension}
+    {else}
+        {assign var='asterisk_only_log_calls_matching_user_extension' value=$config.asterisk_only_log_calls_matching_user_extension}
+    {/if}
+        <input type='textbox' name='asterisk_only_log_calls_matching_user_extension' size="45" value='{$asterisk_only_log_calls_matching_user_extension}'>
+    </td>
+
+<TD>&nbsp;</TD><TD>&nbsp;</TD> </tr>
+
 <TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h3>Logging</h3></TD></tr>
 
 

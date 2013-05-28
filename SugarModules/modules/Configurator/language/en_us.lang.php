@@ -80,6 +80,9 @@ $mod_strings['LBL_ASTERISK_CALL_SUBJECT_MAX_LENGTH'] = 'Max Subject Length';
 $mod_strings['LBL_ASTERISK_LISTENER_POLL_RATE'] = 'AJAX Req Poll Rate in MS';
 $mod_strings['LBL_ASTERISK_LISTENER_POLL_RATE_DESC'] = 'This specifies how frequently an AJAX call is performed to check for new call info.  So, if this is 5000 then there is a maximum time of 5 seconds before a new call popup will appear after its come in to asterisk.  Do not set much lower if you have a lot of CRM users as this will affect your performance.';
 
+$mod_strings['LBL_ASTERISK_ONLY_LOG_CALLS_MATCHING_USER_EXTENSION'] = 'Only Log Calls that Match a User';
+$mod_strings['LBL_ASTERISK_ONLY_LOG_CALLS_MATCHING_USER_EXTENSION_DESC'] = 'If set to true, any calls which do NOT match a user will have the Call objects deleted for.  This happens at hangup.  Use this if you do not want to log calls from the entire company and instead only log calls from the Users who have their extensions configured.';
+
 //$mod_strings['LBL_ASTERISK_SECTIONHDR_OPENCNAM'] = "&nbsp;&nbsp;<a href='www.opencnam.com'>OpenCNAM</a> is a 3rd party api service which provides caller id.  When inbound calls do not match a contact in the CRM, we look it up in OpenCNAM to try and identify the caller.  OpenCNAM offers free and paid accounts.<BR>&nbsp;&nbsp;The free accounts return only cached results where as the paid accounts perform real time lookups.";
 $mod_strings['LBL_ASTERISK_OPENCNAM_ENABLED'] = 'OpenCNAM Integration Enabled';
 $mod_strings['LBL_ASTERISK_OPENCNAM_ENABLED_DESC'] = 'OpenCNAM is a webservice that can do caller id lookups.  If your country isnt supported by opencnam, you will want to keep this disabled.  USA works.  See www.OpenCNAM.com for more info.';

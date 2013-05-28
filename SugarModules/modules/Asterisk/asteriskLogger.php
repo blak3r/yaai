@@ -643,9 +643,10 @@ while (true) {
                     }
 
                     //logLine( print_r($direction,true) );
-                    /** FIXME: Add guard expression here to make sure this feature is enabled **/
-                    if( empty($direction['user_extension'] ) ||
-                        !findUserByAsteriskExtension($direction['user_extension']))
+                    // TODO verify configurator boolean issues will not present a problem for this.
+                    if( $sugar_config['asterisk_only_log_calls_matching_user_extension'] &&
+                        (empty($direction['user_extension'] ) ||
+                         !findUserByAsteriskExtension($direction['user_extension'])))
                     {
                         logLine("  ## Deleting callid = " . $direction['call_record_id'] . " because it didn't match any user extension");
                         deleteCall( $direction['call_record_id']);

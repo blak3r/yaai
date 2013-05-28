@@ -27,6 +27,7 @@ $config_meta['asterisk_listener_poll_rate'] = array('default' => '5000','section
 //$config_meta['asterisk_gravatar_enabled'] = array('default' => 'false','section'=>'Misc') ;
 $config_meta['asterisk_short_call_status'] = array('default' => "Held",'section'=>'Misc');
 $config_meta['asterisk_hide_call_popups_after_mins'] = array('default' => '60','section'=>'Misc');
+$config_meta['asterisk_only_log_calls_matching_user_extension'] = array('default' => '0', 'section'=>'Misc');
 
 $config_meta['asterisk_log_file'] = array('default' => '', 'section'=>'Logging');
 
@@ -46,6 +47,7 @@ $config_meta['asterisk_create_new_contact_enabled'] = array('default' => '1', 's
 //$config_meta['asterisk_max_popups'] = array('default' => '5', 'section'=>'Popup UI');
 //$config_meta['asterisk_filtered_call_states'] = array('default' => '', 'section'=>'Popup UI');
 //$config_meta['asterisk_window_height'] = array('default' => '', 'section'=>'Popup UI');
+
 
 
 $config_meta['asterisk_callinize_api_organizationId'] = array('default' => '', 'section'=>'Callinize');
