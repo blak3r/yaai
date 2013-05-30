@@ -1114,7 +1114,7 @@ while (true) {
                             $chan2 = $e['Channel2'];
                             $theId = $result_id['id'];
                             $userExtension = extractExtensionNumberFromChannel($chan2);
-                            $query = "UPDATE asterisk_log SET channel='$chan2, user_extension='$userExtension'' WHERE id='$theId'";
+                            $query = "UPDATE asterisk_log SET channel='$chan2', user_extension='$userExtension' WHERE id='$theId'";
                             logLine("Queue UPDATE QUERY: $query\n");
                             mysql_checked_query($query);
                         } else {
