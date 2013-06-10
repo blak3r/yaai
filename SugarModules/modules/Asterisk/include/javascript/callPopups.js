@@ -289,7 +289,7 @@ var YAAI = {
         $(dropdownDiv).mouseenter(function() { clearTimeout($(dropdownDiv).data('timeoutId1')); clearTimeout($(dropdownDiv).data('timeoutId2')); YAAI.log("clearing timeouts... div"); } );
 
         function hideDropDown() {
-            console.log("firing hideDropDown");
+            YAAI.log("firing hideDropDown");
             $(dropdownDiv).slideUp("fast");
         }
         // Here we show them all...
