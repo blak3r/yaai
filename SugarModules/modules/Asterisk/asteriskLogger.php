@@ -2224,9 +2224,15 @@ function logLine($str, $logFile = "default") {
         else {
             $myFile = $logFile;
         }
-        $fh = fopen($myFile, 'a') or die("can't open file");
-        fwrite($fh, $str);
-        fclose($fh);
+        try {
+            $fh = fopen($myFile, 'a');
+            fwrite($fh, $str);
+            fclose($fh);
+        }
+        catch(Exception $err) {
+            // ignore errors
+            print "Error: unable to logLine to $myFile: " . $err . '\n';
+        }
     }
 }
 

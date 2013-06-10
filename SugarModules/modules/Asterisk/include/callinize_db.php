@@ -758,7 +758,7 @@ function convert_bean_to_simple_array($moduleName, $innerResultSet, $current_use
             'parent_link' => build_link($parentName, $parentId)
         );
         // PRINT
-        print "Merging in: $beanName\n";
+        //print "Merging in: $beanName\n";
         $beans[] = $bean;
     }
 
