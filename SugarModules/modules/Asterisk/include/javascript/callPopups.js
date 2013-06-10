@@ -274,20 +274,19 @@ var YAAI = {
          })
          .on("mouseenter",function() {
              $(dropdownDiv).css( "margin-left", "50px"); // Needed in ie8 only...
+             clearTimeout($(dropdownDiv).data('timeoutId1'));
+             clearTimeout($(dropdownDiv).data('timeoutId2'));
+             console.log("clearing timeouts... button");
          })
          .on("mouseleave", function () {
-            setTimeout(hidepanel, 600);
+             var timeoutId1 = setTimeout(hidepanel, 600);
+             $(dropdownDiv).data('timeoutId1', timeoutId1);
+             console.log("set timeouts... button");
          });
 
-
-        $(dropdownDiv).mouseleave(function() { setTimeout(hidepanel, 600); });
-
-        function hidepanel() {
-            // 2013-05-21: Code commented below caused issues with IE8, Safe to delete if no issues crop up with other browsers
-            //if ($(dropdownDiv).is(':hover') === false) {
-                $(dropdownDiv).slideUp();
-            //}
-        }
+        // This is for mouse events over the actual dropdowns...
+        $(dropdownDiv).mouseleave(function() { var timeoutId2 = setTimeout(hidepanel, 600); $(dropdownDiv).data('timeoutId2', timeoutId2); console.log("set timeouts... div"); });
+        $(dropdownDiv).mouseenter(function() { clearTimeout($(dropdownDiv).data('timeoutId1')); clearTimeout($(dropdownDiv).data('timeoutId2')); console.log("clearing timeouts... div"); } );
 
 
         // Here we show them all...

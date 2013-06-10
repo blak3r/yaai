@@ -41,7 +41,7 @@ require_once 'parse.php';
 //
 // Debug flags
 //
-$dial_events_log = '/Applications/MAMP/htdocs/dial_events.html';
+$dial_events_log = 'c:/sugarcrm/htdocs/dial_events_log_ast1.html';
 $mysql_loq_queries = 0;
 $mysql_log_results = 0;
 $verbose_log = 0;
@@ -622,6 +622,13 @@ while (true) {
                     mysql_checked_query($query);
                 }
 
+
+                // Had to switch to using Dial End commands because when using hangups I couldn't do calls to cell phones properly... (basically there are so many
+                // hangup events it killed me...
+                // Queues have the opposite issue... I can't detect the end of a Queue call unfortuntely...
+                // Queues -- Could not use Dial End, only Hangup would work.
+
+
                 //
                 // Process "Hangup" events
                 // Yup, we really get TWO hangup events from Asterisk! (Even more with Ringgroups)
@@ -629,7 +636,8 @@ while (true) {
                 //
                 // Asterisk Manager 1.1
                 /*$e['Event'] == 'Hangup'*/
-                if (($e['Event'] == 'Dial' && $e['SubEvent'] == 'End') )  {
+                if (($e['Event'] == 'Dial' && $e['SubEvent'] == 'End') ||
+                    ($e['Event'] == 'Hangup' /*&& preg_match( '/from-queue/', $e['Channel'])*/ ))  {
                     $id = AMI_getUniqueIdFromEvent($e);
                     logLine(" In DialEnd... $id");
                     $query = "SELECT call_record_id,direction,bean_module,bean_id,user_extension,inbound_extension FROM asterisk_log WHERE asterisk_dest_id = '$id' OR asterisk_id = '$id'";
@@ -1081,7 +1089,6 @@ while (true) {
                             $result = mysql_checked_query($query);
                             while ($call_rec_id = mysql_fetch_array($result)) {
                                 logLine("Deleting Call Record: " . $call_rec_id['call_record_id']);
-                                //pause(30000);
                                 deleteCall($call_rec_id['call_record_id']);
                             }
                         } else if($direction['direction'] == "O") {
@@ -1094,7 +1101,6 @@ while (true) {
                     // Here we add support for complicated Ring Groups such as x1 ---> 615 ---> 710,722,735
                     // \--> 620 ---> 810,811,812
                     // Check if both channels are internal... Then, check the asterisk_log table to see if an entry exists where Channel matches one of them... if so then change it out.
-                    // TBD: does answering on a cell phone and not pressing 1 to accept cause a bridge event that messes this up?
                     if (isCallInternal($e['Channel1'], $e['Channel2'])) {
                         logLine("Internal Bridge Event Detected\n");
                         if (preg_match('/(.*);(.*)/', $e['Channel1'], $matches)) {
@@ -1478,7 +1484,6 @@ HTML_HEAD;
 
 function dev_GenericEventPrinter($arg1, $arg2, $arg3, $arg4, $arg5, $arg6, $arg7, $arg8) {
     global $dial_events_log;
-    logLine("In printer generic");
     if( !empty($dial_events_log) ) {
         $s = getTimeStamp() . " ";
         $s .= str_pad($arg1, 8, " ", STR_PAD_BOTH);
@@ -1840,7 +1845,6 @@ function findSugarObjectByPhoneNumber($aPhoneNumber) {
         $resultDecoded = $matchingContacts[0];
 
         if(count($matchingContacts) > 1) {
-            $foundMultipleAccounts = FALSE;
             $matchingAccounts = array();
             //logLine(print_r($resultDecoded,true));
             for ($i = 0; $i < count($matchingContacts); $i++) {
