@@ -15,8 +15,9 @@
         <ul>
             <li class="ul_relate_to_contact"><a href="#" class="relate_to_contact">{{relate_to_contact_label}}</a></li>
             <li class="ul_relate_to_account"><a href="#" class="relate_to_account">{{relate_to_account_label}}</a></li>
+            
             <li class="ul_create_contact"><a href="#" class="create_contact">{{create_new_contact_label}}</a></li>
-            <li class="ul_block_number"><a href="#" class="block_number">{{block_number_label}}</a></li>
+            
         </ul>
     </div>
     <div class="callboxcontent">
@@ -27,36 +28,25 @@
                     <tr class="multiplematchingcontacts">
                         <td colspan="2">
                             <b>{{select_contact_label}}</b>
-                            {{#each contacts}}
-                            <p class="select_contact" id="contact_{{contact_id}}">
-                                <input type="radio" name="contactSelect"  value={{contact_id}}  />
-                                <a class="multiplecontacts" title="{{company}}" href="index.php?module=Contacts&action=DetailView&record={{contact_id}}">{{contact_full_name}}</a>
-                            </p>
-                            {{/each}}
-                        </td>
-                    </tr>
-                    <tr class="multiplematchingaccounts">
-                        <td colspan="2">
-                            <b>{{select_account_label}}</b>
-                            {{#each accounts}}
-                            <p class="select_contact" id="account_{{company_id}}">
-                                <input type="radio" name="accountSelect"  value={{company_id}}  />
-                                <a class="multipleaccounts" title="{{contact_full_name}}" href="index.php?module=Accounts&action=DetailView&record={{company_id}}">{{company}}</a>
+                            {{#each beans}}
+                            <p class="select_contact" id="contact_{{bean_id}}">
+                                <input type="radio" name="contactSelect" class={{bean_module}} value={{bean_id}}  />
+                                <a class="multiplecontacts" title="{{parent_name}}" href={{bean_link}}>{{bean_name}}</a>
                             </p>
                             {{/each}}
                         </td>
                     </tr>
                     <tr class="singlematchingcontact">
                         <td>{{name_label}}</td>
-                        <td><a class="contact_id" href="index.php?module=Contacts&action=DetailView&record={{contact_id}}">
-                            <span class="call_contacts">{{full_name}}</span>
+                        <td><a class="contact_id" href="{{bean_link}}">
+                            <span class="call_contacts">{{bean_name}}</span>
                         </a>
                             <!-- <button class="unrelate_contact"></button> -->
                         </td>
                     </tr>
-                    <tr class="singlematching">
+                    <tr class="parent_name_box">
                         <td>{{company_label}}</td>
-                        <td><a class="company" href="index.php?module=Accounts&action=DetailView&record={{company_id}}">{{company}}</a></td>
+                        <td><a class="company" href="{{parent_link}}">{{parent_name}}</a></td>
                     </tr>
                     <tr class="caller_id_box">
                         <td class="caller_id_label">{{caller_id_label}}:</td>
@@ -72,6 +62,12 @@
                             <span class="call_duration">{{duration}}</span>
                         </td>
                     </tr>
+                    <!--<tr class="call_time_box">-->
+                        <!--<td class="call_time_label">{{call_time_label}}:</td>-->
+                        <!--<td>-->
+                            <!--<span class="call_duration">{{call_time}}</span>-->
+                        <!--</td>-->
+                    <!--</tr>-->
                 </table>
             </div>
         </div>
@@ -98,23 +94,4 @@
         <input type='hidden' name="relateAccountName"/>
     </form>
 </div>
-<div id="block-number-{{callbox_id}}" title="Block Caller" style="display:none;">
-    <form>
-        <fieldset>
-            <label for="block-phone-number">Phone Number</label>
-            <input type="text" name="block-phone-number" class="block-phone-number text ui-widget-content ui-corner-all" disabled="disabled"/>
-            <label for="block-reason">Block Reason:</label>
-            <select name="block-reason" class="block-reason">
-                <option>Marketer</option>
-                <option>Annoying</option>
-            </select>
-            <p>Please provide more details if needed:</p>
-            <textarea rows="4" cols="30" class="block-description"></textarea>
-            <p>
-                <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;">
-                </span>
-                This person will be permanently blocked from calling. Are you sure?
-            </p>
-        </fieldset>
-    </form>
-</div>
+

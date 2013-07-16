@@ -71,13 +71,6 @@ if(!empty($_POST['save'])){
             }
 		}
 	}
-    // Now we go through all the variables of type checkbox... when checkboxes aren't checked they're not sent as post param
-    // I gave up on checkboxes... too much of a pain.  Don't think code below worked.
-    foreach($config_meta as $key => $value ) {
-        if( $value['type'] == 'checkbox' && !isset($_REQUEST[$key]) ) {
-            $_REQUEST['key'] = false;
-        }
-    }
 
 	$configurator->saveConfig();	
 	$focus->saveConfig();
@@ -139,4 +132,10 @@ foreach ($config_meta as $key => $value) {
 }
 
 echo $javascript->getScript();
+
+print <<<ENDJS
+
+ENDJS;
+
+
 ?>

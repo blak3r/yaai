@@ -35,7 +35,9 @@
 
 $admin_option_defs=array();
 $admin_option_defs['Administration']['asterisk_configurator']= array('Administration','LBL_MANAGE_ASTERISK','LBL_ASTERISK','./index.php?module=Configurator&action=asterisk_configurator');
-$admin_option_defs['Administration']['asterisk_donate']= array('Opportunities','LBL_ASTERISK_DONATE','LBL_ASTERISK_DONATE_DESC','http://www.blakerobertson.com/yaai-donation-page');
+// @@@@ BEGIN CALLINIZE COMMUNITY ONLY @@@@
+$admin_option_defs['Administration']['asterisk_donate']= array('Opportunities','LBL_ASTERISK_DONATE','LBL_ASTERISK_DONATE_DESC','http://www.callinize.com/features.html');
+// @@@@ END CALLINIZE COMMUNITY ONLY @@@@
 $admin_option_defs['Administration']['asterisk_usermanual']= array('Support','LBL_ASTERISK_USERMANUAL','LBL_ASTERISK_USERMANUAL_DESC','https://github.com/blak3r/yaai/wiki/User-Manual');
 $admin_option_defs['Administration']['asterisk_mailinglist']= array('Emails','LBL_ASTERISK_MAILINGLIST','LBL_ASTERISK_MAILINGLIST_DESC','http://eepurl.com/rmdML');
 $admin_option_defs['Administration']['asterisk_fakeDialer']= array('Calls','LBL_ASTERISK_FAKECALL','LBL_ASTERISK_FAKECALL_DESC','./index.php?entryPoint=AsteriskFakeCall');

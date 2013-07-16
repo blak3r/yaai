@@ -36,19 +36,6 @@
 
 if (!isset($mod_strings)) { $mod_strings = array(); }
 
-/*
-$mod_strings['LBL_ASTERISK'] = 'Set thedfhhhhhhhh Asterisk connection parameters and other preferences';
-$mod_strings['LBL_ASTERISK_DESC'] = 'Ssdffset the Asterisk connection parameters and other preferences';
-$mod_strings['LBL_ASTERISK_TITLE'] = 'YAAI - LBL_ASTERISK_TITLE SugarCRM Integration';
-
-$mod_strings['LBL_MANAGE_ASTERISK'] = 'YAAI';
-$mod_strings['LBL_MANAGE_ASTERISK_DESC'] = 'Module Configuration';
-$mod_strings['LBL_ASTERISK_DONATE'] = 'Donate';
-$mod_strings['LBL_ASTERISK_DONATE_DESC'] = 'Please help support this project by making a donation.';
-$mod_strings['LBL_ASTERISK_USERMANUAL'] = 'User Manual';
-$mod_strings['LBL_ASTERISK_USERMANUAL_DESC'] = 'Links to the online documentation for this project';
-*/
-
 $mod_strings['LBL_ASTERISK_HOST'] = 'Asterisk Manager Host';
 $mod_strings['LBL_ASTERISK_HOST_DESC'] = 'Set this to the hostname or IP address of the server that asterisk is running on.  If it is the same as your sugarcrm server, set to 127.0.0.1';
 $mod_strings['LBL_ASTERISK_PORT'] = 'Asterisk Manager Port';
@@ -104,11 +91,15 @@ $mod_strings['LBL_ASTERISK_DIGITS_TO_MATCH_DESC'] = 'Specifies the number of dig
 
 $mod_strings['LBL_ASTERISK_LOG_FILE'] = 'Log File Path for asteriskLogger';
 $mod_strings['LBL_ASTERISK_LOG_FILE_DESC'] = 'Enter a file path to enable logging.  Important: make sure asterisk logger has permissions to write to this file.  If it does not, asterisk logger will crash.';
+$mod_strings['LBL_ASTERISK_EVENT_LOG_FILE'] = 'Dial Event Log File Path';
+$mod_strings['LBL_ASTERISK_EVENT_LOG_FILE_DESC'] = 'Creates a condensed event log which is easier to see the big picture.  Was originally developed to facilitate understanding how asterisk generates ids in ring groups / call queue cases.  Each ID is color coded. Should be left blank in production.  This log file is not rotated. Important: make sure asterisk logger has permissions to write to this file.';
+
 
 $mod_strings['LBL_ASTERISK_RECORDINGS_ENABLED'] = "Enable Call Recording Downloads (WIP)";
-$mod_strings['LBL_ASTERISK_RECORDINGS_ENABLED_DESC'] = 'NOT YET RELEASED - This is an advanced feature which will require asterisk dialplan modifications in order to get working.  You will also need to have file system access to recordings folder.  So, if asterisk is on a different machine from your Sugar Instance you will need to map it somehow.';
+$mod_strings['LBL_ASTERISK_RECORDINGS_ENABLED_DESC'] = 'This feature will allow playback of call recordings.  You will need to configure asterisk to recording calls automatically for the appropriate extensions.  You will also need to have file system access to recordings folder.  See the user guide for more info';
 $mod_strings['LBL_ASTERISK_RECORDINGS_PATH'] = 'Asterisk Call Recordings Path (WIP)';
-$mod_strings['LBL_ASTERISK_RECORDINGS_PATH_DESC'] = 'NOT YET RELEASED - This is an advanced feature which requires asterisk dialplan modifications in order to get working.  You will also need to have file system access to recordings folder.  So, if asterisk is on a different machine from your Sugar Instance you will need to map it somehow.';
+$mod_strings['LBL_ASTERISK_RECORDINGS_PATH_DESC'] = 'Set this to the path where recordings can be found. If asterisk is on a different machine from your Sugar Instance you will need to setup a network file share or some type of syncing solution.  See the user guide for more info on this feature.';
+
 
 $mod_strings['LBL_ASTERISK_FOP_URL'] = 'Flash Operator Panel URL';
 $mod_strings['LBL_ASTERISK_FOP_URL_DESC'] = 'If you have the FOP2 extension installed on your asterisk box, specify the URL to use here.  Leave it blank to leave it disabled.';
@@ -119,7 +110,9 @@ $mod_strings['LBL_ASTERISK_FOP_BUTTON_ENABLED'] = 'Show FOP2 Button';
 $mod_strings['LBL_ASTERISK_TRANSFER_BUTTON_ENABLED'] = 'Show Transfer Button';
 $mod_strings['LBL_ASTERISK_RELATE_TO_ACCOUNT_ENABLED'] = 'Show Relate to Account';
 $mod_strings['LBL_ASTERISK_RELATE_TO_CONTACT_ENABLED'] = 'Show Relate To Contact';
+$mod_strings['LBL_ASTERISK_RELATE_TO_LEAD_ENABLED'] = 'Show Relate To Lead';
 $mod_strings['LBL_ASTERISK_CREATE_NEW_CONTACT_ENABLED'] = 'Show Create New Contact';
+$mod_strings['LBL_ASTERISK_CREATE_NEW_LEAD_ENABLED'] = 'Show Create New Lead';
 $mod_strings['LBL_ASTERISK_MAX_POPUPS'] = 'Sets the Max Call Popups';
 $mod_strings['LBL_ASTERISK_FILTERED_CALL_STATES'] = 'Filtered Call States';
 $mod_strings['LBL_ASTERISK_WINDOW_HEIGHT'] = 'Custom Window Height';
@@ -129,9 +122,11 @@ $mod_strings['LBL_ASTERISK_CALLINIZE_API_ORGANIZATIONID'] = 'Callinize API Organ
 $mod_strings['LBL_ASTERISK_CALLINIZE_API_ORGANIZATIONSECRET'] = 'Callinize API Organization Secret';
 
 $mod_strings['LBL_ASTERISK_CONTACT_PHONE_FIELDS'] = "Contact Phone Fields";
-$mod_strings['LBL_ASTERISK_CONTACT_PHONE_FIELDS_DESC'] = "These are the phone fields that will be searched when trying to find matching contacts.  If you've created your own custom fields, you can add them to the list here.  Be sure to add: Comma separated field names and no spaces.";
+$mod_strings['LBL_ASTERISK_CONTACT_PHONE_FIELDS_DESC'] = "These are the phone fields that will be searched when trying to find matching contacts.  If you've created your own custom fields, you can add them to the list here.  Be sure to add: Comma separated field names ending with _c and no spaces.";
 $mod_strings['LBL_ASTERISK_ACCOUNT_PHONE_FIELDS'] = "Account Phone Fields";
-$mod_strings['LBL_ASTERISK_CONTACT_PHONE_FIELDS_DESC'] = "These are the phone fields that will be searched when trying to find matching accounts.  If you've created your own custom fields, you can add them to the list here.  Be sure to add: Comma separated field names and no spaces.";
+$mod_strings['LBL_ASTERISK_CONTACT_PHONE_FIELDS_DESC'] = "These are the phone fields that will be searched when trying to find matching accounts.  If you've created your own custom fields, you can add them to the list here.  Be sure to add: Comma separated field names ending with _c and no spaces.";
+$mod_strings['LBL_ASTERISK_LEAD_PHONE_FIELDS'] = "Lead Phone Fields";
+$mod_strings['LBL_ASTERISK_LEAD_PHONE_FIELDS_DESC'] = "These are the phone fields that will be searched when trying to find matching leads.  If you've created your own custom fields, you can add them to the list here.  Be sure to add: Comma separated field names ending with _c and no spaces.";
 
 $mod_strings['LBL_ASTERISK_YAAI_DEV'] = "Dev Mode Enabled";
 $mod_strings['LBL_ASTERISK_YAAI_DEV_DESC'] = "Enabled developer mode, handlebars template is compiled in browser (rather then pre-compiled).  Set to 0 unless you have a reason to.";

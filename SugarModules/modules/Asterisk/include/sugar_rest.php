@@ -178,7 +178,7 @@ class Sugar_REST {
 
         $ch = curl_init();
 
-        print "IN REST REQUEST: " . $call_name . print_r($call_arguments, true);
+        print "REST REQUEST: " . $call_name . print_r($call_arguments, true);
 
         $post_data = 'method='.$call_name.'&input_type=JSON&response_type=JSON';
         $jsonEncodedData = json_encode($call_arguments);

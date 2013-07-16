@@ -23,7 +23,7 @@ sleep(3);
 $columnSmarty=<<<'END'
     <td nowrap width="10%" class="dataLabel">{$MOD.LBL_@@UPPER@@}
       {if !empty($MOD.LBL_@@UPPER@@_DESC)}
-          [<a href="#" title="{$MOD.LBL_@@UPPER@@_DESC}">?</a>]:
+          [<a href="#" data-toggle="tooltip" title="{$MOD.LBL_@@UPPER@@_DESC}">?</a>]:
       {/if}
     </td>
     <td width="25%" class="dataField">
@@ -35,6 +35,28 @@ $columnSmarty=<<<'END'
         <input type='@@TYPE@@' name='@@NORMAL@@' size="45" value='{$@@NORMAL@@}'>
     </td>
 END;
+$columnSmartyBool=<<<'END2'
+    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_@@UPPER@@}
+      {if !empty($MOD.LBL_@@UPPER@@_DESC)}
+          [<a href="#" data-toggle="tooltip" title="{$MOD.LBL_@@UPPER@@_DESC}">?</a>]:
+      {/if}
+    </td>
+    <td width="25%" class="dataField">
+    {if empty($config.@@NORMAL@@ )}
+        {assign var='@@NORMAL@@' value=$asterisk_config.@@NORMAL@@}
+        {if $asterisk_config.@@NORMAL@@ }
+            {assign var='isChecked' value='checked'}
+        {/if}
+    {else}
+        {assign var='@@NORMAL@@' value=$config.@@NORMAL@@}
+        {if $config.@@NORMAL@@ }
+            {assign var='isChecked' value='checked'}
+        {/if}
+    {/if}
+    <input type='hidden' name='@@NORMAL@@' value='0'>
+    <input type='@@TYPE@@' name='@@NORMAL@@' size="45" value='1' {$isChecked} >
+    </td>
+END2;
 
 $i = 0;
 $prevSection='';
@@ -48,7 +70,7 @@ $prevSection='';
             print "<TD>&nbsp;</TD><TD>&nbsp;</TD> </tr>";
             $i++;
         }
-        print "\n\n<TR><td colspan=\"4\">&nbsp;&nbsp;<TR><TD colspan=\"4\"><h3>{$value['section']}</h3></TD></tr>\n";
+        print "\n\n<TR><td colspan=\"4\">&nbsp;&nbsp;<TR><TD colspan=\"4\"><h4>{$value['section']}</h4></TD></tr>\n";
         $sectionHdr = "LBL_ASTERISK_SECTIONHDR_" . strtoupper($value['section']);
         if( array_key_exists($sectionHdr, $mod_strings) ) {
             print "<TR><TD colspan=\"4\">{$mod_strings[$sectionHdr]}</TD></tr>";
@@ -59,9 +81,12 @@ $prevSection='';
         print "\n\n<TR>\n\n";
 
     $type = "textbox";
+    $checked = '';
     if( isset($value['type'] ) ) {
         if( $value['type'] == "bool") {
             $type = "checkbox"; // checkbox is too hard to support since it's value isn't submitted when form is posted and it's unchecked!
+            $in = $columnSmartyBool;
+
         }
         else {
             $type = $value['type'];
@@ -69,8 +94,8 @@ $prevSection='';
     }
 
     $out  = str_replace(
-        array('@@UPPER@@','@@NORMAL@@','@@TYPE@@'),
-        array(strtoupper($key),$key,$type),
+        array('@@UPPER@@','@@NORMAL@@','@@TYPE@@','@@CHECKED@@'),
+        array(strtoupper($key),$key,$type,$checked),
         $in);
 
     print $out . "\n\n";

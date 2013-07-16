@@ -117,7 +117,7 @@ var YAAI = {
                 caller_id: entry['caller_id'],
                 call_record_id: entry['call_record_id'],
                 select_contact_label: entry['mod_strings']['ASTERISKLBL_SELECTCONTACT'],
-                select_account_label: entry['mod_strings']['ASTERISKLBL_SELECTACCOUNT'],
+                //select_account_label: entry['mod_strings']['ASTERISKLBL_SELECTACCOUNT'], // Removed
                 name_label: entry['mod_strings']['ASTERISKLBL_NAME'],
                 company_label: entry['mod_strings']['ASTERISKLBL_COMPANY'],
                 create_label: entry['mod_strings']['CREATE'],
@@ -125,51 +125,44 @@ var YAAI = {
                 caller_id_label: entry['mod_strings']['ASTERISKLBL_CALLERID'],
                 phone_number_label: entry['mod_strings']['CALL_DESCRIPTION_PHONE_NUMBER'],
                 duration_label: entry['mod_strings']['ASTERISKLBL_DURATION'],
-                block_label: entry['mod_strings']['BLOCK'],
                 save_label: entry['mod_strings']['SAVE'],
-                block_number_label : entry['mod_strings']['BLOCK_NUMBER'],
                 create_new_contact_label : entry['mod_strings']['CREATE_NEW_CONTACT'],
+                create_new_account_label : entry['mod_strings']['CREATE_NEW_ACCOUNT'],
                 relate_to_contact_label : entry['mod_strings']['RELATE_TO_CONTACT'],
-                relate_to_account_label : entry['mod_strings']['RELATE_TO_ACCOUNT']
+                relate_to_account_label : entry['mod_strings']['RELATE_TO_ACCOUNT'],
+
+                block_label: entry['mod_strings']['BLOCK'],
+                block_number_label : entry['mod_strings']['BLOCK_NUMBER'],
+                create_new_lead_label : entry['mod_strings']['CREATE_NEW_LEAD'],
+                relate_to_lead_label : entry['mod_strings']['RELATE_TO_LEAD']
             };
 
-            var bean_module = 'contacts';
-            if( entry['accounts'] && entry['accounts'].length > 0 ) {
-                bean_module = 'accounts';
-            }
-            switch(entry[bean_module].length){
+            var numMatches = entry['beans'].length;
+            YAAI.log("Matches: " + numMatches);
+
+            switch(numMatches){
                 case 0 :
                     html = template(context);
                     $('body').append(html);
-                    YAAI.setupHandlebarsContextNoMatchingCase(callboxid, entry);
+                    YAAI.setupHandlebarsContextNoMatchingCase(callboxid, context, entry);
                     $('#callbox_'+callboxid).find('.nomatchingcontact').show();
                     break;
 
                 case 1 :
-                    context = YAAI.setupHandlebarsContextForSingleMatchingCase(callboxid, context, entry, bean_module);
+                    context = YAAI.setupHandlebarsContextForSingleMatchingCase(callboxid, context, entry);
                     html = template(context);
                     $('body').append(html);
                     YAAI.bindOpenPopupSingleMatchingContact(callboxid, entry);
-                    if( bean_module == "contacts" ){
-                        $('#callbox_'+callboxid).find('.singlematchingcontact').show();
-                        $('#callbox_'+callboxid).find('.singlematching').show();
-                    }
-                    else if( bean_module == "accounts" ) {
-                        $('#callbox_'+callboxid).find('.singlematching').show();
-                    }
+                    $('#callbox_'+callboxid).find('.singlematchingcontact').show();
+                    // TODO this should set the account display right away if it's available instead of waiting till 2nd poll refresh
                     break;
 
-                default :
-                    context = YAAI.setupHandlebarsContextForMultipleMatchingCase(callboxid, context, entry, bean_module);
+                default : // Matches > 1
+                    context = YAAI.setupHandlebarsContextForMultipleMatchingCase(callboxid, context, entry);
                     html = template(context);
                     $('body').append(html);
-                    YAAI.bindSetBeanID(callboxid, entry, bean_module);
-                    if( bean_module == "contacts" ){
-                        $('#callbox_'+callboxid).find('.multiplematchingcontacts').show();
-                    }
-                    else {
-                        $('#callbox_'+callboxid).find('.multiplematchingaccounts').show();
-                    }
+                    YAAI.bindSetBeanID(callboxid, entry);
+                    $('#callbox_'+callboxid).find('.multiplematchingcontacts').show();
                     break;
             }
 
@@ -182,9 +175,6 @@ var YAAI = {
 
             //bind user actions
             YAAI.bindCheckCallBoxInputKey(callboxid, entry['call_record_id'], entry['phone_number'], entry['direction']);
-            //YAAI.fop2 ? YAAI.bindOperatorPanel(callboxid) : YAAI.bindTransferButton(callboxid, entry);
-            if( YAAI.fop2 ) YAAI.bindOperatorPanel(callboxid);
-            // Transfer Button happens in updateCall method
             YAAI.bindCloseCallBox(callboxid, entry['call_record_id']);
             YAAI.bindToggleCallBoxGrowth(callboxid);
             YAAI.bindSaveMemo(callboxid, entry['call_record_id'], entry['phone_number'], entry['direction']);
@@ -235,8 +225,7 @@ var YAAI = {
             }
         }
     },
-    
-    // BIND CLICKABLE ACTIONS TO HTML ELEMENTS
+
     bindToggleCallBoxGrowth : function (callboxid){
         $('#callbox_'+callboxid).find('.callboxhead').on("click",  function(){
             YAAI.toggleCallBoxGrowth(callboxid);
@@ -253,6 +242,31 @@ var YAAI = {
         $('#callbox_'+callboxid).find('.save_memo').button().on("click", function(){
             YAAI.saveMemo(callboxid, call_record_id, phone_number, direction);  
         });
+    },
+
+    bindTransferButton : function(callboxid, entry){
+        $('#callbox_'+callboxid).find('.transfer_panel').button( {
+            icons: {
+                primary: 'ui-icon-transfer',
+                secondary: null
+            }
+        }).on("click", function() {
+                YAAI.log("Binding Transfer Button action");
+                YAAI.showTransferMenu(entry);
+        });
+    },
+
+    showTransferButton : function(callboxid,entry) {
+        $('#callbox_'+callboxid).find('.transfer_panel').show();
+    },
+    hideTransferButton : function(callboxid, entry) {
+        $('#callbox_'+callboxid).find('.transfer_panel').hide();
+    },
+    bindCheckCallBoxInputKey : function(callboxid, entry){
+        $('#callbox_'+callboxid).find('.transfer_button').keydown(function(event){
+            YAAI.checkCallBoxInputKey(event, callboxid, entry);
+        });
+
     },
 
     bindActionDropdown : function(callboxid,entry){
@@ -276,20 +290,28 @@ var YAAI = {
              $(dropdownDiv).css( "margin-left", "50px"); // Needed in ie8 only...
              clearTimeout($(dropdownDiv).data('timeoutId1'));
              clearTimeout($(dropdownDiv).data('timeoutId2'));
-             YAAI.log("clearing timeouts... button");
+             //YAAI.log("clearing timeouts... button");
          })
          .on("mouseleave", function () {
              var timeoutId1 = setTimeout(hideDropDown,600);
              $(dropdownDiv).data('timeoutId1', timeoutId1);
-             YAAI.log("set timeouts... button");
+             //YAAI.log("set timeouts... button");
          });
 
         // This is for mouse events over the actual dropdowns...
-        $(dropdownDiv).mouseleave(function() { var timeoutId2 = setTimeout(hideDropDown, 600); $(dropdownDiv).data('timeoutId2', timeoutId2); YAAI.log("set timeouts... div"); });
-        $(dropdownDiv).mouseenter(function() { clearTimeout($(dropdownDiv).data('timeoutId1')); clearTimeout($(dropdownDiv).data('timeoutId2')); YAAI.log("clearing timeouts... div"); } );
+        $(dropdownDiv).mouseleave(function() {
+            var timeoutId2 = setTimeout(hideDropDown, 600);
+            $(dropdownDiv).data('timeoutId2', timeoutId2);
+            //YAAI.log("set timeouts... div");
+        });
+        $(dropdownDiv).mouseenter(function() {
+            clearTimeout($(dropdownDiv).data('timeoutId1'));
+            clearTimeout($(dropdownDiv).data('timeoutId2'));
+            //YAAI.log("clearing timeouts... div");
+        });
 
         function hideDropDown() {
-            YAAI.log("firing hideDropDown");
+            //YAAI.log("firing hideDropDown");
             $(dropdownDiv).slideUp("fast");
         }
         // Here we show them all...
@@ -298,7 +320,7 @@ var YAAI = {
             YAAI.log("  Adding Relate to Contact");
             $(dropdownDiv+" ul li.ul_relate_to_contact").show();
             $(dropdownDiv+" ul li a.relate_to_contact").on("click", entry, function() {
-                YAAI.openContactRelatePopup(entry)
+                YAAI.openContactRelatePopup(entry);
             });
         }
 
@@ -318,103 +340,45 @@ var YAAI = {
             });
         }
 
-        if( window.yaai_block_button_enabled ) {
-            YAAI.log("  Adding Block Button Enabled");
-            $(dropdownDiv+" ul li.ul_block_number").show();
-            $(dropdownDiv+" ul li a.block_number").on("click", {
-                entry: entry,
-                callboxid: callboxid
-            }, function() {
-                YAAI.showBlockNumberDialog(callboxid, entry)
-            });
-        }
-
         /*
-        if( window.yaai_relate_to_contact_enabled ) {
-            YAAI.log("  Adding Relate to Contact");
-            // TODO Remove line below... for debugging
-            YAAI.log( $(dropdownDiv+" ul").length + " was found?");
+         if( window.yaai_relate_to_contact_enabled ) {
+         YAAI.log("  Adding Relate to Contact");
+         // TODO Remove line below... for debugging
+         YAAI.log( $(dropdownDiv+" ul").length + " was found?");
 
-            $(dropdownDiv+" ul").append("<li><a href='#' class='relate_to_contact'>"+entry['mod_strings']['RELATE_TO_CONTACT']+"</a></li>");
-            $(dropdownDiv+" ul a.relate_to_contact").on("click", entry, function() {
-                YAAI.openContactRelatePopup(entry)
-            });
-        }
-        // TODO create
-        if( window.yaai_relate_to_account_enabled ) {
-            YAAI.log("  Adding Relate to Account");
-            $(dropdownDiv+" ul").append("<li><a href='#' class='relate_to_account'>"+entry['mod_strings']['RELATE_TO_ACCOUNT']+"</a></li>");
-            $(dropdownDiv+" ul a.relate_to_account").on("click", entry, function() {
-                YAAI.openAccountRelatePopup(entry);
-            });
-        }
+         $(dropdownDiv+" ul").append("<li><a href='#' class='relate_to_contact'>"+entry['mod_strings']['RELATE_TO_CONTACT']+"</a></li>");
+         $(dropdownDiv+" ul a.relate_to_contact").on("click", entry, function() {
+         YAAI.openContactRelatePopup(entry)
+         });
+         }
+         // TODO create
+         if( window.yaai_relate_to_account_enabled ) {
+         YAAI.log("  Adding Relate to Account");
+         $(dropdownDiv+" ul").append("<li><a href='#' class='relate_to_account'>"+entry['mod_strings']['RELATE_TO_ACCOUNT']+"</a></li>");
+         $(dropdownDiv+" ul a.relate_to_account").on("click", entry, function() {
+         YAAI.openAccountRelatePopup(entry);
+         });
+         }
 
-        if( window.yaai_create_new_contact_enabled ) {
-            YAAI.log("  Adding Create New Contact");
-            $(dropdownDiv+" ul").append("<li><a href='#' class='create_contact'>"+entry['mod_strings']['CREATE_NEW_CONTACT']+"</a></li>");
-            $(dropdownDiv+" ul a.create_contact").on("click", entry, function() {
-                YAAI.createContact(entry)
-            });
-        }
+         if( window.yaai_create_new_contact_enabled ) {
+         YAAI.log("  Adding Create New Contact");
+         $(dropdownDiv+" ul").append("<li><a href='#' class='create_contact'>"+entry['mod_strings']['CREATE_NEW_CONTACT']+"</a></li>");
+         $(dropdownDiv+" ul a.create_contact").on("click", entry, function() {
+         YAAI.createContact(entry)
+         });
+         }
 
-        if( window.yaai_block_button_enabled ) {
-            YAAI.log("  Adding Block Button Enabled");
-            $(dropdownDiv+" ul").append("<li><a href='#' class='block_number'>"+entry['mod_strings']['BLOCK_NUMBER']+"</a></li>");
-            $(dropdownDiv+" ul a.block_number").on("click", {
-                entry: entry,
-                callboxid: callboxid
-            }, function() {
-                YAAI.showBlockNumberDialog(callboxid, entry)
-            });
-        }
-        */
-    },
-
-    bindTransferButton : function(callboxid, entry){
-        $('#callbox_'+callboxid).find('.transfer_panel').button( {
-            icons: {
-                primary: 'ui-icon-transfer',
-                secondary: null
-            }
-        }).on("click", function() {
-                YAAI.log("Binding Transfer Button action");
-                YAAI.showTransferMenu(entry);
-        });
-    },
-    showTransferButton : function(callboxid,entry) {
-        $('#callbox_'+callboxid).find('.transfer_panel').show();
-    },
-    hideTransferButton : function(callboxid, entry) {
-        $('#callbox_'+callboxid).find('.transfer_panel').hide();
-    },
-
-    bindOperatorPanel : function(callboxid){ 
-        YAAI.log("Binding FOP Panel");
-        $('#callbox_'+callboxid).find('.operator_panel').button({
-            icons: {
-                primary: 'ui-icon-custom-phone', 
-                secondary: null
-            }
-        }).on("click", function(){
-            $.fancybox({
-                href : YAAI.fop2URL + '?exten=' + YAAI.fop2UserID + '&pass=' + YAAI.fop2Password,
-                type : 'iframe',
-                padding : 5,
-                showCloseButton : true,
-                afterClose : function() {
-                    window.location.href=window.location.href
-                }
-            }); 
-        }).show();
-        
-    },
-
-     
-    bindCheckCallBoxInputKey : function(callboxid, entry){
-        $('#callbox_'+callboxid).find('.transfer_button').keydown(function(event){
-            YAAI.checkCallBoxInputKey(event, callboxid, entry);
-        }); 
-        
+         if( window.yaai_block_button_enabled ) {
+         YAAI.log("  Adding Block Button Enabled");
+         $(dropdownDiv+" ul").append("<li><a href='#' class='block_number'>"+entry['mod_strings']['BLOCK_NUMBER']+"</a></li>");
+         $(dropdownDiv+" ul a.block_number").on("click", {
+         entry: entry,
+         callboxid: callboxid
+         }, function() {
+         YAAI.showBlockNumberDialog(callboxid, entry)
+         });
+         }
+         */
     },
 
     // This is the icon next to the name.
@@ -422,7 +386,7 @@ var YAAI = {
         $('#callbox_'+callboxid).find('.singlematchingcontact .unrelate_contact').button({
             icons: {
                 primary: 'ui-icon-custom-unrelate',
-		secondary: null
+		        secondary: null
             },
             text: false
         }).on("click", function(){
@@ -443,14 +407,10 @@ var YAAI = {
             });
     },
     
-    bindSetBeanID : function(callboxid, entry, bean_module){
+    bindSetBeanID : function(callboxid, entry){
         //console.log("in bind "+ bean_module + " is what beanmodule is");
         $('#callbox_'+callboxid).find('.multiplematchingcontacts td p').on("click", "input",  function(){
-            YAAI.setBeanID(entry['call_record_id'], bean_module, this.value);
-        })
-        // TODO Refactor this out
-        $('#callbox_'+callboxid).find('.multiplematchingaccounts td p').on("click", "input",  function(){
-            YAAI.setBeanID(entry['call_record_id'], bean_module, this.value);
+            YAAI.setBeanID(entry['call_record_id'], this.className, this.value);
         })
     },
     
@@ -542,7 +502,6 @@ var YAAI = {
         },"single",true);
     },
 
-
     showTransferMenu : function(entry, callboxid, exten ) {
         if( callboxid != '' ) {
             exten = prompt("Please enter the extension number you'd like to transfer to:\n(Leave Blank to cancel)","");
@@ -557,56 +516,7 @@ var YAAI = {
         }
     }, 
     
-    showBlockNumberDialog : function(callboxid, entry){
-        //setup form display
-        $("#block-number-callbox_"+callboxid).find('.block-phone-number').val(entry['phone_number']);
-    
-        //present dialog
-        $("#block-number-callbox_"+callboxid).dialog({
-            autoOpen: true,
-            resizable: false,
-            width: 400,
-            height:300,
-            modal: true,
-            buttons: {
-                "Block Caller": function() {                     
-                    $.ajax({
-                        url:"index.php?entryPoint=AsteriskController&action=block",
-                        data: {
-                            number: entry['phone_number'],
-                            reason: $("#block-number-"+callboxid).find('.reason').val(),
-                            description: $("#block-number-"+callboxid).find('.block-description').val(),
-                            agent_id: YAAI.sugarUserID
-                        }, 
-                        type: "POST",			
-                        success: function(transport){
-                            YAAI.log("BlockCall Action Response: " + transport);
-                            if( transport.indexOf('Permission denied') != -1 ) {
-                                alert("Unable to BLOCK Number.\nAMI Connection requires write: system priviledge\nYou can disable this drop down item in Admin Config\n\n------------\n" + transport + "\n------------\n");  // Shows error message on ClickToDial failure.
-                            }
-                            else if( transport.indexOf('Error') != -1 ) {
-                                alert("Unable to BLOCK Number.  See Details Below.\nYou can disable this drop down item in Admin Config\n\n------------\n" + transport + "\n------------\n");  // Shows error message on ClickToDial failure.
-                            }
-                            else {
-                                alert(entry['phone_number'] + ' has been Blocked');
-                            }
-                        },
-                        error: function (jqXHR, textStatus, thrownError){
-                            YAAI.log(jqXHR.status);
-                            YAAI.log(textStatus);
-                            YAAI.log(thrownError);
-                        }
-                    });
-                    $( this ).dialog( "close" );
-                },
-                Cancel: function() {
-                    $( this ).dialog( "close" );
-                }
-            }
-        });  
-    },
-    
-/*
+    /*
  * Relate Contact Callback method.
  * This is called by the open_popup sugar call when a contact is selected.
  *
@@ -645,7 +555,6 @@ var YAAI = {
         else {
             alert("Error updating related Contact");
         }
-        
     },
 
     /*
@@ -691,7 +600,7 @@ var YAAI = {
     },
 
 
-    // DRAWING/UI FUNCTIONS
+    // -=-=-=-= DRAWING/UI FUNCTIONS =-=-=-=-=-=-=-=-=- //
 
     restructureCallBoxes : function(callboxid) {
         var currHeight = 0;
@@ -769,85 +678,60 @@ var YAAI = {
     },
     
     refreshSingleMatchView : function (callboxid, entry){
-        
-        var singlematching = $('#callbox_'+callboxid).find('.singlematching');
+
+        console.log("Refreshing single match");
+        var singlematching = $('#callbox_'+callboxid).find('.singlematchingcontact');
 
         // 1 Match --> 1 Match Different Contact or Account
         //check if a single contacts match has had changes - must do this here because using SugarCRMs function we lose control of the callboxid that initated the callback
-        if( (entry['contacts'].length == 1 || entry['accounts'].length == 1) && singlematching.is(':visible')){
+        if( entry['beans'].length == 1 && singlematching.is(':visible')){
 
             // TODO REFACTOR
-            if( entry['contacts'].length == 1 ) {
+            if( entry['beans'].length == 1 ) {
                    //check on id, because name could be duplicate
                var old_contact_id = $('#callbox_'+callboxid).find('.contact_id').attr('href').substr(-36);
-               var new_contact_id = entry['contacts'][0]['contact_id'];
+               var new_contact_id = entry['beans'][0]['bean_id'];
                var old_company_id = $('#callbox_'+callboxid).find('.company_id').attr('href') == undefined ? null : $('#callbox_'+callboxid).find('.company_id').attr('href').substr(-36)
-               var new_company_id = entry['contacts'][0]['company_id'];
+               var new_company_id = entry['beans'][0]['parent_id'];
                if(old_contact_id != new_contact_id || old_company_id != new_company_id){
                    YAAI.refreshSingleMatchingContact(callboxid, entry);
                    YAAI.log('Refreshing ' + callboxid);
                }
             }
-            // Account 1 --> 1 case
-            else {
-                var old_company_id = $('#callbox_'+callboxid).find('.company').attr('href').substr(-36);
-                var new_company_id = entry['accounts'][0]['company_id'];
-                if(old_company_id != new_company_id){
-                    YAAI.refreshSingleMatchingAccount(callboxid, entry);
-                    YAAI.log('Refreshing ' + callboxid);
-                }
-            }
         }
         
         // MULTIPLE OR NO MATCH --> Single case
-        if( (entry['contacts'].length == 1  || entry['accounts'].length == 1) && singlematching.is(':hidden') ){
-            //remove the dropdown menu
-            // TODO: BR Make this configurable...
-            //$('#callbox_'+callboxid).find('.callbox_action').hide();
-
+        if( entry['beans'].length == 1 && singlematching.is(':hidden') ){
             //bind back the unrelate button
             YAAI.bindOpenPopupSingleMatchingContact(callboxid, entry);
             
             $('#callbox_'+callboxid).find('.nomatchingcontact').hide();
             $('#callbox_'+callboxid).find('.multiplematchingcontacts').hide();
-            $('#callbox_'+callboxid).find('.multiplematchingaccounts').hide();
-            $('#callbox_'+callboxid).find('.singlematching').show();  // <-- this is common to Account and Contact
-
-            if( entry['contacts'].length == 1) {
-                YAAI.refreshSingleMatchingContact(callboxid, entry);
-            }
-            else {
-                YAAI.refreshSingleMatchingAccount(callboxid,entry);
-            }
+            YAAI.refreshSingleMatchingContact(callboxid, entry);
         }
     },
     
     refreshSingleMatchingContact : function(callboxid, entry){
+        var bean = entry['beans'][0];
+
         $('#callbox_'+callboxid).find('.singlematchingcontact').show();
-        $('#callbox_'+callboxid).find('.singlematchingcontact td a.contact_id').attr('href', 'index.php?module=Contacts&action=DetailView&record='+entry['contacts'][0]['contact_id']);
-        $('#callbox_'+callboxid).find('.singlematchingcontact td span.call_contacts').text(entry['contacts'][0]['contact_full_name']); 
+        $('#callbox_'+callboxid).find('.singlematchingcontact td a.contact_id').attr('href', bean['bean_link']);
+        $('#callbox_'+callboxid).find('.singlematchingcontact td span.call_contacts').text(bean['bean_name']);
         
         //check if new contact has an account
-        if(entry['contacts'][0]['company_id'] == null){
-            $('#callbox_'+callboxid).find('.singlematching td a.company').hide();
+        if(bean['parent_name'] == null || bean['parent_name'].length <= 0 ) {
+            $('#callbox_'+callboxid).find('.parent_name_box').hide();
         }else{
-            $('#callbox_'+callboxid).find('.singlematching td a.company').attr('href', 'index.php?module=Accounts&action=DetailView&record='+entry['contacts'][0]['company_id']);
-            $('#callbox_'+callboxid).find('.singlematching td a.company').text(entry['contacts'][0]['company']);
-            $('#callbox_'+callboxid).find('.singlematching td a.company').show();
+            if( bean['parent_link'] != null ) {
+                $('#callbox_'+callboxid).find('.parent_name_box td a.company').attr('href', bean['parent_link']);
+            }
+            else {
+                $('#callbox_'+callboxid).find('.parent_name_box td a.company').attr('href', '#');
+            }
+            $('#callbox_'+callboxid).find('.parent_name_box td a.company').text(bean['parent_name']);
+            $('#callbox_'+callboxid).find('.parent_name_box').show();
         }
     },
-
-refreshSingleMatchingAccount : function(callboxid, entry){
-        $('#callbox_'+callboxid).find('.singlematchingcontact').hide();
-        $('#callbox_'+callboxid).find('.singlematchingcontact td a.contact_id').hide();
-
-        $('#callbox_'+callboxid).find('.singlematching td a.company').attr('href', 'index.php?module=Accounts&action=DetailView&record='+entry['accounts'][0]['company_id']);
-        $('#callbox_'+callboxid).find('.singlematching td a.company').text(entry['accounts'][0]['company']);
-        $('#callbox_'+callboxid).find('.singlematching td a.company').show();
-    },
-
-
-
 
     // Saves what is placed in the input box whenever call is saved.
     checkCallBoxInputKey : function(event, callboxid, call_record_id, phone_number, direction) {
@@ -868,7 +752,7 @@ refreshSingleMatchingAccount : function(callboxid, entry){
 
     },
 
-    setupHandlebarsContextNoMatchingCase : function(callboxid, entry){
+    setupHandlebarsContextNoMatchingCase : function(callboxid, context, entry){
 
     },
 
@@ -878,50 +762,44 @@ refreshSingleMatchingAccount : function(callboxid, entry){
      * @param callboxid
      * @param context
      * @param entry
-     * @param bean_type is either "contacts" or "accounts"
      * @return {*}
      */
-    setupHandlebarsContextForSingleMatchingCase : function(callboxid, context, entry, bean_type){
-        context['contact_id'] = entry[bean_type][0]['contact_id'];
-        context['full_name'] = entry[bean_type][0]['contact_full_name'];
-        context['company'] = entry[bean_type][0]['company'];
-        context['company_id'] = entry[bean_type][0]['company_id'];
+    setupHandlebarsContextForSingleMatchingCase : function(callboxid, context, entry){
+        var bean = entry['beans'][0];
+        console.log(bean);
+        context['bean_id'] = bean['bean_id'];
+        context['bean_module'] = bean['bean_module'];
+        context['bean_name'] = bean['bean_name'];
+        context['bean_link'] = bean['bean_link'];
+        context['parent_name'] = bean['parent_name'];
+        context['parent_id'] = bean['parent_id'];
+        context['parent_link'] = bean['parent_link'];
 
         return context;
     },
-    setupHandlebarsContextForMultipleMatchingCase : function(callboxid, context, entry, bean_type){
-        if( bean_type == "accounts" ) {
-            context['accounts'] = entry['accounts'];
-        }
-        else {
-            context['contacts'] = entry['contacts'];
-        }
+    setupHandlebarsContextForMultipleMatchingCase : function(callboxid, context, entry){
+        context['beans'] = entry['beans'];
 
         Handlebars.registerHelper('each', function(context, options) {
             if(typeof context != "undefined"){
                 var ret = "";
-
                 for(var i=0, j=context.length; i<j; i++) {
                     ret = ret + options.fn(context[i]);
                 }
-
                 return ret;
             }
-    
         });
     
         return context;
     },
     
     setCallBoxHeadColor : function (callboxid, entry){
-                
         if( entry['is_hangup']  ) {
             $("#callbox_"+callboxid+" .callboxhead").css("background-color", "#f99d39"); // an orange color
         }
         else {
             $("#callbox_"+callboxid+" .callboxhead").css("background-color", "#0D5995"); // a blue color
         }
-
     },
 
     setTransferButton : function(callboxid, entry ) {
@@ -936,14 +814,10 @@ refreshSingleMatchingAccount : function(callboxid, entry){
     },
 
     //UTILITY FUNCTIONS
-    
     createContact : function (entry) {
-    
         var phone_number = entry['phone_number'];
-    
         window.location = "index.php?module=Contacts&action=EditView&phone_work="+phone_number;
     },    
-    
     // Updates the cookie which stores the state of all the callboxes (whether minimized or maximized)
     // Only problem with this approach is on second browser window you might have them open differently... and this would save the state as such.
     updateMinimizeCookie : function() {
@@ -1114,7 +988,8 @@ $(document).ready(function(){
     // or if ajax isn't in url --- include
     if( !isAjaxUiEnabled || SUGAR.ajaxUI.hist_loaded ) {
         YAAI.log('loading yaai...');
-            var loop = true;
-            YAAI.checkForNewStates(loop);
-    }
+        var loop = true;
+        YAAI.checkForNewStates(loop);
+
+        }
 });

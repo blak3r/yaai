@@ -1,5 +1,17 @@
 IMPORTANT: when upgrading, please see the instructions in the User Manual <http://www.github.com/blak3r/yaai/wiki/User-Manual>
 
+##Version 3.5.4 (2013-07-08)
+* New User Interface
+* Ability to specify which contact and account phone fields are searched.
+* Major Performance Improvements
+* Improvements to support for ring groups and queues.
+* Ability to relate calls to a contact or account.
+* Account Matching in Popups.
+* Improvements to Admin Pages to have checkboxes instead of textboxes for boolean config elements.
+* Cleaner formatting of asterisk log statements.
+* New dial events log
+
+
 ##Version 2.6.0 (2012-11-03)##
 
 ### NEW Features ###

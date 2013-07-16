@@ -82,8 +82,11 @@ class AsteriskJS {
                 echo '<script type="text/javascript">window.yaai_show_transfer_button= ' . $GLOBALS['sugar_config']['asterisk_transfer_button_enabled'] . ';</script>';
                 echo '<script type="text/javascript">window.yaai_relate_to_account_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_account_enabled'] . ';</script>';
                 echo '<script type="text/javascript">window.yaai_relate_to_contact_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_contact_enabled'] . ';</script>';
+                echo '<script type="text/javascript">window.yaai_relate_to_lead_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_lead_enabled'] . ';</script>';
                 echo '<script type="text/javascript">window.yaai_create_new_contact_enabled = ' . $GLOBALS['sugar_config']['asterisk_create_new_contact_enabled'] . ';</script>';
+                echo '<script type="text/javascript">window.yaai_create_new_lead_enabled = ' . $GLOBALS['sugar_config']['asterisk_create_new_lead_enabled'] . ';</script>';
                 echo '<script type="text/javascript">window.yaai_block_button_enabled = ' . $GLOBALS['sugar_config']['asterisk_block_button_enabled'] . ';</script>';
+                echo '<script type="text/javascript">window.yaai_recording_enabled = ' . $GLOBALS['sugar_config']['asterisk_recordings_enabled'] . ';</script>';
 
                 echo '<script type="text/javascript"> if (!window.console) console = {log: function() {}}; </script>'; // Prevents bug in IE (See Issue #108)
 

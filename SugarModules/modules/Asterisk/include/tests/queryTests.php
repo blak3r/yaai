@@ -18,11 +18,11 @@ require_once("custom/modules/Asterisk/include/callinize_db.php");
 
 //echo "CONTACTS:\n" . print_r($contacts,true);
 
-$beans = find_beans("4102152497", null, $GLOBALS['current_user'], "accounts,contacts,leads", false);
+$beans = find_beans("4102152497", "accounts,contacts,leads", $GLOBALS['current_user']);
 echo "BEANS:\n" . print_r($beans,true);
 
 
-$beans = find_beans("4102152497", null, $GLOBALS['current_user'], "accounts,contacts,leads", true);
+$beans = find_beans("4102152497", "accounts,contacts,leads", $GLOBALS['current_user']);
 echo "BEANS:\n" . print_r($beans,true);
 
 echo "ALL DONE";

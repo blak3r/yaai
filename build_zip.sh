@@ -11,7 +11,7 @@ else
 fi
 
 php manifest_updater.php $1
-zip -r yaai-$VERSION.zip * -x .git* *.zip *.bak *.pnps *.pnproj *.eclipse *.svn copyTo*.sh copyFrom*.sh compile*.sh *.bat *.idea manifest_template.php nbproject/*
+zip -r yaai-$VERSION.zip * -x .git* *.zip *.bak *.pnps *.pnproj *.eclipse *.svn copyTo*.sh update_*.sh run_*.sh copyFrom*.sh compile*.sh *.bat *.idea manifest_template.php nbproject/*
 
 echo ""
 echo ""

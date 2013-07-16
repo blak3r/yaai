@@ -32,18 +32,82 @@
  *
  *
 *}
-<script type='text/javascript' src='include/javascript/overlibmws.js'></script>
+<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+<script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
 <BR>
+<BR/>
+<img src="custom/modules/Asterisk/include/images/callinize-configure-logo.png" alt="Callinize Logo" width="350px"><br>
+<img src="https://gitimg.com/blak3r/yaai/config-v3.5/track" alt="Config Logo"><br>
+
+
+
+<!-- @@@@ BEGIN CALLINIZE COMMUNITY ONLY @@@@ -->
+
+<table style="margin-bottom:-30px;">
+    <tr>
+    <TD width="2%"> &nbsp;</td>
+    <td width="40%" valign="top">
+        <div class="know-whos-calling">
+            <div class="item">
+                <div class="left">
+                    <h2>Upgrade Today</h2>
+                    <p>Upgrade from the community edition and get awesome features like:<P>
+                    <UL>
+                        <LI> Mobile App - Log/Create/Track from Anywhere! </LI>
+                        <LI> Support for Leads and custom phone fields. </LI>
+                        <LI> Call Recording / Playback in Sugar</LI>
+                        <LI> Operator Panel - Web switchboard for Asterisk </LI>
+                        <LI> Customer Support </LI>
+                    </UL>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://www.callinize.com/features.html" target="_blank"><button class="btn btn-primary">Learn More</button></a>
+                </div>
+            </div>
+        </div>
+
+    <TD width="75px"> &nbsp;</td>
+    <TD width="50%">
+
+    <div id="myCarousel" class="carousel slide animate" style="width:375px; ">
+        <ol class="carousel-indicators dark">
+            <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+            <li data-target="#myCarousel" data-slide-to="1" class=""></li>
+            <li data-target="#myCarousel" data-slide-to="2" class=""></li>
+        </ol>
+        <div class="carousel-inner">
+            <div class="item active">
+                <img src="custom/modules/Asterisk/include/images/banner_mobile_cropped.jpg" alt="" style="width: 375px; height: 275px; max-height:400px;">
+                <div class="carousel-caption">
+                    <p><strong>Mobile App:</strong> Finally! Your CRM Telephony integration will not require users to be tied down to their desk.
+                </div>
+            </div>
+            <div class="item">
+                <img src="custom/modules/Asterisk/include/images/banner_fop2.jpg" alt="" style="width: 375px; height: 275px; max-height:400px;">
+                <div class="carousel-caption">
+                    <P><strong>Operator Panel</strong> See presence of your coworkers, attended transfer, manage call queues, park calls, etc. -- all from right inside sugar.</P>
+                </div>
+            </div>
+            <div class="item">
+                <img src="custom/modules/Asterisk/include/images/banner_callrecording.jpg" alt="" style="width: 375px; height: 275px; max-height:400px;">
+                <div class="carousel-caption">
+                    <p><strong>Call Recordings</strong> Listen to phone call recordings inside SugarCRM automatically related to the Call.
+                </div>
+            </div>
+        </div>
+
+    </div>
+   </td>
+   </tr>
+   </table>
+
+<!-- @@@@ END CALLINIZE COMMUNITY ONLY @@@@ -->
+
 <form name="ConfigureSettings" enctype='multipart/form-data' method="POST" action="index.php" onSubmit="return (add_checks(document.ConfigureSettings) && check_form('ConfigureSettings'));">
     <input type='hidden' name='action' value='asterisk_configurator'/>
     <input type='hidden' name='module' value='Configurator'/>
     <span class='error'>{$error.main}</span>
 
-    <BR/>
-    <img src="http://www.blakerobertson.com/ext/yaai-config-logo-26.png" alt="YAAI Logo"><br>
-    <img src="https://gitimg.com/blak3r/yaai/config-v3/track" alt="Config Logo"><br>
-
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <!--
         <tr>
 
             <td style="padding-bottom: 2px;">
@@ -52,6 +116,7 @@
                 &nbsp;<input title="{$MOD.LBL_CANCEL_BUTTON_TITLE}"  onclick="document.location.href='index.php?module=Administration&action=index'" class="button"  type="button" name="cancel" value="  {$APP.LBL_CANCEL_BUTTON_LABEL}  " >
             </td>
         </tr>
+        -->
         <tr><td>
                 <br>
                 <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabForm">
@@ -77,7 +142,7 @@
 
     <BR/>
 
-    <h3 style="color:red">You must restart asteriskLogger after making changes to the config in order for them to take effect</h3><br/>
+    <h4 style="color:red">You must restart asteriskLogger after making changes to the config in order for them to take effect</h4><br/>
 
     <div style="padding-top: 2px;">
         <input title="{$APP.LBL_SAVE_BUTTON_TITLE}" class="button"  type="submit" name="save" value="  {$APP.LBL_SAVE_BUTTON_LABEL}  " />
@@ -93,10 +158,15 @@
 <Table width=100% align=center cellspacing="5">
 
     <tr valign=top>
-        <td width="20%">
-            <a href="https://github.com/blak3r/yaai/wiki/User-Manual"><img src="custom/modules/Asterisk/include/documentation.png"> Link to Online Documentation</a>
-
-        <td width="40%" >
+        <td width="33%">
+            <a href="https://github.com/blak3r/yaai/wiki/User-Manual"><img src="custom/modules/Asterisk/include/images/documentation.png"> Link to Online Documentation</a>
+        <td width="33%" >
+            <h4>Stats</h4>
+            <div>
+                <b>Callinize has automatically logged: {$callsLogged} calls for you!</b>
+            </div>
+            <!-- @@@@ BEGIN CALLINIZE COMMUNITY ONLY @@@@ -->
+            <!--
             <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
                 <input type="hidden" name="cmd" value="_s-xclick">
                 <input type="hidden" name="hosted_button_id" value="FA36DGSYQ3NE6">
@@ -104,10 +174,12 @@
                 <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
             </form>
             <P align="center" style="padding-top:0px; margin-top: 0px;width=75%;">
-                Hundreds of man hours have been invested in this project. Please help keep YAAI Free and allow us to keep making YAAI even better.<BR><BR>
-                <b>So far, YAAI has automatically logged: {$callsLogged} calls for you!</b>
+                Hundreds of man hours have been invested in this project. Please consider upgrading your callinize edition or making a donation.<BR><BR>
+                <b>So far, Callinize has automatically logged: {$callsLogged} calls for you!</b>
             </P>
-        <td width="40%">
+            -->
+            <!-- @@@@ END CALLINIZE COMMUNITY ONLY @@@@ -->
+        <td width="33%">
 
             {literal}
                 <!-- Begin MailChimp Signup Form -->
@@ -134,6 +206,14 @@
     </tr>
 </table>
 
+{literal}
+<script type="text/javascript">
+    $(function(){
+        $('.carousel').carousel();
+    });
+    $(".moduleTitle").hide();
+</script>
+{/literal}
 
 
 

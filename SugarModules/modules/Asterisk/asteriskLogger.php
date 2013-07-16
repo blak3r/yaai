@@ -37,11 +37,18 @@
  *
  */
 
-require_once 'parse.php';
+
 //
 // Debug flags
 //
-$dial_events_log = 'c:/sugarcrm/htdocs/dial_events_log_ast1.html';
+
+// IF FollowMe == 0, then call popups are lost after call is answered on a cell phone.
+// If FollowMe == 1, disadvantage is ... call popups don't appear until call is answered on RING GROUPS and QUEUES.
+$FOLLOWME = 1;
+// This is a different log file then one specified in Admin Config.
+// This creates an html formatted, color coded, 1 line per event log.
+// It's a lot easier to visualize what's going on then the standard asterisk log.
+$dial_events_log = '';//'/var/logs/dial_events.html';
 $mysql_loq_queries = 0;
 $mysql_log_results = 0;
 $verbose_log = 0;
@@ -244,7 +251,18 @@ if ($argc > 1 && $argv[1] == "test") {
 
     print "Entered test mode!";
 
+    mt_start();
     $obj = findSugarObjectByPhoneNumber("4102152497");
+    $dur_oldMethod = mt_end();
+
+    mt_start();
+    $obj = findSugarBeanByPhoneNumber("4102152497");
+    $dur_newMethod = mt_end();
+
+    logLine("Old / New: $dur_oldMethod  $dur_newMethod");
+
+    print_r(findSugarBeanByPhoneNumber("7607058888") );
+
     $obj = findSugarObjectByPhoneNumber("4108464565");
     print "findUserByAsteriskExtension(51) returned: " . findUserByAsteriskExtension("51") . "\n";
     print "findUserByAsteriskExtension(207) returned: " . findUserByAsteriskExtension("207") . "\n";
@@ -416,7 +434,6 @@ while (true) {
                     purgeExpiredEventsFromDb(); // clears out db of old events... also called when timeouts occcur
 
                     logLine("! Dial Event src=" . $e['Channel'] . " dest=" . $e['Destination'] . "\n"); //Asterisk Manager 1.1
-                    //print "! Dial Event src=" . $e['Source'] . " dest=" . $e['Destination'] . "\n"; //Asterisk Manager 1.0
 
                     $eChannel = $e['Channel'];
 
@@ -475,7 +492,8 @@ while (true) {
                         }
                     }
 
-                    // Fix for issue on some asterisk 1.8 boxes where CallerId on click to dial is not set. See https://github.com/blak3r/yaai/issues/75
+                    // Fix for issue on some asterisk 1.8 boxes where CallerId on click to dial is not set.
+                    // See https://github.com/blak3r/yaai/issues/75
                     if ($tmpCallerID == '<unknown>' && !empty($e['ConnectedLineNum'])) {
                         $tmpCallerID = trim($e['ConnectedLineNum']);
 
@@ -556,32 +574,42 @@ while (true) {
                                 // Extract from eDestination
                                 $inboundExtension = extractExtensionNumberFromChannel($eDestination);
                             }
+
+                            $userDevice = $userExtension; // Not completely thought out... might be more cases to consider.
+
+
+                            // Here we are looking back in time...
+                            // We look into the call log to see if there are events with the same asterisk_id (which implies it's the same original call that's branched off to several different extensions).
+                            // We then look at the original call record's inbound extension and use it!
+
+                            if( $FOLLOWME == 1) {
+                                $asteriskId = AMI_getUniqueIdFromEvent($e);
+                                $query = sprintf("select user_extension, inbound_extension from asterisk_log where asterisk_id = '$asteriskId' order by id asc");
+                                $res = mysql_checked_query($query);
+                                $prevRowDetails = mysql_fetch_array($res);
+                                if( !empty( $prevRowDetails['inbound_extension'])) {
+                                    $inboundExtension = $prevRowDetails['inbound_extension'];
+                                    dev_logString("Using $inboundExtension as this entries inbound extension");
+
+                                    // We're detecting if this is calling an external line... like a cell
+                                    if( $userExtension > 7 ) {
+                                        dev_logString("Using $userExtension as this USER ext (instead of $userExtension)");
+                                        $userExtension = $prevRowDetails['user_extension'];
+                                    }
+                                }
+                            }
+
+
+
+
                             logLine("  inbound_extension = " . $inboundExtension );
 
-                            $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestamp_call, asterisk_dest_id,user_extension,inbound_extension) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s','%s','%s')", AMI_getUniqueIdFromEvent($e), $callRecordId, $eDestination, $eChannel, 'Dial', 'I', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $e['DestUniqueID'], $userExtension, $inboundExtension);
+                            $query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, remote_channel, callstate, direction, CallerID, timestamp_call, asterisk_dest_id,user_extension,inbound_extension,user_device) VALUES('%s','%s','%s','%s','%s','%s','%s',%s,'%s','%s','%s','%s')", AMI_getUniqueIdFromEvent($e), $callRecordId, $eDestination, $eChannel, 'Dial', 'I', $tmpCallerID, 'FROM_UNIXTIME(' . time() . ')', $e['DestUniqueID'], $userExtension, $inboundExtension, $userDevice);
                             $callDirection = 'Inbound';
                             dev_logString("Insert Inbound");
                             logLine("Inbound state detected... $asteriskMatchInternal is astMatchInternal eChannel= " . $eChannel . ' eDestination=' . $eDestination . "\n");
 
-							//FIXME REENABLE
-                            if( $inboundExtension == "211" || $inboundExtension == "52") {
-                                // TODO Fix
-                                callinize_push($inboundExtension,$tmpCallerID, $callRecordId, "+14102152497");
                             }
-                            else if( $inboundExtension == "216") {
-                                // TODO Fix
-                                callinize_push($inboundExtension,$tmpCallerID, $callRecordId, "+14153435295");
-                            }
-							else if( $inboundExtension == "215") {
-                                // TODO Fix
-                                callinize_push($inboundExtension,$tmpCallerID, $callRecordId, "+14153435295");
-                            }
-                            else if( $inboundExtension == "217") {
-                                // TODO Fix
-                                callinize_push($inboundExtension,$tmpCallerID, $callRecordId, "+12026883230");
-                            }
-
-                        }
                         mysql_checked_query($query);
 
                         //
@@ -816,7 +844,10 @@ while (true) {
                                             'name' => 'asterisk_caller_id_c',
                                             'value' => $rawData['callerID']
                                         ),
-
+                                        array(
+                                            'name' => 'asterisk_call_id_c',
+                                            'value' => empty($rawData['asterisk_id2']) ? $rawData['asterisk_id'] : $rawData['asterisk_id2']
+                                        ),
                                         array(
                                             'name' => 'asterisk_user_extension_c',
                                             'value' => $direction['user_extension']
@@ -1011,6 +1042,10 @@ while (true) {
                                             'value' => $rawData['callerID']
                                         ),
                                         array(
+                                            'name' => 'asterisk_call_id_c',
+                                            'value' => $rawData['asterisk_id']
+                                        ),
+                                        array(
                                             'name' => 'asterisk_user_extension_c',
                                             'value' => $direction['user_extension']
                                         ),
@@ -1170,7 +1205,7 @@ while (true) {
                   // NOTE: AMI v1.0 will not support Ring Groups and Queues like AMI v1.1 does until it's ported.
                };
 
-// Reset event buffer
+                // Reset event buffer
                 $event = '';
             }
         }
@@ -1216,140 +1251,6 @@ exit(0);
 // ******************
 // Helper functions *
 // ******************
-
-    /**
-     * Method which initiates the callinize push notification to cell phones.
-     * @param $inboundExtension - this is the cell phone number to send push notification to
-     * @param $phone_number - this is the number of the person calling.
-     * @param $call_record_id - record id of the call.
-     * @param $cell_number - is the phone number who's being called.
-     * @return bool
-     */
-    function callinize_push($inboundExtension,$phone_number, $call_record_id, $cell_number)
-    {
-        global $sugar_config;
-        global $last_push_time;
-        $now_time = time();
-        $duration = abs($last_push_time - $now_time);
-        if( strlen($inboundExtension) < 4 && $duration > 10) {
-            $last_push_time = time();
-            logLine(getTimeStamp() . "### Callinize START ####");
-            logLine(getTimeStamp() . "Last Push was $duration secs ago");
-			mt_start();
-
-            $assocAccount = findSugarAccountByPhoneNumber($phone_number);
-            if ($assocAccount != FALSE) {
-                logLine("Found a matching account, relating to account instead of contact\n");
-                $beanID = $assocAccount['values']['id'];
-                $beanType = $assocAccount['type'];
-                $parentType = 'Accounts';
-                $parentID = $beanID;
-            } else {
-                $assoSugarObject = findSugarObjectByPhoneNumber($phone_number);
-                $beanID = $assoSugarObject['values']['id'];
-                $beanType = $assoSugarObject['type'];
-            }
-            // FIXME doesn't handle multiple matching contacts right now.
-            logLine(" Details:  callId:" . $call_record_id . " beanId:" . $beanID . " " . $beanType . " x" . $inboundExtension . " targetPhone: " . $cell_number);
-
-            // GET Contact Info
-            $sql = "select contacts.*, accounts.name from contacts left join accounts_contacts on contacts.id = accounts_contacts.contact_id left join accounts on accounts_contacts.account_id = accounts.id where contacts.id = '$beanID'";
-            $queryResult = mysql_checked_query($sql);
-            if ($queryResult === FALSE) {
-                logLine("! Contact lookup failed");
-                return FALSE;
-            }
-            else {
-                $row = mysql_fetch_assoc($queryResult);
-				
-				$emailSql = "select email_addresses.email_address from email_addr_bean_rel left join email_addresses on email_addr_bean_rel.email_address_id = email_addresses.id where email_addr_bean_rel.bean_id = '" . $row['id'] . "'";
-				logLine("Email SQL: " . $emailSql);
-				$queryEmailResult = mysql_checked_query($emailSql);
-				$emailRow = mysql_fetch_assoc($queryEmailResult);
-            }
-			
-
-			$dur_search = mt_end();
-
-            // TODO Finalize exactly what we let the backend handle... $body below is all the contact info.
-            $body = json_encode($row);
-
-            $c = array();
-
-            // Actions
-            $c['action'] = 'add';
-            $c['send_push'] = 'true';
-
-            // Organization Credentials
-            $c['organizationId'] =  $sugar_config['asterisk_callinize_api_organizationId'];
-            $c['organizationSecret'] = $sugar_config['asterisk_callinize_api_organizationSecret'];
-
-
-            // Call Table Stuff
-            $c['callerName'] = $row['first_name'] . " " . $row['last_name'];
-            $c['callerAccountName'] = empty($row['name']) ? $row['department'] : $row['name'];  // TODO remove department here.
-            $c['callerShortInfo'] = $row['description']; // TODO change this to be the last note logged.
-			$c['callerDescription'] = $row['description'];
-			//$c['callerLongInfo'] = 
-			$c['callerEmail'] =  $emailRow['email_address'];//"todo@todotown.com";
-            $c['callerTitle'] = $row['title'];
-            $c['callerCrmId'] = $row['id'];
-            $c['crmCallRecordId'] = $call_record_id;
-            $c['callerPhone'] = $phone_number;  // e164 TODO
-            $c['userPhone'] = $cell_number; // e164 TODO
-            $c['inboundExtension'] = $inboundExtension;
-            //$c['provider'] = "parse";
-
-            logLine( print_r($row,true) );
-
-            // Creates the message for the push notification
-            if( !empty($row['first_name']) ) {
-                $pushMessage = "x$inboundExtension: {$row['first_name']} {$row['last_name']},{$row['title']}\n{$c['caller_account']}\n{$row['description']}";
-                $c['contactCount'] = 1;
-				$dur_opencnam = "N/A";
-            }
-            else {
-                require_once 'include/opencnam.php';
-                $opencnam = new opencnam($sugar_config['asterisk_opencnam_account_sid'], $sugar_config['asterisk_opencnam_auth_token']);
-                logLine(getTimeStamp() . " opencnam Start");
-                mt_start();
-                $callerid = $opencnam->fetch($phone_number);
-				$dur_opencnam = mt_end();
-                logLine(getTimeStamp() . " OpenCNAM took: " . $dur_opencnam);
-                $callerIdInfo = "";
-                if( !empty($callerid) ) {
-                    $callerIdInfo = "CallerID: " . $callerid;
-                }
-                $pushMessage = "x$inboundExtension: Not in CRM\n" . $callerIdInfo;
-                $c['contactCount'] = 0;
-            }
-            $c['message'] = $pushMessage;
-            $c['searchTime'] = intval($dur_search*1000);
-
-            // Moved delay to parse
-			//mt_start();
-			//$sleep = (4.5-$dur_search)*1000000;
-			//usleep($sleep);
-			//$dur_sleep = mt_end();
-            $dur_sleep = 0;
-            logLine( print_r($c, true) );
-            $parse = new ParseBackendWrapper();
-            mt_start();
-			
-		
-            $add_call_resp = $parse->customCodeMethod('manage_calls', $c);
-			$dur_parse = mt_end();
-            dev_logString("Callinize push took " . $dur_parse . "s response: " . $add_call_resp );
-            //$add_call_resp = $parse->customCodeMethod('add_call', $c);
-            logLine(getTimeStamp() . " Add Call Response: " . $add_call_resp . "\nTook: $dur_parse");
-            //$send_push_resp = $parse->customCodeMethod('send_push', $c);
-            //logLine("Send Push Response: " . $send_push_resp);
-			logLine(getTimeStamp() . " Callinize Timing: search: $dur_search opencnam: $dur_opencnam parse: $dur_parse  delay=$dur_sleep");
-    }
-    else {
-        logLine("Callinize Push Surpressed... last push was $duration secs ago");
-    }
-}
 
 /**
  * Removes calls from asterisk_log that have expired or closed.
@@ -1659,6 +1560,65 @@ function decode_name_value_list(&$nvl) {
         $result[$key] = $val;
     }
     return $result;
+}
+
+/**
+ *
+ * @param $origPhoneNumber
+ * @param bool $stopOnFind -Controls whether or not to keep searching down the list of modules to find a match...
+ *                          For example, if a match in contacts is found... it will not try leads.
+ * @param bool $returnMultipleMatches - when true it returns all matches (callinize push uses true, unattended will return false)
+ *                                      think of this as attended vs. unattended mode... true it returns all the matches to the user so
+ *                                      they can see all the results.
+ * @return An|array|null
+ */
+function findSugarBeanByPhoneNumber($origPhoneNumber,$stopOnFind=false, $returnMultipleMatches=false) {
+    global $sugar_config;
+    require_once("include/sugar_rest.php");
+    $url = $sugar_config["site_url"] .  '/custom/service/callinize/rest.php';
+    $sugar = new Sugar_REST($url,$sugar_config['asterisk_soapuser'], $sugar_config['asterisk_soappass']);
+    $params = array();
+    $params['phone_number'] = $origPhoneNumber;
+    $params['module_order'] = "accounts,contacts,leads";
+    $params['stop_on_find'] = $stopOnFind;
+    $beans = $sugar->custom_method("find_beans_with_phone_number", $params);
+
+    $retVal = null;
+
+    if( count($beans) == 1 ) {
+        $retVal = $beans; // Do not return beans[0]!
+    }
+    else if( count($beans) > 1 ) {
+        // Check if all beans are from the same parent
+        $firstParentId = $beans[0]['parent_id'];
+        $moreThanOneParent = false;
+        for( $i=1; $i < count($beans); $i++ ) {
+            if( $beans[$i]['parent_id'] !== $firstParentId) {
+                $moreThanOneParent = true;
+                break;
+            }
+        }
+        if( $moreThanOneParent ) {
+            logLine("Found Multiple matching beans and they have different parents.  Logging to noone");
+            if( $returnMultipleMatches ) {
+                $retVal = $beans;
+            }
+            else {
+                $retVal = null;
+            }
+        }
+        else {
+            logLine("Found multiple matching beans but they all share the same parent.  Logging to parent");
+            if( !empty($firstParentId) ) {
+                $retVal = array();
+                $retVal['bean_id'] = $beans[0]['parent_id'];
+                $retVal['bean_name'] = $beans[0]['parent_name'];
+                $retVal['bean_link'] = $beans[0]['parent_link'];
+            }
+        }
+    }
+
+    return $retVal;
 }
 
 //
@@ -2224,15 +2184,15 @@ function logLine($str, $logFile = "default") {
         else {
             $myFile = $logFile;
         }
-        try {
+      //  try {
             $fh = fopen($myFile, 'a');
             fwrite($fh, $str);
             fclose($fh);
-        }
-        catch(Exception $err) {
+      //  }
+      //  catch(Exception $err) {
             // ignore errors
-            print "Error: unable to logLine to $myFile: " . $err . '\n';
-        }
+      //      print "Error: unable to logLine to $myFile: " . $err . '\n';
+      //  }
     }
 }
 
@@ -2332,5 +2292,3 @@ function was_call_answered($id) {
         return 1;
     }
 }
-?>
-

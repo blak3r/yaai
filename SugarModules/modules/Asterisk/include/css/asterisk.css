@@ -67,6 +67,11 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
 .caller_id_box {
     display:none;
 }
+
+.parent_name_box {
+    display:none;
+}
+
 .callbox {
 	position: fixed;
 	position:expression("absolute");
@@ -183,7 +188,7 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
 	float: left;
 }
 
-.multiplematchingcontacts, .multiplematchingaccounts, .singlematchingcontact, .nomatchingcontact, .singlematching {
+.multiplematchingcontacts, .multiplematchingaccounts, .singlematchingcontact, .nomatchingcontact {
         display: none;
 }
 
@@ -209,11 +214,11 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
 .ui-button .ui-icon.ui-icon-custom-phone { background-image: url('../images/dialpad-grid.png'); }
 .ui-button .ui-icon.ui-icon-custom-unrelate { background-image: url('../images/unrelate-call-icon.png'); }
 
-.multiplematchingcontacts, .multiplematchingaccounts, .singlematchingcontact, .nomatchingcontact, .singlematching {
+.multiplematchingcontacts, .multiplematchingaccounts, .singlematchingcontact, .nomatchingcontact {
     display: none;
 }
 
-.li_create_new_contact, .li_relate_to_account, .li_relate_to_contact, .li_block_call {
+.li_create_new_contact, .li_create_new_contact, .li_relate_to_account, .li_relate_to_contact, .li_relate_to_lead, .li_block_call {
     display: none;
 }
 
@@ -319,12 +324,14 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
 	background-repeat: no-repeat;
 }
 
+/*
 .dropdown-menu .undo A { background-image: url(icons/arrow-curve-180-left.png); }
 .dropdown-menu .redo A { background-image: url(icons/arrow-curve.png); }
 .dropdown-menu .cut A { background-image: url(icons/scissors.png); }
 .dropdown-menu .copy A { background-image: url(icons/document-copy.png); }
 .dropdown-menu .paste A { background-image: url(icons/clipboard.png); }
 .dropdown-menu .delete A { background-image: url(icons/cross-script.png); }
+*/
 
 .block-reason {
     display: block;

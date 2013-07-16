@@ -22,7 +22,7 @@
          *    'parent_name' == Leads can put company name here... note: parent_module should be set to leads, and parent_id is also leads.
          *
          */
-        function get_beans($session, $phone_number)
+        function find_beans_with_phone_number($session, $phone_number, $module_order, $stop_on_find)
         {
             $GLOBALS['log']->info('Begin: SugarWebServiceImplv4_1_custom->example_method');
             $error = new SoapError();
@@ -37,7 +37,7 @@
 				//$retVal['data'] = '';
 			}
 			else {
-                $retVal =  find_contacts($phone_number,null,$GLOBALS['current_user'] );
+                $retVal =  find_beans($phone_number,$module_order, $stop_on_find,$GLOBALS['current_user'] );
           	}
 
 			

@@ -23,6 +23,7 @@ if( empty($manifest) ) {
 }
 //print $manifest;
 
+$manifestOutput = '';
 if( $argc > 1 ) {
 
     $manifestOutput = str_replace( array("@@VERSION@@", "@@PUBLISH_DATE@@","@@WARNING@@"),
@@ -32,7 +33,7 @@ if( $argc > 1 ) {
 
 }
 else {
-    print "ERROR: no version argment provided.";
+    print "ERROR: no version argument provided.";
 
 }
 
@@ -40,5 +41,3 @@ print $manifestOutput;
 
 
 file_put_contents( $OUTPUT_FILE, $manifestOutput);
-
-?>
