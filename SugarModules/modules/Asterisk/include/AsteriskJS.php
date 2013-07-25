@@ -56,7 +56,7 @@ class AsteriskJS {
             if(!empty( $GLOBALS['current_user']->asterisk_ext_c) &&
                (($GLOBALS['current_user']->asterisk_inbound_c == '1') || ($GLOBALS['current_user']->asterisk_outbound_c == '1')))
             {
-                $yaaiDevMode = $GLOBALS['sugar_config']['asterisk_yaai_dev'];
+                $callinizeDevMode = $GLOBALS['sugar_config']['asterisk_callinize_dev'];
 
                 $poll_rate = !empty($GLOBALS['sugar_config']['asterisk_listener_poll_rate']) ? $GLOBALS['sugar_config']['asterisk_listener_poll_rate'] : "10000";
                 $user_extension = !empty($GLOBALS['current_user']->asterisk_ext_c) ? $GLOBALS['current_user']->asterisk_ext_c : "Not Configured!";
@@ -70,23 +70,23 @@ class AsteriskJS {
                 $fop_enabled = !empty($fop_url) ? 1 : 0;
 
                 //JS Global Variables
-                echo '<script type="text/javascript">window.yaai_dev = ' . $GLOBALS['sugar_config']['asterisk_yaai_dev'] . ';</script>';
-                echo '<script type="text/javascript">window.yaai_debug = ' . $GLOBALS['sugar_config']['asterisk_yaai_debug'] . ';</script>';
-                echo '<script type="text/javascript">window.yaai_poll_rate = ' . $poll_rate . ';</script>';
-                echo '<script type="text/javascript">window.yaai_user_extension = ' . "'$user_extension'" . ';</script>';
-                echo '<script type="text/javascript">window.yaai_current_user_id = ' . "'$current_user_id'" . ';</script>';
-                echo '<script type="text/javascript">window.yaai_fop_user = "' . $fop_user . '";</script>';
-                echo '<script type="text/javascript">window.yaai_fop_pass = "' . $fop_pass . '";</script>';
-                echo '<script type="text/javascript">window.yaai_fop_url= "' . $fop_url . '";</script>';
-                echo '<script type="text/javascript">window.yaai_fop_enabled= ' . $fop_enabled . ';</script>';
-                echo '<script type="text/javascript">window.yaai_show_transfer_button= ' . $GLOBALS['sugar_config']['asterisk_transfer_button_enabled'] . ';</script>';
-                echo '<script type="text/javascript">window.yaai_relate_to_account_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_account_enabled'] . ';</script>';
-                echo '<script type="text/javascript">window.yaai_relate_to_contact_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_contact_enabled'] . ';</script>';
-                echo '<script type="text/javascript">window.yaai_relate_to_lead_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_lead_enabled'] . ';</script>';
-                echo '<script type="text/javascript">window.yaai_create_new_contact_enabled = ' . $GLOBALS['sugar_config']['asterisk_create_new_contact_enabled'] . ';</script>';
-                echo '<script type="text/javascript">window.yaai_create_new_lead_enabled = ' . $GLOBALS['sugar_config']['asterisk_create_new_lead_enabled'] . ';</script>';
-                echo '<script type="text/javascript">window.yaai_block_button_enabled = ' . $GLOBALS['sugar_config']['asterisk_block_button_enabled'] . ';</script>';
-                echo '<script type="text/javascript">window.yaai_recording_enabled = ' . $GLOBALS['sugar_config']['asterisk_recordings_enabled'] . ';</script>';
+                echo '<script type="text/javascript">window.callinize_dev = ' . $GLOBALS['sugar_config']['asterisk_callinize_dev'] . ';</script>';
+                echo '<script type="text/javascript">window.callinize_debug = ' . $GLOBALS['sugar_config']['asterisk_callinize_debug'] . ';</script>';
+                echo '<script type="text/javascript">window.callinize_poll_rate = ' . $poll_rate . ';</script>';
+                echo '<script type="text/javascript">window.callinize_user_extension = ' . "'$user_extension'" . ';</script>';
+                echo '<script type="text/javascript">window.callinize_current_user_id = ' . "'$current_user_id'" . ';</script>';
+                echo '<script type="text/javascript">window.callinize_fop_user = "' . $fop_user . '";</script>';
+                echo '<script type="text/javascript">window.callinize_fop_pass = "' . $fop_pass . '";</script>';
+                echo '<script type="text/javascript">window.callinize_fop_url= "' . $fop_url . '";</script>';
+                echo '<script type="text/javascript">window.callinize_fop_enabled= ' . $fop_enabled . ';</script>';
+                echo '<script type="text/javascript">window.callinize_show_transfer_button= ' . $GLOBALS['sugar_config']['asterisk_transfer_button_enabled'] . ';</script>';
+                echo '<script type="text/javascript">window.callinize_relate_to_account_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_account_enabled'] . ';</script>';
+                echo '<script type="text/javascript">window.callinize_relate_to_contact_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_contact_enabled'] . ';</script>';
+                echo '<script type="text/javascript">window.callinize_relate_to_lead_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_lead_enabled'] . ';</script>';
+                echo '<script type="text/javascript">window.callinize_create_new_contact_enabled = ' . $GLOBALS['sugar_config']['asterisk_create_new_contact_enabled'] . ';</script>';
+                echo '<script type="text/javascript">window.callinize_create_new_lead_enabled = ' . $GLOBALS['sugar_config']['asterisk_create_new_lead_enabled'] . ';</script>';
+                echo '<script type="text/javascript">window.callinize_block_button_enabled = ' . $GLOBALS['sugar_config']['asterisk_block_button_enabled'] . ';</script>';
+                echo '<script type="text/javascript">window.callinize_recording_enabled = ' . $GLOBALS['sugar_config']['asterisk_recordings_enabled'] . ';</script>';
 
                 echo '<script type="text/javascript"> if (!window.console) console = {log: function() {}}; </script>'; // Prevents bug in IE (See Issue #108)
 
@@ -97,7 +97,7 @@ class AsteriskJS {
                     echo '<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js" type="text/javascript"></script>';
                 }
 
-                if( $yaaiDevMode ) {
+                if( $callinizeDevMode ) {
                     // This version includes the compiler and the non compiled template
                     echo '<script src="custom/modules/Asterisk/include/javascript/offlineMode/handlebars-1.0.rc.1.js"></script>';
                     $template = file_get_contents( "custom/modules/Asterisk/include/template/call-template.html" );
@@ -111,13 +111,18 @@ class AsteriskJS {
                 echo '<script src="custom/modules/Asterisk/include/javascript/jquery.fancybox.js" type="text/javascript" ></script>';
                 //echo '<script src="custom/modules/Asterisk/include/javascript/jquery.dropdown.js" type="text/javascript" ></script>';
 
-                //JS YAAI
+                //JS CALLINIZE
                 if($GLOBALS['current_user']->asterisk_inbound_c == '1') {
                     echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/callPopups.js"></script>';
                 }
                 if($GLOBALS['current_user']->asterisk_outbound_c == '1') {
                     echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/dialout.js"></script>';
                 }
+
+                // @@@@ BEGIN CALLINIZE SIP ONLY @@@@
+                echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/SIPml-api.js"></script>';
+                echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/sipml-callinize.js"></script>';
+                // @@@@ END CALLINIZE SIP ONLY @@@@
 
                 //CSS Third-Party Libraries
                 if( $yaaiDevMode ) {
@@ -128,7 +133,7 @@ class AsteriskJS {
 
                 echo '<link rel="stylesheet" type="text/css" href="custom/modules/Asterisk/include/css/jquery.fancybox.css" media="screen" />';
 
-                //CSS YAAI
+                //CSS CALLINIZE
 
                 echo '<link rel="stylesheet" type="text/css" media="all" href="custom/modules/Asterisk/include/css/asterisk.css" />';
                 echo '<!--[if lte IE 7]>';

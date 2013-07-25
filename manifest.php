@@ -61,9 +61,9 @@ $manifest = array (
                    'icon' => '',
                    'is_uninstallable' => true,
                    'name' => 'Callinize - community Edition',
-                   'published_date' => 'Jul 15, 2013',
+                   'published_date' => 'Jul 25, 2013',
                    'type' => 'module',
-                   'version' => '3.5.5',
+                   'version' => '3.5.6',
                    'remove_tables' => 'true',  /** This does absolutely nothing since our asterisk log table is created manually instead of as a bean **/
                    );
 

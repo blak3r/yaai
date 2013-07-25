@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>YAAI Fake Dialer</title>
+    <title>Callinize Fake Dialer</title>
 <!--    <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.0/themes/base/jquery-ui.css" />-->
     <link rel="stylesheet" href="custom/modules/Asterisk/include/javascript/offlineMode/jquery-ui.css" />
     <script src="custom/modules/Asterisk/include/javascript/offlineMode/jquery-1.8.2.min.js"></script>

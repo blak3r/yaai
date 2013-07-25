@@ -43,6 +43,28 @@
 			
             return $retVal;//$session . " oid: " . $oid;
         }
+
+        function originate_call($session, $from_extension, $toNumber) {
+            $GLOBALS['log']->info('Begin: SugarWebServiceImplv4_1_custom->example_method');
+            $error = new SoapError();
+            $retVal = array();
+
+
+            //authenticate
+            if (!self::$helperObject->checkSessionAndModuleAccess($session, 'invalid_session', '', '', '',  $error))
+            {
+                $GLOBALS['log']->info('End: SugarWebServiceImplv4_1_custom->example_method.');
+                //$retVal['status'] = "ERROR: Invalid Session ID";
+                //$retVal['data'] = '';
+            }
+            else {
+                require_once 'custom/modules/Asterisk/include/callinize_db.php"';
+                originate($from_extension, $toNumber);
+            }
+
+
+            return $retVal;//$session . " oid: " . $oid;
+        }
     }
 
 ?>

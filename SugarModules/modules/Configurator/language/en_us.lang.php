@@ -36,6 +36,10 @@
 
 if (!isset($mod_strings)) { $mod_strings = array(); }
 
+
+$mod_strings['LBL_ASTERISK_LICENSE'] = 'License Key';
+$mod_strings['LBL_ASTERISK_LICENSE_DESC'] = 'Enter the key provided to you when you purchased Callinize.';
+
 $mod_strings['LBL_ASTERISK_HOST'] = 'Asterisk Manager Host';
 $mod_strings['LBL_ASTERISK_HOST_DESC'] = 'Set this to the hostname or IP address of the server that asterisk is running on.  If it is the same as your sugarcrm server, set to 127.0.0.1';
 $mod_strings['LBL_ASTERISK_PORT'] = 'Asterisk Manager Port';
@@ -49,7 +53,7 @@ $mod_strings['LBL_ASTERISK_DIALINPREFIX'] = 'Dialin Prefix';
 $mod_strings['LBL_ASTERISK_DIALINPREFIX_DESC'] = 'Strips these numbers from the inbound call... for example if incoming calls show up as +1########## but you dont have +1 in the phone fields for contacts, you would put +1 in this field. If inbound calls are not being related to contacts in your database, you might need to tweak this setting.';
 $mod_strings['LBL_ASTERISK_CONTEXT'] = 'Dial Context';
 $mod_strings['LBL_ASTERISK_EXPR'] = 'Dialpattern for inbound/outbound matching';
-$mod_strings['LBL_ASTERISK_EXPR_DESC'] = 'Regular expression to match incoming calls';
+$mod_strings['LBL_ASTERISK_EXPR_DESC'] = 'Regular expression which is applied to the Channel and Destination elements of an AMI Dial.  This regex needs to be able to detect whether the Channel or the Destination is the local side (ie none external) channel for the phone call.  This is then used to determine if the call is inbound or outbound.  This should not need to be changed unless your trunk shows up as something like SIP/ followed by 3 digits.';
 $mod_strings['LBL_ASTERISK_DIALOUT_CHANNEL'] = 'Dialout Channel';
 $mod_strings['LBL_ASTERISK_DIALOUT_CHANNEL_DESC'] = 'Regular expression the ### will be replaced with current users extension. (Always leave the ### as 3 digits regardless of how many actual digits your extensions are).';
 $mod_strings['LBL_ASTERISK_DIALIN_EXT_MATCH'] = 'Custom User Ext Match Regex';
@@ -92,14 +96,13 @@ $mod_strings['LBL_ASTERISK_DIGITS_TO_MATCH_DESC'] = 'Specifies the number of dig
 $mod_strings['LBL_ASTERISK_LOG_FILE'] = 'Log File Path for asteriskLogger';
 $mod_strings['LBL_ASTERISK_LOG_FILE_DESC'] = 'Enter a file path to enable logging.  Important: make sure asterisk logger has permissions to write to this file.  If it does not, asterisk logger will crash.';
 $mod_strings['LBL_ASTERISK_EVENT_LOG_FILE'] = 'Dial Event Log File Path';
-$mod_strings['LBL_ASTERISK_EVENT_LOG_FILE_DESC'] = 'Creates a condensed event log which is easier to see the big picture.  Was originally developed to facilitate understanding how asterisk generates ids in ring groups / call queue cases.  Each ID is color coded. Should be left blank in production.  This log file is not rotated. Important: make sure asterisk logger has permissions to write to this file.';
+$mod_strings['LBL_ASTERISK_EVENT_LOG_FILE_DESC'] = 'Creates a condensed event log which is html formatted, color coded, 1 line per event.  Makes it easier to see the big picture as the asterisk log is quite verbose.  Was originally developed to facilitate understanding how asterisk generates ids in ring groups / call queue cases.  Should be left blank in production.  This log file is not rotated. Make sure the process asteriskLogger is running as has appropriate permissions to write to this file.';
 
 
 $mod_strings['LBL_ASTERISK_RECORDINGS_ENABLED'] = "Enable Call Recording Downloads (WIP)";
 $mod_strings['LBL_ASTERISK_RECORDINGS_ENABLED_DESC'] = 'This feature will allow playback of call recordings.  You will need to configure asterisk to recording calls automatically for the appropriate extensions.  You will also need to have file system access to recordings folder.  See the user guide for more info';
 $mod_strings['LBL_ASTERISK_RECORDINGS_PATH'] = 'Asterisk Call Recordings Path (WIP)';
 $mod_strings['LBL_ASTERISK_RECORDINGS_PATH_DESC'] = 'Set this to the path where recordings can be found. If asterisk is on a different machine from your Sugar Instance you will need to setup a network file share or some type of syncing solution.  See the user guide for more info on this feature.';
-
 
 $mod_strings['LBL_ASTERISK_FOP_URL'] = 'Flash Operator Panel URL';
 $mod_strings['LBL_ASTERISK_FOP_URL_DESC'] = 'If you have the FOP2 extension installed on your asterisk box, specify the URL to use here.  Leave it blank to leave it disabled.';
@@ -114,6 +117,7 @@ $mod_strings['LBL_ASTERISK_RELATE_TO_LEAD_ENABLED'] = 'Show Relate To Lead';
 $mod_strings['LBL_ASTERISK_CREATE_NEW_CONTACT_ENABLED'] = 'Show Create New Contact';
 $mod_strings['LBL_ASTERISK_CREATE_NEW_LEAD_ENABLED'] = 'Show Create New Lead';
 $mod_strings['LBL_ASTERISK_MAX_POPUPS'] = 'Sets the Max Call Popups';
+$mod_strings['LBL_ASTERISK_MAX_POPUPS_DESC'] = 'Sets the Max Number of Popups that will appear on users screen.  This is good for users who get a lot of calls.  They might return to desk and have to X out of a lot of call popups.';
 $mod_strings['LBL_ASTERISK_FILTERED_CALL_STATES'] = 'Filtered Call States';
 $mod_strings['LBL_ASTERISK_WINDOW_HEIGHT'] = 'Custom Window Height';
 
@@ -128,12 +132,10 @@ $mod_strings['LBL_ASTERISK_CONTACT_PHONE_FIELDS_DESC'] = "These are the phone fi
 $mod_strings['LBL_ASTERISK_LEAD_PHONE_FIELDS'] = "Lead Phone Fields";
 $mod_strings['LBL_ASTERISK_LEAD_PHONE_FIELDS_DESC'] = "These are the phone fields that will be searched when trying to find matching leads.  If you've created your own custom fields, you can add them to the list here.  Be sure to add: Comma separated field names ending with _c and no spaces.";
 
-$mod_strings['LBL_ASTERISK_YAAI_DEV'] = "Dev Mode Enabled";
-$mod_strings['LBL_ASTERISK_YAAI_DEV_DESC'] = "Enabled developer mode, handlebars template is compiled in browser (rather then pre-compiled).  Set to 0 unless you have a reason to.";
-$mod_strings['LBL_ASTERISK_YAAI_DEBUG'] = "Debug Mode Enabled";
-$mod_strings['LBL_ASTERISK_YAAI_DEBUG_DESC'] = "Provides debug information about call popups in the Console.log (should be 0 in production).";
+$mod_strings['LBL_ASTERISK_CALLINIZE_DEV'] = "Dev Mode Enabled";
+$mod_strings['LBL_ASTERISK_CALLINIZE_DEV_DESC'] = "Enabled developer mode, handlebars template is compiled in browser (rather then pre-compiled).  Set to 0 unless you have a reason to.";
+$mod_strings['LBL_ASTERISK_CALLINIZE_DEBUG'] = "Debug Mode Enabled";
+$mod_strings['LBL_ASTERISK_CALLINIZE_DEBUG_DESC'] = "Provides debug information about call popups in the Console.log (should be 0 in production).";
 
-
-// C:\yaai\SugarModules\modules\Configurator>php configuratorGeneratorUtil.php > asterisk_configurator_table.tpl
 
 ?>

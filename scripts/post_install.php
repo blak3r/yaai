@@ -31,6 +31,11 @@ function post_install() {
 	  'auth' => true,
 	);
 
+    $entry_point_registry['AsteriskCallDownload'] = array (
+        'file' => 'custom/modules/Asterisk/include/callDownload.php',
+        'auth' => true,
+    );
+
     $entry_point_registry['AsteriskFakeCall'] = array (
         'file' => 'custom/modules/Asterisk/include/tests/fake_dialer/test_ui.php',
         'auth' => true,

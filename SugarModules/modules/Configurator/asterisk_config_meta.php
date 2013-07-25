@@ -3,6 +3,9 @@
 // This $config_meta array is used by configuratorGeneratorUtil.php to automatically generate the .tpl file html
 // The default type = "varchar" & by default it's 'required'
 // Put all the config params in order.  They're processed sequentially, each time the 'section' changes a new section header is placed in the template.
+
+$config_meta['asterisk_license'] = array('default' => '', 'section'=>'License');
+
 $config_meta['asterisk_host'] 	= array('default' => '127.0.0.1', 'section'=>'Asterisk Server Settings');
 $config_meta['asterisk_port'] 	= array('default' => '5038', 'type'=>'int', 'section'=>'Asterisk Server Settings');
 $config_meta['asterisk_user'] = array('default' => 'ami_user', 'section'=>'Asterisk Server Settings');
@@ -42,12 +45,11 @@ $config_meta['asterisk_create_new_contact_enabled'] = array('type'=>"bool", 'def
 $config_meta['asterisk_contact_phone_fields'] = array('default' => 'phone_work,phone_home,phone_mobile,phone_other,assistant_phone', 'section' => 'Phone Fields');
 $config_meta['asterisk_account_phone_fields'] = array('default' => 'phone_office,phone_alternate', 'section' => 'Phone Fields');
 
-$config_meta['asterisk_yaai_dev'] = array('type'=>"bool", 'default' => '0', 'section' => 'Developer');
-$config_meta['asterisk_yaai_debug'] = array('type'=>"bool", 'default' => '0', 'section' => 'Developer');
+$config_meta['asterisk_callinize_dev'] = array('type'=>"bool", 'default' => '0', 'section' => 'Developer');
+$config_meta['asterisk_callinize_debug'] = array('type'=>"bool", 'default' => '0', 'section' => 'Developer');
 
 
 
 //$config_meta['asterisk_max_popups'] = array('default' => '5', 'section'=>'Popup UI');
 //$config_meta['asterisk_filtered_call_states'] = array('default' => '', 'section'=>'Popup UI');
 //$config_meta['asterisk_window_height'] = array('default' => '', 'section'=>'Popup UI');
-// C:\yaai\SugarModules\modules\Configurator>php configuratorGeneratorUtil.php > asterisk_configurator_table.tpl

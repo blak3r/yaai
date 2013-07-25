@@ -23,7 +23,7 @@ require_once('modules/Contacts/Contact.php');
 // ACTION FUNCTIONS
 
     function memoSave($call_record_id, $sugar_user_id, $phone_number, $description, $direction) {
-        $GLOBALS['log']->fatal('memoSave' . $phone_number);
+        $GLOBALS['log']->debug('memoSave' . $phone_number);
         if ($call_record_id) {
             $call = new Call();
 
@@ -108,7 +108,7 @@ require_once('modules/Contacts/Contact.php');
                 $parent_module = "accounts";
                 $parent_name = $c->account_name;
 
-                $GLOBALS["log"]->fatal(print_r($c,true));
+                //$GLOBALS["log"]->fatal(print_r($c,true));
             }
             else if( $bean_module == "accounts" ) {
                 $a = new Account();
@@ -425,49 +425,60 @@ require_once('modules/Contacts/Contact.php');
      * @return array
      */
     function build_getCalls_item_list($result_set, $current_user, $mod_strings) {
-
+        global $sugar_config;
         $response = array();
+        $index = 0;
+
+        $numCalls = $current_user->db->getRowCount($result_set);
+        $maxCalls = $sugar_config['asterisk_max_popups'];
         while ($row = $current_user->db->fetchByAssoc($result_set)) {
-
-            $state = get_call_state($row, $mod_strings);
-            $phone_number = get_callerid($row);
-            $call_direction = get_call_direction($row, $mod_strings);
-
-            $contacts = array();
-
-            // Dont fetch contacts if it's already known this is already been related to another module.
-            if( !empty($row['bean_module']) && !empty($row['bean_id']) ) {
-                $beans = make_bean_array_from_call_row($row);;
+            // If we have too many calls, we nuke the extra from beginning of result_set since they're the oldest.
+            if( $numCalls > $maxCalls &&
+                $index++ < ($numCalls - $maxCalls)) {
+                updateUIState("Closed",$row['call_record_id'],$row['asterisk_id']);
+                //error_log("Too many active popups, closing {$row['asterisk_id']}");
             }
             else {
-                // @@@@ BEGIN CALLINIZE COMMUNITY ONLY @@@@
-                $beans = find_beans($phone_number,"accounts,contacts",false,$current_user);
-                // @@@@ END CALLINIZE COMMUNITY ONLY @@@@
+                $state = get_call_state($row, $mod_strings);
+                $phone_number = get_callerid($row);
+                $call_direction = get_call_direction($row, $mod_strings);
 
+                $contacts = array();
+
+                // Dont fetch contacts if it's already known this is already been related to another module.
+                if( !empty($row['bean_module']) && !empty($row['bean_id']) ) {
+                    $beans = make_bean_array_from_call_row($row);;
+                }
+                else {
+                    // @@@@ BEGIN CALLINIZE COMMUNITY ONLY @@@@
+                    $beans = find_beans($phone_number,"accounts,contacts",false,$current_user);
+                    // @@@@ END CALLINIZE COMMUNITY ONLY @@@@
+
+                    }
+
+                // When only one matching number, save the result in call record.
+                if( count($beans) == 1 ) {
+                    setBeanID( $row['call_record_id'], $beans[0]['bean_module'], $beans[0]['bean_id']);
                 }
 
-            // When only one matching number, save the result in call record.
-            if( count($beans) == 1 ) {
-                setBeanID( $row['call_record_id'], $beans[0]['bean_module'], $beans[0]['bean_id']);
+                $call = array(
+                    'id' => $row['id'],
+                    'asterisk_id' => $row['asterisk_id'],
+                    'state' => $state,
+                    'is_hangup' => $state == $mod_strings['YAAI']['HANGUP'],
+                    'call_record_id' => $row['call_record_id'],
+                    'phone_number' => $phone_number,
+                    'timestamp_call' => $row['timestamp_call'],
+                    'title' => get_title($beans, $phone_number, $state, $mod_strings),
+                    'beans' => $beans,
+                    'call_type' => $call_direction['call_type'],
+                    'direction' => $call_direction['direction'],
+                    'duration' => get_duration($row),
+                    'mod_strings' => $mod_strings['YAAI']
+                );
+
+                $response[] = $call;
             }
-
-            $call = array(
-                'id' => $row['id'],
-                'asterisk_id' => $row['asterisk_id'],
-                'state' => $state,
-                'is_hangup' => $state == $mod_strings['YAAI']['HANGUP'],
-                'call_record_id' => $row['call_record_id'],
-                'phone_number' => $phone_number,
-                'timestamp_call' => $row['timestamp_call'],
-                'title' => get_title($beans, $phone_number, $state, $mod_strings),
-                'beans' => $beans,
-                'call_type' => $call_direction['call_type'],
-                'direction' => $call_direction['direction'],
-                'duration' => get_duration($row),
-                'mod_strings' => $mod_strings['YAAI']
-            );
-
-            $response[] = $call;
         }
 
         return $response;

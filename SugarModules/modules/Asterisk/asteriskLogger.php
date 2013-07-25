@@ -45,10 +45,6 @@
 // IF FollowMe == 0, then call popups are lost after call is answered on a cell phone.
 // If FollowMe == 1, disadvantage is ... call popups don't appear until call is answered on RING GROUPS and QUEUES.
 $FOLLOWME = 1;
-// This is a different log file then one specified in Admin Config.
-// This creates an html formatted, color coded, 1 line per event log.
-// It's a lot easier to visualize what's going on then the standard asterisk log.
-$dial_events_log = '';//'/var/logs/dial_events.html';
 $mysql_loq_queries = 0;
 $mysql_log_results = 0;
 $verbose_log = 0;
@@ -134,7 +130,11 @@ class SugarSoap extends nusoapclient {
 require_once($sugarRoot . 'config.php');
 include_once($sugarRoot . 'config_override.php');
 
-logLine(" Logging to: " . $sugar_config['asterisk_log_file'] . "\n");
+logLine(" Main Log is logging to: " . $sugar_config['asterisk_log_file'] . "\n");
+$dial_events_log = $sugar_config['asterisk_event_log_file'];
+if( !empty($dial_events_log) ) {
+    logLine(" Dial Events Log is enabled and logging to: " . $dial_events_log );
+}
 $asteriskServer = $sugar_config['asterisk_host'];
 $asteriskManagerPort = (int) $sugar_config['asterisk_port'];
 $asteriskUser = "Username: " . $sugar_config['asterisk_user'] . "\r\n";
@@ -770,29 +770,17 @@ while (true) {
                                     $beanID = $direction['bean_id'];
                                     $beanType = ucfirst($direction['bean_module']);
                                 } else {
-
-                                    $assocAccount = findSugarAccountByPhoneNumber($rawData['callerID']);
-                                    if ($assocAccount != FALSE) {
-                                        logLine("Found a matching account, relating to account instead of contact\n");
-                                        $beanID = $assocAccount['values']['id'];
-                                        $beanType = $assocAccount['type'];
-                                        $parentType = 'Accounts';
-                                        $parentID = $beanID;
-                                    } else {
-                                        $assoSugarObject = findSugarObjectByPhoneNumber($rawData['callerID']);
-                                        $beanID = $assoSugarObject['values']['id'];
-                                        $beanType = $assoSugarObject['type'];
+                                    $beans = findSugarBeanByPhoneNumber($rawData['callerID'],true,false);
+                                    if( $beans != null && count($beans) == 1 ) {
+                                        $beanID = $beans[0]['bean_id'];
+                                        $beanType = $beans[0]['bean_module'];
+                                        $parentType = $beans[0]['parent_module'];
+                                        $parentID = $beans[0]['parent_id'];
                                     }
                                 }
                                 setRelationshipBetweenCallAndBean($callRecord['sweet']['id'], $beanType, $beanID);
-
-                                if ($beanType == "Contacts" && !empty($beanID)) {
-                                    $assocAccount = findAccountForContact($beanID);
-                                    if ($assocAccount) {
-                                        $parentType = 'Accounts';
-                                        $parentID = $assocAccount;
-                                    }
-                                } else if ($beanType == "Accounts") {
+                                // This might not be needed... forget if service does this already.
+                                if ($beanType == "Accounts") {
                                     $parentType = "Accounts";
                                     $parentID = $beanID;
                                 }
@@ -959,7 +947,6 @@ while (true) {
                                     dev_logString(" Adding INBOUND Missed (or Failed) Call, id=$id, call_id = " . $callRecord['sweet']['id'] . "\n");
                                 }
 
-
                                 // Establish Relationships with the Call and Contact/Account
                                 $beanID = NULL;
                                 $beanType = NULL;
@@ -970,28 +957,17 @@ while (true) {
                                     $beanID = $direction['bean_id'];
                                     $beanType = ucfirst($direction['bean_module']);
                                 } else {
-                                    $assocAccount = findSugarAccountByPhoneNumber($rawData['callerID']);
-                                    if ($assocAccount != FALSE) {
-                                        logLine("Found a matching account, relating to account instead of contact\n");
-                                        $beanID = $assocAccount['values']['id'];
-                                        $beanType = $assocAccount['type'];
-                                        $parentType = 'Accounts';
-                                        $parentID = $beanID;
-                                    } else {
-                                        $assoSugarObject = findSugarObjectByPhoneNumber($rawData['callerID']);
-                                        $beanID = $assoSugarObject['values']['id'];
-                                        $beanType = $assoSugarObject['type'];
+                                    $beans = findSugarBeanByPhoneNumber($rawData['callerID'],true,false);
+                                    if( $beans != null && count($beans) == 1 ) {
+                                        $beanID = $beans[0]['bean_id'];
+                                        $beanType = $beans[0]['bean_module'];
+                                        $parentType = $beans[0]['parent_module'];
+                                        $parentID = $beans[0]['parent_id'];
                                     }
                                 }
                                 setRelationshipBetweenCallAndBean($callRecord['sweet']['id'], $beanType, $beanID);
-
-                                if ($beanType == "Contacts" && !empty($beanID)) {
-                                    $assocAccount = findAccountForContact($beanID);
-                                    if ($assocAccount) {
-                                        $parentType = 'Accounts';
-                                        $parentID = $assocAccount;
-                                    }
-                                } else if ( $beanType == "Accounts") {
+                                // This might not be needed... forget if service does this already.
+                                if ($beanType == "Accounts") {
                                     $parentType = "Accounts";
                                     $parentID = $beanID;
                                 }
@@ -1236,6 +1212,7 @@ while (true) {
             logLine("__MySQL connection lost, reconnecting__\n");
             $sql_connection = mysql_connect($sugar_config['dbconfig']['db_host_name'], $sugar_config['dbconfig']['db_user_name'], $sugar_config['dbconfig']['db_password']);
             $sql_db = mysql_select_db($sugar_config['dbconfig']['db_name']);
+            mysql_query("SET time_zone='+00:00'");
         }
     }
 
@@ -1270,9 +1247,9 @@ function purgeExpiredEventsFromDb() {
 
     // BR: 2013-04-30 fixed bug where closing the call popup before the call was over the duration would potentially not get set right.
     $query = " DELETE FROM asterisk_log WHERE (uistate = 'Closed' AND timestamp_hangup is not NULL) OR ( timestamp_hangup is not NULL AND '$calls_expire_time' > timestamp_hangup ) OR ('$five_hours_ago' > timestamp_call )";
+    //logLine( "Debug Purge Query: " . $query );
     mysql_checked_query($query);
     $rowsDeleted = mysql_affected_rows();
-   // logLine("DEBUG: $query");
     if( $rowsDeleted > 0 ) {
         logLine("  Purged $rowsDeleted row(s) from the call log table.");
     }
@@ -1567,9 +1544,9 @@ function decode_name_value_list(&$nvl) {
  * @param $origPhoneNumber
  * @param bool $stopOnFind -Controls whether or not to keep searching down the list of modules to find a match...
  *                          For example, if a match in contacts is found... it will not try leads.
- * @param bool $returnMultipleMatches - when true it returns all matches (callinize push uses true, unattended will return false)
+ * @param bool $returnMultipleMatches - when true it returns all matches (callinize push uses true, unattended will use false)
  *                                      think of this as attended vs. unattended mode... true it returns all the matches to the user so
- *                                      they can see all the results.
+ *                                      they can see all the results where false a computer has to make a decision and we dont ever want to make assumptions.
  * @return An|array|null
  */
 function findSugarBeanByPhoneNumber($origPhoneNumber,$stopOnFind=false, $returnMultipleMatches=false) {
@@ -1579,7 +1556,10 @@ function findSugarBeanByPhoneNumber($origPhoneNumber,$stopOnFind=false, $returnM
     $sugar = new Sugar_REST($url,$sugar_config['asterisk_soapuser'], $sugar_config['asterisk_soappass']);
     $params = array();
     $params['phone_number'] = $origPhoneNumber;
-    $params['module_order'] = "accounts,contacts,leads";
+
+    // @@@@ BEGIN CALLINIZE COMMUNITY ONLY @@@@
+    $params['module_order'] = "accounts,contacts";
+    // @@@@ END CALLINIZE COMMUNITY ONLY @@@@
     $params['stop_on_find'] = $stopOnFind;
     $beans = $sugar->custom_method("find_beans_with_phone_number", $params);
 
@@ -1917,9 +1897,9 @@ function isSoapResultAnError($soapResult) {
 
 /**
  * Performs a soap call to set a relationship between a call record and a bean (contact)
- * @param $callRecordId the call record id.
- * @param $beanType usually "Contacts"
- * @param $beanId
+ * @param $callRecordId string - the call record id.
+ * @param $beanType string - usually "Contacts"
+ * @param $beanId string
  */
 function setRelationshipBetweenCallAndBean($callRecordId, $beanType, $beanId) {
     global $soapSessionId, $soapClient, $verbose_logging;
@@ -1935,14 +1915,15 @@ function setRelationshipBetweenCallAndBean($callRecordId, $beanType, $beanId) {
             )
         );
 
-        logLine(" Establishing relation to $beanType... Call ID: $callRecordId to Bean ID: $beanId\n");
+        logLine(" Establishing relation to $beanType ID: $beanId, Call Record ID: $callRecordId");
         if ($verbose_logging) {
             var_dump($soapArgs);
         }
         $soapResult = $soapClient->call('set_relationship', $soapArgs);
         isSoapResultAnError($soapResult);
     } else {
-        logLine("! Invalid Arguments passed to setRelationshipBetweenCallAndBean callRecordId=$callRecordId, beanId=$beanId, beanType=$beanType\n");
+        logLine("! Call is not related to any record (no matches)");
+        //logLine("! Invalid Arguments passed to setRelationshipBetweenCallAndBean callRecordId=$callRecordId, beanId=$beanId, beanType=$beanType\n");
     }
 }
 

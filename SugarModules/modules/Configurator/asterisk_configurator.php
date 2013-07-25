@@ -108,6 +108,7 @@ $sugar_smarty->assign('APP_LIST', $app_list_strings);
 $sugar_smarty->assign('config', $configurator->config);
 $sugar_smarty->assign('asterisk_config', $asterisk_config);
 $sugar_smarty->assign('callsLogged', $callsLogged);
+$sugar_smarty->assign('licenseSummary', $licenseSummary);
 
 $sugar_smarty->assign('error', $configurator->errors);
 
