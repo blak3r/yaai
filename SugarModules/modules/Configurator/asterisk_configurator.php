@@ -98,6 +98,7 @@ catch(Exception $ex) {
     $callsLogged = "Unknown";
 }
 
+$licenseSummary = '';
 require_once('include/Sugar_Smarty.php');
 $sugar_smarty = new Sugar_Smarty();
 

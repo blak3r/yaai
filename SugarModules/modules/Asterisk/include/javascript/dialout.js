@@ -55,8 +55,8 @@ $(document).ready(function()
 				contactId = $('input[name="mass[]"]', $(this).parents('tr:first')).attr('value');
 			}		
 			
-			if( window.yaai_user_extension ) {
-				$(this).append('&nbsp;&nbsp;<img title="Extension Configured for Click To Dial is: ' + window.yaai_user_extension + '" src="custom/modules/Asterisk/include/images/call_active.gif" class="asterisk_placeCall" value="anrufen" style="cursor: pointer;"/>&nbsp;');	
+			if( window.callinize_user_extension ) {
+				$(this).append('&nbsp;&nbsp;<img title="Extension Configured for Click To Dial is: ' + window.callinize_user_extension + '" src="custom/modules/Asterisk/include/images/call_active.gif" class="asterisk_placeCall" value="anrufen" style="cursor: pointer;"/>&nbsp;');
 			}
 			else {
 				$(this).append('&nbsp;&nbsp;<img title="No extension configured!  Go to user preferences to set your extension" src="custom/modules/Asterisk/include/images/call_noextset.gif" class="asterisk_placeCall" value="anrufen" style="cursor: pointer;"/>&nbsp;');	

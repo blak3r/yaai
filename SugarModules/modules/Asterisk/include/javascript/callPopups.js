@@ -41,13 +41,13 @@ var YAAI = {
     newMessages : [],
     callBoxes : [],
     sugarUserID : window.current_user_id,
-    phoneExtension : window.yaai_user_extension,
-    pollRate: window.yaai_poll_rate,
-    fop2 : window.yaai_fop_enabled,
-    fop2URL : window.yaai_fop_url,
-    fop2UserID : window.yaai_fop_user,
-    fop2Password : window.yaai_fop_pass,
-    showTransferButton : window.yaai_show_transfer_button,
+    phoneExtension : window.callinize_user_extension,
+    pollRate: window.callinize_poll_rate,
+    fop2 : window.callinize_fop_enabled,
+    fop2URL : window.callinize_fop_url,
+    fop2UserID : window.callinize_fop_user,
+    fop2Password : window.callinize_fop_pass,
+    showTransferButton : window.callinize_show_transfer_button,
     filteredCallStates : [''], //['Ringing'], // TODO make this configurable
 
     checkForNewStates : function(loop){
@@ -97,7 +97,7 @@ var YAAI = {
            var html;
            var template = '';
 
-           if( window.yaai_dev ) {
+           if( window.callinize_dev ) {
                YAAI.log("WARNING: YAAI Developer Mode is enabled, this should not be used in production!");
                var source   = $("#handlebars-dev-template").html();
                template = Handlebars.compile(source);
@@ -316,7 +316,7 @@ var YAAI = {
         }
         // Here we show them all...
 
-        if( window.yaai_relate_to_contact_enabled ) {
+        if( window.callinize_relate_to_contact_enabled ) {
             YAAI.log("  Adding Relate to Contact");
             $(dropdownDiv+" ul li.ul_relate_to_contact").show();
             $(dropdownDiv+" ul li a.relate_to_contact").on("click", entry, function() {
@@ -324,7 +324,7 @@ var YAAI = {
             });
         }
 
-        if( window.yaai_relate_to_account_enabled ) {
+        if( window.callinize_relate_to_account_enabled ) {
             YAAI.log("  Adding Relate to Account");
             $(dropdownDiv+" ul li.ul_relate_to_account").show();
             $(dropdownDiv+" ul li a.relate_to_account").on("click", entry, function() {
@@ -332,7 +332,7 @@ var YAAI = {
             });
         }
 
-        if( window.yaai_create_new_contact_enabled ) {
+        if( window.callinize_create_new_contact_enabled ) {
             YAAI.log("  Adding Create New Contact " + dropdownDiv+" ul li.li_create_new_contact");
             $(dropdownDiv+" ul li.ul_create_contact").show();
             $(dropdownDiv+" ul li a.create_contact").on("click", entry, function() {
@@ -341,7 +341,7 @@ var YAAI = {
         }
 
         /*
-         if( window.yaai_relate_to_contact_enabled ) {
+         if( window.callinize_relate_to_contact_enabled ) {
          YAAI.log("  Adding Relate to Contact");
          // TODO Remove line below... for debugging
          YAAI.log( $(dropdownDiv+" ul").length + " was found?");
@@ -352,7 +352,7 @@ var YAAI = {
          });
          }
          // TODO create
-         if( window.yaai_relate_to_account_enabled ) {
+         if( window.callinize_relate_to_account_enabled ) {
          YAAI.log("  Adding Relate to Account");
          $(dropdownDiv+" ul").append("<li><a href='#' class='relate_to_account'>"+entry['mod_strings']['RELATE_TO_ACCOUNT']+"</a></li>");
          $(dropdownDiv+" ul a.relate_to_account").on("click", entry, function() {
@@ -360,7 +360,7 @@ var YAAI = {
          });
          }
 
-         if( window.yaai_create_new_contact_enabled ) {
+         if( window.callinize_create_new_contact_enabled ) {
          YAAI.log("  Adding Create New Contact");
          $(dropdownDiv+" ul").append("<li><a href='#' class='create_contact'>"+entry['mod_strings']['CREATE_NEW_CONTACT']+"</a></li>");
          $(dropdownDiv+" ul a.create_contact").on("click", entry, function() {
@@ -368,7 +368,7 @@ var YAAI = {
          });
          }
 
-         if( window.yaai_block_button_enabled ) {
+         if( window.callinize_block_button_enabled ) {
          YAAI.log("  Adding Block Button Enabled");
          $(dropdownDiv+" ul").append("<li><a href='#' class='block_number'>"+entry['mod_strings']['BLOCK_NUMBER']+"</a></li>");
          $(dropdownDiv+" ul a.block_number").on("click", {
@@ -909,7 +909,7 @@ var YAAI = {
     },
     
     log : function(message) {
-        if (window.yaai_debug == 1) {
+        if (window.callinize_debug == 1) {
             console.log(message);
         }
     },
