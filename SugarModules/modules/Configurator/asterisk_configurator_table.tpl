@@ -371,6 +371,41 @@
 
 
 
+<TR>
+
+    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_JQUERY_OVERRIDE}
+      {if !empty($MOD.LBL_JQUERY_OVERRIDE_DESC)}
+          [<a href="#" data-toggle="tooltip" title="{$MOD.LBL_JQUERY_OVERRIDE_DESC}">?</a>]:
+      {/if}
+    </td>
+    <td width="25%" class="dataField">
+
+    {if empty($config.jquery_override)}
+        {assign var='jquery_override' value=$asterisk_config.jquery_override}
+        {if $asterisk_config.jquery_override == '1' }
+            {assign var='isCheckedjquery_override' value='checked'}
+            {assign var="caseNumjquery_override" value="Case1a: Config not set, default value = 1"}
+        {else}
+            {assign var='isCheckedjquery_override' value=''}
+            {assign var="caseNumjquery_override" value="CASE1b: Config not set, using default value = 0"}
+        {/if}
+    {else}
+        {assign var='jquery_override' value=$config.jquery_override}
+        {if $config.jquery_override == '1' }
+            {assign var='isCheckedjquery_override' value='checked'}
+            {assign var="caseNumjquery_override" value="CASE2a: Config is set, value = 1"}
+        {else}
+            {assign var='isCheckedjquery_override' value=''}
+            {assign var="caseNumjquery_override" value="CASE2b: Config is set, value = 0"}
+        {/if}
+    {/if}
+    <input type='hidden' name='jquery_override' value='0'>
+    <input type='checkbox' name='jquery_override' size="45" value='1' {$isCheckedjquery_override} >
+    <!-- {$caseNumjquery_override} Config Val: '{$config.jquery_override}', default value: '{$asterisk_config.jquery_override}' -->
+    </td>
+
+<TD>&nbsp;</TD><TD>&nbsp;</TD> </tr>
+
 <TR><td colspan="4">&nbsp;&nbsp;<TR><TD colspan="4"><h4>Logging</h4></TD></tr>
 
 
@@ -417,19 +452,29 @@
       {/if}
     </td>
     <td width="25%" class="dataField">
-    {if empty($config.asterisk_block_button_enabled )}
+
+    {if empty($config.asterisk_block_button_enabled)}
         {assign var='asterisk_block_button_enabled' value=$asterisk_config.asterisk_block_button_enabled}
-        {if $asterisk_config.asterisk_block_button_enabled }
-            {assign var='isChecked' value='checked'}
+        {if $asterisk_config.asterisk_block_button_enabled == '1' }
+            {assign var='isCheckedasterisk_block_button_enabled' value='checked'}
+            {assign var="caseNumasterisk_block_button_enabled" value="Case1a: Config not set, default value = 1"}
+        {else}
+            {assign var='isCheckedasterisk_block_button_enabled' value=''}
+            {assign var="caseNumasterisk_block_button_enabled" value="CASE1b: Config not set, using default value = 0"}
         {/if}
     {else}
         {assign var='asterisk_block_button_enabled' value=$config.asterisk_block_button_enabled}
-        {if $config.asterisk_block_button_enabled }
-            {assign var='isChecked' value='checked'}
+        {if $config.asterisk_block_button_enabled == '1' }
+            {assign var='isCheckedasterisk_block_button_enabled' value='checked'}
+            {assign var="caseNumasterisk_block_button_enabled" value="CASE2a: Config is set, value = 1"}
+        {else}
+            {assign var='isCheckedasterisk_block_button_enabled' value=''}
+            {assign var="caseNumasterisk_block_button_enabled" value="CASE2b: Config is set, value = 0"}
         {/if}
     {/if}
     <input type='hidden' name='asterisk_block_button_enabled' value='0'>
-    <input type='checkbox' name='asterisk_block_button_enabled' size="45" value='1' {$isChecked} >
+    <input type='checkbox' name='asterisk_block_button_enabled' size="45" value='1' {$isCheckedasterisk_block_button_enabled} >
+    <!-- {$caseNumasterisk_block_button_enabled} Config Val: '{$config.asterisk_block_button_enabled}', default value: '{$asterisk_config.asterisk_block_button_enabled}' -->
     </td>
 
     <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_TRANSFER_BUTTON_ENABLED}
@@ -438,19 +483,29 @@
       {/if}
     </td>
     <td width="25%" class="dataField">
-    {if empty($config.asterisk_transfer_button_enabled )}
+
+    {if empty($config.asterisk_transfer_button_enabled)}
         {assign var='asterisk_transfer_button_enabled' value=$asterisk_config.asterisk_transfer_button_enabled}
-        {if $asterisk_config.asterisk_transfer_button_enabled }
-            {assign var='isChecked' value='checked'}
+        {if $asterisk_config.asterisk_transfer_button_enabled == '1' }
+            {assign var='isCheckedasterisk_transfer_button_enabled' value='checked'}
+            {assign var="caseNumasterisk_transfer_button_enabled" value="Case1a: Config not set, default value = 1"}
+        {else}
+            {assign var='isCheckedasterisk_transfer_button_enabled' value=''}
+            {assign var="caseNumasterisk_transfer_button_enabled" value="CASE1b: Config not set, using default value = 0"}
         {/if}
     {else}
         {assign var='asterisk_transfer_button_enabled' value=$config.asterisk_transfer_button_enabled}
-        {if $config.asterisk_transfer_button_enabled }
-            {assign var='isChecked' value='checked'}
+        {if $config.asterisk_transfer_button_enabled == '1' }
+            {assign var='isCheckedasterisk_transfer_button_enabled' value='checked'}
+            {assign var="caseNumasterisk_transfer_button_enabled" value="CASE2a: Config is set, value = 1"}
+        {else}
+            {assign var='isCheckedasterisk_transfer_button_enabled' value=''}
+            {assign var="caseNumasterisk_transfer_button_enabled" value="CASE2b: Config is set, value = 0"}
         {/if}
     {/if}
     <input type='hidden' name='asterisk_transfer_button_enabled' value='0'>
-    <input type='checkbox' name='asterisk_transfer_button_enabled' size="45" value='1' {$isChecked} >
+    <input type='checkbox' name='asterisk_transfer_button_enabled' size="45" value='1' {$isCheckedasterisk_transfer_button_enabled} >
+    <!-- {$caseNumasterisk_transfer_button_enabled} Config Val: '{$config.asterisk_transfer_button_enabled}', default value: '{$asterisk_config.asterisk_transfer_button_enabled}' -->
     </td>
 
 
@@ -463,19 +518,29 @@
       {/if}
     </td>
     <td width="25%" class="dataField">
-    {if empty($config.asterisk_relate_to_account_enabled )}
+
+    {if empty($config.asterisk_relate_to_account_enabled)}
         {assign var='asterisk_relate_to_account_enabled' value=$asterisk_config.asterisk_relate_to_account_enabled}
-        {if $asterisk_config.asterisk_relate_to_account_enabled }
-            {assign var='isChecked' value='checked'}
+        {if $asterisk_config.asterisk_relate_to_account_enabled == '1' }
+            {assign var='isCheckedasterisk_relate_to_account_enabled' value='checked'}
+            {assign var="caseNumasterisk_relate_to_account_enabled" value="Case1a: Config not set, default value = 1"}
+        {else}
+            {assign var='isCheckedasterisk_relate_to_account_enabled' value=''}
+            {assign var="caseNumasterisk_relate_to_account_enabled" value="CASE1b: Config not set, using default value = 0"}
         {/if}
     {else}
         {assign var='asterisk_relate_to_account_enabled' value=$config.asterisk_relate_to_account_enabled}
-        {if $config.asterisk_relate_to_account_enabled }
-            {assign var='isChecked' value='checked'}
+        {if $config.asterisk_relate_to_account_enabled == '1' }
+            {assign var='isCheckedasterisk_relate_to_account_enabled' value='checked'}
+            {assign var="caseNumasterisk_relate_to_account_enabled" value="CASE2a: Config is set, value = 1"}
+        {else}
+            {assign var='isCheckedasterisk_relate_to_account_enabled' value=''}
+            {assign var="caseNumasterisk_relate_to_account_enabled" value="CASE2b: Config is set, value = 0"}
         {/if}
     {/if}
     <input type='hidden' name='asterisk_relate_to_account_enabled' value='0'>
-    <input type='checkbox' name='asterisk_relate_to_account_enabled' size="45" value='1' {$isChecked} >
+    <input type='checkbox' name='asterisk_relate_to_account_enabled' size="45" value='1' {$isCheckedasterisk_relate_to_account_enabled} >
+    <!-- {$caseNumasterisk_relate_to_account_enabled} Config Val: '{$config.asterisk_relate_to_account_enabled}', default value: '{$asterisk_config.asterisk_relate_to_account_enabled}' -->
     </td>
 
     <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_RELATE_TO_CONTACT_ENABLED}
@@ -484,19 +549,29 @@
       {/if}
     </td>
     <td width="25%" class="dataField">
-    {if empty($config.asterisk_relate_to_contact_enabled )}
+
+    {if empty($config.asterisk_relate_to_contact_enabled)}
         {assign var='asterisk_relate_to_contact_enabled' value=$asterisk_config.asterisk_relate_to_contact_enabled}
-        {if $asterisk_config.asterisk_relate_to_contact_enabled }
-            {assign var='isChecked' value='checked'}
+        {if $asterisk_config.asterisk_relate_to_contact_enabled == '1' }
+            {assign var='isCheckedasterisk_relate_to_contact_enabled' value='checked'}
+            {assign var="caseNumasterisk_relate_to_contact_enabled" value="Case1a: Config not set, default value = 1"}
+        {else}
+            {assign var='isCheckedasterisk_relate_to_contact_enabled' value=''}
+            {assign var="caseNumasterisk_relate_to_contact_enabled" value="CASE1b: Config not set, using default value = 0"}
         {/if}
     {else}
         {assign var='asterisk_relate_to_contact_enabled' value=$config.asterisk_relate_to_contact_enabled}
-        {if $config.asterisk_relate_to_contact_enabled }
-            {assign var='isChecked' value='checked'}
+        {if $config.asterisk_relate_to_contact_enabled == '1' }
+            {assign var='isCheckedasterisk_relate_to_contact_enabled' value='checked'}
+            {assign var="caseNumasterisk_relate_to_contact_enabled" value="CASE2a: Config is set, value = 1"}
+        {else}
+            {assign var='isCheckedasterisk_relate_to_contact_enabled' value=''}
+            {assign var="caseNumasterisk_relate_to_contact_enabled" value="CASE2b: Config is set, value = 0"}
         {/if}
     {/if}
     <input type='hidden' name='asterisk_relate_to_contact_enabled' value='0'>
-    <input type='checkbox' name='asterisk_relate_to_contact_enabled' size="45" value='1' {$isChecked} >
+    <input type='checkbox' name='asterisk_relate_to_contact_enabled' size="45" value='1' {$isCheckedasterisk_relate_to_contact_enabled} >
+    <!-- {$caseNumasterisk_relate_to_contact_enabled} Config Val: '{$config.asterisk_relate_to_contact_enabled}', default value: '{$asterisk_config.asterisk_relate_to_contact_enabled}' -->
     </td>
 
 
@@ -509,19 +584,29 @@
       {/if}
     </td>
     <td width="25%" class="dataField">
-    {if empty($config.asterisk_create_new_contact_enabled )}
+
+    {if empty($config.asterisk_create_new_contact_enabled)}
         {assign var='asterisk_create_new_contact_enabled' value=$asterisk_config.asterisk_create_new_contact_enabled}
-        {if $asterisk_config.asterisk_create_new_contact_enabled }
-            {assign var='isChecked' value='checked'}
+        {if $asterisk_config.asterisk_create_new_contact_enabled == '1' }
+            {assign var='isCheckedasterisk_create_new_contact_enabled' value='checked'}
+            {assign var="caseNumasterisk_create_new_contact_enabled" value="Case1a: Config not set, default value = 1"}
+        {else}
+            {assign var='isCheckedasterisk_create_new_contact_enabled' value=''}
+            {assign var="caseNumasterisk_create_new_contact_enabled" value="CASE1b: Config not set, using default value = 0"}
         {/if}
     {else}
         {assign var='asterisk_create_new_contact_enabled' value=$config.asterisk_create_new_contact_enabled}
-        {if $config.asterisk_create_new_contact_enabled }
-            {assign var='isChecked' value='checked'}
+        {if $config.asterisk_create_new_contact_enabled == '1' }
+            {assign var='isCheckedasterisk_create_new_contact_enabled' value='checked'}
+            {assign var="caseNumasterisk_create_new_contact_enabled" value="CASE2a: Config is set, value = 1"}
+        {else}
+            {assign var='isCheckedasterisk_create_new_contact_enabled' value=''}
+            {assign var="caseNumasterisk_create_new_contact_enabled" value="CASE2b: Config is set, value = 0"}
         {/if}
     {/if}
     <input type='hidden' name='asterisk_create_new_contact_enabled' value='0'>
-    <input type='checkbox' name='asterisk_create_new_contact_enabled' size="45" value='1' {$isChecked} >
+    <input type='checkbox' name='asterisk_create_new_contact_enabled' size="45" value='1' {$isCheckedasterisk_create_new_contact_enabled} >
+    <!-- {$caseNumasterisk_create_new_contact_enabled} Config Val: '{$config.asterisk_create_new_contact_enabled}', default value: '{$asterisk_config.asterisk_create_new_contact_enabled}' -->
     </td>
 
 <TD>&nbsp;</TD><TD>&nbsp;</TD> </tr>
@@ -572,19 +657,29 @@
       {/if}
     </td>
     <td width="25%" class="dataField">
-    {if empty($config.asterisk_callinize_dev )}
+
+    {if empty($config.asterisk_callinize_dev)}
         {assign var='asterisk_callinize_dev' value=$asterisk_config.asterisk_callinize_dev}
-        {if $asterisk_config.asterisk_callinize_dev }
-            {assign var='isChecked' value='checked'}
+        {if $asterisk_config.asterisk_callinize_dev == '1' }
+            {assign var='isCheckedasterisk_callinize_dev' value='checked'}
+            {assign var="caseNumasterisk_callinize_dev" value="Case1a: Config not set, default value = 1"}
+        {else}
+            {assign var='isCheckedasterisk_callinize_dev' value=''}
+            {assign var="caseNumasterisk_callinize_dev" value="CASE1b: Config not set, using default value = 0"}
         {/if}
     {else}
         {assign var='asterisk_callinize_dev' value=$config.asterisk_callinize_dev}
-        {if $config.asterisk_callinize_dev }
-            {assign var='isChecked' value='checked'}
+        {if $config.asterisk_callinize_dev == '1' }
+            {assign var='isCheckedasterisk_callinize_dev' value='checked'}
+            {assign var="caseNumasterisk_callinize_dev" value="CASE2a: Config is set, value = 1"}
+        {else}
+            {assign var='isCheckedasterisk_callinize_dev' value=''}
+            {assign var="caseNumasterisk_callinize_dev" value="CASE2b: Config is set, value = 0"}
         {/if}
     {/if}
     <input type='hidden' name='asterisk_callinize_dev' value='0'>
-    <input type='checkbox' name='asterisk_callinize_dev' size="45" value='1' {$isChecked} >
+    <input type='checkbox' name='asterisk_callinize_dev' size="45" value='1' {$isCheckedasterisk_callinize_dev} >
+    <!-- {$caseNumasterisk_callinize_dev} Config Val: '{$config.asterisk_callinize_dev}', default value: '{$asterisk_config.asterisk_callinize_dev}' -->
     </td>
 
     <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_CALLINIZE_DEBUG}
@@ -593,18 +688,28 @@
       {/if}
     </td>
     <td width="25%" class="dataField">
-    {if empty($config.asterisk_callinize_debug )}
+
+    {if empty($config.asterisk_callinize_debug)}
         {assign var='asterisk_callinize_debug' value=$asterisk_config.asterisk_callinize_debug}
-        {if $asterisk_config.asterisk_callinize_debug }
-            {assign var='isChecked' value='checked'}
+        {if $asterisk_config.asterisk_callinize_debug == '1' }
+            {assign var='isCheckedasterisk_callinize_debug' value='checked'}
+            {assign var="caseNumasterisk_callinize_debug" value="Case1a: Config not set, default value = 1"}
+        {else}
+            {assign var='isCheckedasterisk_callinize_debug' value=''}
+            {assign var="caseNumasterisk_callinize_debug" value="CASE1b: Config not set, using default value = 0"}
         {/if}
     {else}
         {assign var='asterisk_callinize_debug' value=$config.asterisk_callinize_debug}
-        {if $config.asterisk_callinize_debug }
-            {assign var='isChecked' value='checked'}
+        {if $config.asterisk_callinize_debug == '1' }
+            {assign var='isCheckedasterisk_callinize_debug' value='checked'}
+            {assign var="caseNumasterisk_callinize_debug" value="CASE2a: Config is set, value = 1"}
+        {else}
+            {assign var='isCheckedasterisk_callinize_debug' value=''}
+            {assign var="caseNumasterisk_callinize_debug" value="CASE2b: Config is set, value = 0"}
         {/if}
     {/if}
     <input type='hidden' name='asterisk_callinize_debug' value='0'>
-    <input type='checkbox' name='asterisk_callinize_debug' size="45" value='1' {$isChecked} >
+    <input type='checkbox' name='asterisk_callinize_debug' size="45" value='1' {$isCheckedasterisk_callinize_debug} >
+    <!-- {$caseNumasterisk_callinize_debug} Config Val: '{$config.asterisk_callinize_debug}', default value: '{$asterisk_config.asterisk_callinize_debug}' -->
     </td>
 

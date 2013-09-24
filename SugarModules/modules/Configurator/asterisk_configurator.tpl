@@ -37,69 +37,11 @@
 <BR>
 <BR/>
 <img src="custom/modules/Asterisk/include/images/callinize-configure-logo.png" alt="Callinize Logo" width="350px"><br>
-<img src="https://gitimg.com/blak3r/yaai/config-v3.5/track" alt="Config Logo"><br>
+<img src="https://gitimg.com/blak3r/yaai/config-3.6.2-pro/track" alt="Config Logo"><br>
 
 
 
-<!-- @@@@ BEGIN CALLINIZE COMMUNITY ONLY @@@@ -->
 
-<table style="margin-bottom:-30px;">
-    <tr>
-    <TD width="2%"> &nbsp;</td>
-    <td width="40%" valign="top">
-        <div class="know-whos-calling">
-            <div class="item">
-                <div class="left">
-                    <h2>Upgrade Today</h2>
-                    <p>Upgrade from the community edition and get awesome features like:<P>
-                    <UL>
-                        <LI> Mobile App - Log/Create/Track from Anywhere! </LI>
-                        <LI> Support for Leads and custom phone fields. </LI>
-                        <LI> Call Recording / Playback in Sugar</LI>
-                        <LI> Operator Panel - Web switchboard for Asterisk </LI>
-                        <LI> Customer Support </LI>
-                    </UL>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://www.callinize.com/features.html" target="_blank"><button class="btn btn-primary">Learn More</button></a>
-                </div>
-            </div>
-        </div>
-
-    <TD width="75px"> &nbsp;</td>
-    <TD width="50%">
-
-    <div id="myCarousel" class="carousel slide animate" style="width:375px; ">
-        <ol class="carousel-indicators dark">
-            <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-            <li data-target="#myCarousel" data-slide-to="1" class=""></li>
-            <li data-target="#myCarousel" data-slide-to="2" class=""></li>
-        </ol>
-        <div class="carousel-inner">
-            <div class="item active">
-                <img src="custom/modules/Asterisk/include/images/banner_mobile_cropped.jpg" alt="" style="width: 375px; height: 275px; max-height:400px;">
-                <div class="carousel-caption">
-                    <p><strong>Mobile App:</strong> Finally! Your CRM Telephony integration will not require users to be tied down to their desk.
-                </div>
-            </div>
-            <div class="item">
-                <img src="custom/modules/Asterisk/include/images/banner_fop2.jpg" alt="" style="width: 375px; height: 275px; max-height:400px;">
-                <div class="carousel-caption">
-                    <P><strong>Operator Panel</strong> See presence of your coworkers, attended transfer, manage call queues, park calls, etc. -- all from right inside sugar.</P>
-                </div>
-            </div>
-            <div class="item">
-                <img src="custom/modules/Asterisk/include/images/banner_callrecording.jpg" alt="" style="width: 375px; height: 275px; max-height:400px;">
-                <div class="carousel-caption">
-                    <p><strong>Call Recordings</strong> Listen to phone call recordings inside SugarCRM automatically related to the Call.
-                </div>
-            </div>
-        </div>
-
-    </div>
-   </td>
-   </tr>
-   </table>
-
-<!-- @@@@ END CALLINIZE COMMUNITY ONLY @@@@ -->
 
 
 
@@ -167,20 +109,7 @@
             <div>
                 <b>Callinize has automatically logged: {$callsLogged} calls for you!</b>
             </div>
-            <!-- @@@@ BEGIN CALLINIZE COMMUNITY ONLY @@@@ -->
-            <!--
-            <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                <input type="hidden" name="cmd" value="_s-xclick">
-                <input type="hidden" name="hosted_button_id" value="FA36DGSYQ3NE6">
-                <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal" style="display: block;margin-left:auto; margin-right: auto; margin-bottom: 0px; padding-bottom: 0px;">
-                <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
-            </form>
-            <P align="center" style="padding-top:0px; margin-top: 0px;width=75%;">
-                Hundreds of man hours have been invested in this project. Please consider upgrading your callinize edition or making a donation.<BR><BR>
-                <b>So far, Callinize has automatically logged: {$callsLogged} calls for you!</b>
-            </P>
-            -->
-            <!-- @@@@ END CALLINIZE COMMUNITY ONLY @@@@ -->
+            
         <td width="33%">
 
             {literal}

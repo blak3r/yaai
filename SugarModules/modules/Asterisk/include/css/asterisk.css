@@ -42,7 +42,7 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
     border: 0px;
     background: 0;
 }
-.asterisk_placeCall:hover {background: 0 !important; border: 0;}
+.asterisk_placeCall:hover {opacity:.50;}
 
 .asteriskActionsLinks {
     font-family: Verdana,sans-serif;
@@ -373,3 +373,20 @@ td.asterisk_state		{	font-weight: bold; text-align: center;}
 }
 
 
+.activeCall
+{
+    width:23px;
+    height:23px;
+    background:url(../images/click-to-dial.png) 0 0 no-repeat;
+    float:left;
+    background-position: 0px 0px;
+}
+
+.dialedCall
+{
+    width:23px;
+    height:23px;
+    background:url(../images/click-to-dial-calling.gif) 0 0 no-repeat;
+    float:left;
+    background-position: 0px 0px;
+}

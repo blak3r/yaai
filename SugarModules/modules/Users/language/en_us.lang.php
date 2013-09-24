@@ -37,7 +37,8 @@
 if (!isset($mod_strings)) { $mod_strings = array(); }
 
 $mod_strings['LBL_ASTERISK_OPTIONS_TITLE'] = 'Asterisk options';
-$mod_strings['LBL_ASTERISK_EXT'] = 'Asterisk Extension';
+$mod_strings['LBL_ASTERISK_EXT'] = 'Personal Extension(s)';
+$mod_strings['LBL_ASTERISK_USER_QUEUES'] = 'Queues/RG\'s (comma separated no spaces)';
 $mod_strings['LBL_ASTERISK_EXT_DESC'] = 'Asterisk extension assigned to this user (usually a two or three digit number)';
 $mod_strings['LBL_ASTERISK_INBOUND'] = 'Call notification';
 $mod_strings['LBL_ASTERISK_OUTBOUND'] = 'Magic dial buttons';

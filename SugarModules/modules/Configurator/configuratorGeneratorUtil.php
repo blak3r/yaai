@@ -42,19 +42,29 @@ $columnSmartyBool=<<<'END2'
       {/if}
     </td>
     <td width="25%" class="dataField">
-    {if empty($config.@@NORMAL@@ )}
+
+    {if empty($config.@@NORMAL@@)}
         {assign var='@@NORMAL@@' value=$asterisk_config.@@NORMAL@@}
-        {if $asterisk_config.@@NORMAL@@ }
-            {assign var='isChecked' value='checked'}
+        {if $asterisk_config.@@NORMAL@@ == '1' }
+            {assign var='isChecked@@NORMAL@@' value='checked'}
+            {assign var="caseNum@@NORMAL@@" value="Case1a: Config not set, default value = 1"}
+        {else}
+            {assign var='isChecked@@NORMAL@@' value=''}
+            {assign var="caseNum@@NORMAL@@" value="CASE1b: Config not set, using default value = 0"}
         {/if}
     {else}
         {assign var='@@NORMAL@@' value=$config.@@NORMAL@@}
-        {if $config.@@NORMAL@@ }
-            {assign var='isChecked' value='checked'}
+        {if $config.@@NORMAL@@ == '1' }
+            {assign var='isChecked@@NORMAL@@' value='checked'}
+            {assign var="caseNum@@NORMAL@@" value="CASE2a: Config is set, value = 1"}
+        {else}
+            {assign var='isChecked@@NORMAL@@' value=''}
+            {assign var="caseNum@@NORMAL@@" value="CASE2b: Config is set, value = 0"}
         {/if}
     {/if}
     <input type='hidden' name='@@NORMAL@@' value='0'>
-    <input type='@@TYPE@@' name='@@NORMAL@@' size="45" value='1' {$isChecked} >
+    <input type='@@TYPE@@' name='@@NORMAL@@' size="45" value='1' {$isChecked@@NORMAL@@} >
+    <!-- {$caseNum@@NORMAL@@} Config Val: '{$config.@@NORMAL@@}', default value: '{$asterisk_config.@@NORMAL@@}' -->
     </td>
 END2;
 
@@ -86,7 +96,6 @@ $prevSection='';
         if( $value['type'] == "bool") {
             $type = "checkbox"; // checkbox is too hard to support since it's value isn't submitted when form is posted and it's unchecked!
             $in = $columnSmartyBool;
-
         }
         else {
             $type = $value['type'];
@@ -94,8 +103,8 @@ $prevSection='';
     }
 
     $out  = str_replace(
-        array('@@UPPER@@','@@NORMAL@@','@@TYPE@@','@@CHECKED@@'),
-        array(strtoupper($key),$key,$type,$checked),
+        array('@@UPPER@@','@@NORMAL@@','@@TYPE@@'),
+        array(strtoupper($key),$key,$type),
         $in);
 
     print $out . "\n\n";

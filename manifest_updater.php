@@ -3,6 +3,8 @@
 
 /**
  * Simple script to update manifest version / date.
+ *
+ * NOTE: THIS IS NO LONGER USED SINCE WE MOVED TO ANT TO BUILD
  */
 
 

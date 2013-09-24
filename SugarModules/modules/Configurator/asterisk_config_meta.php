@@ -31,6 +31,7 @@ $config_meta['asterisk_listener_poll_rate'] = array('default' => '5000','section
 //$config_meta['asterisk_gravatar_enabled'] = array('default' => 'false','section'=>'Misc') ;
 $config_meta['asterisk_short_call_status'] = array('default' => "Held",'section'=>'Misc');
 $config_meta['asterisk_hide_call_popups_after_mins'] = array('default' => '60','section'=>'Misc');
+$config_meta['jquery_override'] = array('type'=>"bool", 'default' => '0', 'section'=>'Misc');
 $config_meta['asterisk_log_file'] = array('default' => '', 'section'=>'Logging');
 $config_meta['asterisk_event_log_file'] = array('default' => '', 'section'=>'Logging');
 

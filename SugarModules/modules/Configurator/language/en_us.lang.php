@@ -91,6 +91,8 @@ $mod_strings['LBL_ASTERISK_HIDE_CALL_POPUPS_AFTER_MINS'] = 'Hide Call Popups Aft
 $mod_strings['LBL_ASTERISK_HIDE_CALL_POPUPS_AFTER_MINS_DESC'] = 'Specifies how long the user has to take notes in call popups before they disappear.  Default is 60 minutes.';
 $mod_strings['LBL_ASTERISK_DIGITS_TO_MATCH'] = 'Digits to Match';
 $mod_strings['LBL_ASTERISK_DIGITS_TO_MATCH_DESC'] = 'Specifies the number of digits to match in a phone number.  For example, if only 8 is specified just the last 8 digits are matched.  This can be helpful if you have local numbers come in with less digits then international or long distance numbers.  Setting this number too low you run the risk of matching multiple contacts for the same phone number.';
+$mod_strings['LBL_ASTERISK_LOGGER_SQL_MODE'] = 'SQL Performance Mode (Experimental)';
+$mod_strings['LBL_ASTERISK_LOGGER_SQL_MODE_DESC'] = 'When checked, the logger script will do direct SQL queries to the Calls module instead of making SOAP calls whenever possible.  The performance of this mode is better and should be used on very active asterisk installations to prevent popup delay.  The downside of this mode is if you use any workflow rules that get triggered on the Calls object they will not be fired.';
 
 
 $mod_strings['LBL_ASTERISK_LOG_FILE'] = 'Log File Path for asteriskLogger';
@@ -136,6 +138,12 @@ $mod_strings['LBL_ASTERISK_CALLINIZE_DEV'] = "Dev Mode Enabled";
 $mod_strings['LBL_ASTERISK_CALLINIZE_DEV_DESC'] = "Enabled developer mode, handlebars template is compiled in browser (rather then pre-compiled).  Set to 0 unless you have a reason to.";
 $mod_strings['LBL_ASTERISK_CALLINIZE_DEBUG'] = "Debug Mode Enabled";
 $mod_strings['LBL_ASTERISK_CALLINIZE_DEBUG_DESC'] = "Provides debug information about call popups in the Console.log (should be 0 in production).";
+
+$mod_strings['LBL_ASTERISK_CALLINIZE_DEBUG'] = "Debug Mode Enabled";
+$mod_strings['LBL_ASTERISK_CALLINIZE_DEBUG_DESC'] = "Provides debug information about call popups in the Console.log (should be 0 in production).";
+
+$mod_strings['LBL_JQUERY_OVERRIDE'] = "Jquery Override";
+$mod_strings['LBL_JQUERY_OVERRIDE_DESC'] = "If you have conflicts with multiple jquery libraries being loaded, set this override";
 
 
 ?>

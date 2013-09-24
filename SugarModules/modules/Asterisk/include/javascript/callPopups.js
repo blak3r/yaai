@@ -56,38 +56,45 @@ var YAAI = {
         // changes.  See: http://stackoverflow.com/questions/199099/how-to-manage-a-redirect-request-after-a-jquery-ajax-call
         // So, now I only schedule a setTimeout upon a successful AJAX call.  The only downside of this is if there is a legit reason
         // the call does fail it'll never try again..
-        $.getJSON('index.php?entryPoint=AsteriskController&action=get_calls', function(data){
-            YAAI.log(data);
-            var callboxids = [];
-            
-            //if the loop variable is true then setup the loop, if it is false then don't, because a one-time refresh was called'
-            if(loop){
-                setTimeout('YAAI.checkForNewStates(true)', YAAI.pollRate);  
-            }
-            
-            if( data != ".") {
-                $.each(data, function(entryIndex, entry){    
-                    if(YAAI.callStateIsNotFiltered(entry)){
-                        var callboxid = YAAI.getAsteriskID(entry['asterisk_id']); 
-                        callboxids.push(callboxid);            
-	    
-                        if(YAAI.callBoxHasNotAlreadyBeenCreated(callboxid)) {
-                            YAAI.createCallBox(callboxid, entry);
-                            YAAI.log('create');
+        $.ajax({
+            url:"index.php?entryPoint=AsteriskController&action=get_calls",
+            cache: false,
+            type: "GET",
+            success: function(data){
+                YAAI.log(data);
+                data = $.parseJSON(data);
+                var callboxids = [];
+
+                //if the loop variable is true then setup the loop, if it is false then don't, because a one-time refresh was called'
+                if(loop){
+                    setTimeout('YAAI.checkForNewStates(true)', YAAI.pollRate);
+                }
+                YAAI.log(data);
+                YAAI.log('start render' + Date(Date.now() * 1000));
+                if( data != ".") {
+                    $.each(data, function(entryIndex, entry){
+                        if(YAAI.callStateIsNotFiltered(entry)){
+                            var callboxid = YAAI.getAsteriskID(entry['asterisk_id']);
+                            callboxids.push(callboxid);
+
+                            if(YAAI.callBoxHasNotAlreadyBeenCreated(callboxid)) {
+                                YAAI.createCallBox(callboxid, entry);
+                                YAAI.log('create');
+                            }
+                            else {
+                                YAAI.updateCallBox(callboxid, entry);
+                                YAAI.log('update');
+                            }
                         }
-                        else {  
-                            YAAI.updateCallBox(callboxid, entry);
-                            YAAI.log('update');
-                        }
-                    }
-                });  
+                    });
+                }
+
+                YAAI.wasCallBoxClosedInAnotherBrowserWindow(callboxids);
+            },
+            error: function (jqXHR, textStatus, thrownError){
+                YAAI.log('There is a problem with getJSON in checkForNewStates()');
             }
-        
-            YAAI.wasCallBoxClosedInAnotherBrowserWindow(callboxids);
-        })
-        .error(function(){
-            YAAI.log('There is a problem with getJSON in checkForNewStates()');
-        });	
+        });
     },
 
     // CREATE
@@ -137,7 +144,10 @@ var YAAI = {
                 relate_to_lead_label : entry['mod_strings']['RELATE_TO_LEAD']
             };
 
-            var numMatches = entry['beans'].length;
+            var numMatches = 0;
+            if( entry['beans'] != null ) {
+                numMatches = entry['beans'].length;
+            }
             YAAI.log("Matches: " + numMatches);
 
             switch(numMatches){

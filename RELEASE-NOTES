@@ -1,5 +1,16 @@
 IMPORTANT: when upgrading, please see the instructions in the User Manual <http://www.github.com/blak3r/yaai/wiki/User-Manual>
 
+##Version 3.6.0 (2013-07-28)
+* Enhancements
+** Click To Dial is more intelligent, it always relates call to the record clicked. Before if multiple matching phone numbers, before if phone number matched multiple contacts it showed radio buttons.
+** New config option "Max Call Popups" controls the maximum number of popups that will appear on a users screen.
+** The 'X' button is easier to click to close call popups.
+** (Basic/Pro Only) - Calls to Queues and RingGroups now popup on callee's screen before answering.
+* Bug Fixes
+** dial_events_log in admin config now works.
+** Admin Checkboxes always appeared as checked.
+
+
 ##Version 3.5.4 (2013-07-08)
 * New User Interface
 * Ability to specify which contact and account phone fields are searched.

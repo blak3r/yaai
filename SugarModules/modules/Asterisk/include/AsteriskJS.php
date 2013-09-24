@@ -79,20 +79,20 @@ class AsteriskJS {
                 echo '<script type="text/javascript">window.callinize_fop_pass = "' . $fop_pass . '";</script>';
                 echo '<script type="text/javascript">window.callinize_fop_url= "' . $fop_url . '";</script>';
                 echo '<script type="text/javascript">window.callinize_fop_enabled= ' . $fop_enabled . ';</script>';
-                echo '<script type="text/javascript">window.callinize_show_transfer_button= ' . $GLOBALS['sugar_config']['asterisk_transfer_button_enabled'] . ';</script>';
-                echo '<script type="text/javascript">window.callinize_relate_to_account_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_account_enabled'] . ';</script>';
-                echo '<script type="text/javascript">window.callinize_relate_to_contact_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_contact_enabled'] . ';</script>';
-                echo '<script type="text/javascript">window.callinize_relate_to_lead_enabled = ' . $GLOBALS['sugar_config']['asterisk_relate_to_lead_enabled'] . ';</script>';
-                echo '<script type="text/javascript">window.callinize_create_new_contact_enabled = ' . $GLOBALS['sugar_config']['asterisk_create_new_contact_enabled'] . ';</script>';
-                echo '<script type="text/javascript">window.callinize_create_new_lead_enabled = ' . $GLOBALS['sugar_config']['asterisk_create_new_lead_enabled'] . ';</script>';
-                echo '<script type="text/javascript">window.callinize_block_button_enabled = ' . $GLOBALS['sugar_config']['asterisk_block_button_enabled'] . ';</script>';
-                echo '<script type="text/javascript">window.callinize_recording_enabled = ' . $GLOBALS['sugar_config']['asterisk_recordings_enabled'] . ';</script>';
+                echo '<script type="text/javascript">window.callinize_show_transfer_button= ' . getConfigBool('asterisk_transfer_button_enabled',0) . ';</script>';
+                echo '<script type="text/javascript">window.callinize_relate_to_account_enabled = ' . getConfigBool('asterisk_relate_to_account_enabled',0) . ';</script>';
+                echo '<script type="text/javascript">window.callinize_relate_to_contact_enabled = ' . getConfigBool('asterisk_relate_to_contact_enabled',0) . ';</script>';
+                echo '<script type="text/javascript">window.callinize_relate_to_lead_enabled = ' . getConfigBool('asterisk_relate_to_lead_enabled',0) . ';</script>';
+                echo '<script type="text/javascript">window.callinize_create_new_contact_enabled = ' . getConfigBool('asterisk_create_new_contact_enabled',0) . ';</script>';
+                echo '<script type="text/javascript">window.callinize_create_new_lead_enabled = ' . getConfigBool('asterisk_create_new_lead_enabled',0) . ';</script>';
+                echo '<script type="text/javascript">window.callinize_block_button_enabled = ' . getConfigBool('asterisk_block_button_enabled',0) . ';</script>';
+                echo '<script type="text/javascript">window.callinize_recording_enabled = ' . getConfigBool('asterisk_recordings_enabled',0) . ';</script>';
 
                 echo '<script type="text/javascript"> if (!window.console) console = {log: function() {}}; </script>'; // Prevents bug in IE (See Issue #108)
 
 
                 //JS Third-Party Libraries
-                if( preg_match("/^6\.[1-4]/",$GLOBALS['sugar_version']) ) {
+                if( preg_match("/^6\.[1-4]/",$GLOBALS['sugar_version'] && $GLOBALS['sugar_config']['asterisk_jquery_override'] == '0') ) {
                     echo '<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>';
                     echo '<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js" type="text/javascript"></script>';
                 }
@@ -102,10 +102,10 @@ class AsteriskJS {
                     echo '<script src="custom/modules/Asterisk/include/javascript/offlineMode/handlebars-1.0.rc.1.js"></script>';
                     $template = file_get_contents( "custom/modules/Asterisk/include/template/call-template.html" );
                     echo '<script id="handlebars-dev-template" type="text/x-handlebars-template">' . $template . '</script>';
-                }
-                else {
-                    echo '<script src="http://cloud.github.com/downloads/wycats/handlebars.js/handlebars.runtime-1.0.rc.1.js"></script>';
+                }else {
+                    echo '<script src="custom/modules/Asterisk/include/javascript/handlebars.runtime.js"></script>';
                     echo '<script src="custom/modules/Asterisk/include/template/call-template.tmpl"></script>';
+
                 }
 
                 echo '<script src="custom/modules/Asterisk/include/javascript/jquery.fancybox.js" type="text/javascript" ></script>';
@@ -119,16 +119,14 @@ class AsteriskJS {
                     echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/dialout.js"></script>';
                 }
 
-                // @@@@ BEGIN CALLINIZE SIP ONLY @@@@
-                echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/SIPml-api.js"></script>';
-                echo '<script type="text/javascript" src="custom/modules/Asterisk/include/javascript/sipml-callinize.js"></script>';
-                // @@@@ END CALLINIZE SIP ONLY @@@@
-
                 //CSS Third-Party Libraries
-                if( $yaaiDevMode ) {
-                    echo '<link rel="stylesheet" href="custom/modules/Asterisk/include/javascript/offlineMode/jquery-ui.css" />';
-                }else {
-                    echo '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/redmond/jquery-ui.css" />';
+                if ($GLOBALS['sugar_config']['asterisk_jquery_override'] == '0') {
+                    if ($callinizeDevMode) {
+                        echo '<link rel="stylesheet" href="custom/modules/Asterisk/include/javascript/offlineMode/jquery-ui.css" />';
+                    } else {
+
+                        echo '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/redmond/jquery-ui.css" />';
+                    }
                 }
 
                 echo '<link rel="stylesheet" type="text/css" href="custom/modules/Asterisk/include/css/jquery.fancybox.css" media="screen" />';
@@ -142,7 +140,16 @@ class AsteriskJS {
             }
         }
     }
+}
 
+function getConfigBool($index,$defaultValue=0) {
+    //return "1";
+    if( !empty( $GLOBALS['sugar_config'][$index]) ) {
+        return $GLOBALS['sugar_config'][$index];
+    }
+    else {
+        return $defaultValue;
+    }
 }
 
 ?>

@@ -55,16 +55,12 @@ Versions Developed with:
 
 * Better handling for answering on mobile phone. (currently a chat box still appears).
 * Would be cool if it could give you voicemail also.
-* Ability to record the call?
-* Have Button to create a new contact when number isn't recognized.
 
 
 
 ==[ Configuration Changes Needed]===
 
-Add gravatar one,
 Add opencnam enabled / apikey
-$rgDetectRegex = "/^Local\/RG/i"; // TODO make this a configuration option
 $rgCellRingRegex = "/^Local\/\d{7,10}/i";// TODO make this a configuration option.... This detects in a RG when an outside line is called (usually for a cellphone)... for some reason the cell shows up as the Channel (aka the source)... We detect this by finding a number thats at least 7-10 characters long..
 Add option to save short calls (ie inbound calls that weren't answered) as failed (which shows up in activities) or Held.
 * Need configurable Channel detection in order to assign calls to users when they answer on cell phones. 
