@@ -194,7 +194,7 @@ function printr($data, $exit = TRUE) {
  // }
  }
 
- function logLine($str)
+function logLine($str)
 {
    // print($str);
 
@@ -206,6 +206,21 @@ function printr($data, $exit = TRUE) {
 		fwrite($fh, $str);
 		fclose($fh);
 	}
+}
+
+/**
+ * Performs an async get request (doesn't wait for response)
+ * Note: One limitation of this approach is it will not work if server does any URL rewriting
+ */
+function gitimg_log($event) {
+    $host = "gitimg.com";
+    $path = "/rs/track/blak3r/yaai-stats/$event/increment";
+    $fp = fsockopen($host,80, $errno, $errstr, 30);
+    $out = "GET " . $path . " HTTP/1.1\r\n";
+    $out.= "Host: " . $host . "\r\n";
+    $out.= "Connection: Close\r\n\r\n";
+    fwrite($fp, $out);
+    fclose($fp);
 }
 
 /**

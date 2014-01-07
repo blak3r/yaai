@@ -142,8 +142,8 @@ $mod_strings['LBL_ASTERISK_CALLINIZE_DEBUG_DESC'] = "Provides debug information 
 $mod_strings['LBL_ASTERISK_CALLINIZE_DEBUG'] = "Debug Mode Enabled";
 $mod_strings['LBL_ASTERISK_CALLINIZE_DEBUG_DESC'] = "Provides debug information about call popups in the Console.log (should be 0 in production).";
 
-$mod_strings['LBL_JQUERY_OVERRIDE'] = "Jquery Override";
-$mod_strings['LBL_JQUERY_OVERRIDE_DESC'] = "If you have conflicts with multiple jquery libraries being loaded, set this override";
+$mod_strings['LBL_ASTERISK_JQUERY_OVERRIDE'] = "Jquery Override";
+$mod_strings['LBL_ASTERISK_JQUERY_OVERRIDE'] = "If you have conflicts with multiple jquery libraries being loaded, set this override";
 
 
 ?>

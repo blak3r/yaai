@@ -373,35 +373,84 @@
 
 <TR>
 
-    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_JQUERY_OVERRIDE}
-      {if !empty($MOD.LBL_JQUERY_OVERRIDE_DESC)}
-          [<a href="#" data-toggle="tooltip" title="{$MOD.LBL_JQUERY_OVERRIDE_DESC}">?</a>]:
+    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_JQUERY_OVERRIDE}
+      {if !empty($MOD.LBL_ASTERISK_JQUERY_OVERRIDE_DESC)}
+          [<a href="#" data-toggle="tooltip" title="{$MOD.LBL_ASTERISK_JQUERY_OVERRIDE_DESC}">?</a>]:
       {/if}
     </td>
     <td width="25%" class="dataField">
 
-    {if empty($config.jquery_override)}
-        {assign var='jquery_override' value=$asterisk_config.jquery_override}
-        {if $asterisk_config.jquery_override == '1' }
-            {assign var='isCheckedjquery_override' value='checked'}
-            {assign var="caseNumjquery_override" value="Case1a: Config not set, default value = 1"}
+    {if empty($config.asterisk_jquery_override)}
+        {assign var='asterisk_jquery_override' value=$asterisk_config.asterisk_jquery_override}
+        {if $asterisk_config.asterisk_jquery_override == '1' }
+            {assign var='isCheckedasterisk_jquery_override' value='checked'}
+            {assign var="caseNumasterisk_jquery_override" value="Case1a: Config not set, default value = 1"}
         {else}
-            {assign var='isCheckedjquery_override' value=''}
-            {assign var="caseNumjquery_override" value="CASE1b: Config not set, using default value = 0"}
+            {assign var='isCheckedasterisk_jquery_override' value=''}
+            {assign var="caseNumasterisk_jquery_override" value="CASE1b: Config not set, using default value = 0"}
         {/if}
     {else}
-        {assign var='jquery_override' value=$config.jquery_override}
-        {if $config.jquery_override == '1' }
-            {assign var='isCheckedjquery_override' value='checked'}
-            {assign var="caseNumjquery_override" value="CASE2a: Config is set, value = 1"}
+        {assign var='asterisk_jquery_override' value=$config.asterisk_jquery_override}
+        {if $config.asterisk_jquery_override == '1' }
+            {assign var='isCheckedasterisk_jquery_override' value='checked'}
+            {assign var="caseNumasterisk_jquery_override" value="CASE2a: Config is set, value = 1"}
         {else}
-            {assign var='isCheckedjquery_override' value=''}
-            {assign var="caseNumjquery_override" value="CASE2b: Config is set, value = 0"}
+            {assign var='isCheckedasterisk_jquery_override' value=''}
+            {assign var="caseNumasterisk_jquery_override" value="CASE2b: Config is set, value = 0"}
         {/if}
     {/if}
-    <input type='hidden' name='jquery_override' value='0'>
-    <input type='checkbox' name='jquery_override' size="45" value='1' {$isCheckedjquery_override} >
-    <!-- {$caseNumjquery_override} Config Val: '{$config.jquery_override}', default value: '{$asterisk_config.jquery_override}' -->
+    <input type='hidden' name='asterisk_jquery_override' value='0'>
+    <input type='checkbox' name='asterisk_jquery_override' size="45" value='1' {$isCheckedasterisk_jquery_override} >
+    <!-- {$caseNumasterisk_jquery_override} Config Val: '{$config.asterisk_jquery_override}', default value: '{$asterisk_config.asterisk_jquery_override}' -->
+    </td>
+
+    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_MAX_POPUPS}
+      {if !empty($MOD.LBL_ASTERISK_MAX_POPUPS_DESC)}
+          [<a href="#" data-toggle="tooltip" title="{$MOD.LBL_ASTERISK_MAX_POPUPS_DESC}">?</a>]:
+      {/if}
+    </td>
+    <td width="25%" class="dataField">
+    {if empty($config.asterisk_max_popups )}
+        {assign var='asterisk_max_popups' value=$asterisk_config.asterisk_max_popups}
+    {else}
+        {assign var='asterisk_max_popups' value=$config.asterisk_max_popups}
+    {/if}
+        <input type='int' name='asterisk_max_popups' size="45" value='{$asterisk_max_popups}'>
+    </td>
+
+
+
+<TR>
+
+    <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_LOGGER_SQL_MODE}
+      {if !empty($MOD.LBL_ASTERISK_LOGGER_SQL_MODE_DESC)}
+          [<a href="#" data-toggle="tooltip" title="{$MOD.LBL_ASTERISK_LOGGER_SQL_MODE_DESC}">?</a>]:
+      {/if}
+    </td>
+    <td width="25%" class="dataField">
+
+    {if empty($config.asterisk_logger_sql_mode)}
+        {assign var='asterisk_logger_sql_mode' value=$asterisk_config.asterisk_logger_sql_mode}
+        {if $asterisk_config.asterisk_logger_sql_mode == '1' }
+            {assign var='isCheckedasterisk_logger_sql_mode' value='checked'}
+            {assign var="caseNumasterisk_logger_sql_mode" value="Case1a: Config not set, default value = 1"}
+        {else}
+            {assign var='isCheckedasterisk_logger_sql_mode' value=''}
+            {assign var="caseNumasterisk_logger_sql_mode" value="CASE1b: Config not set, using default value = 0"}
+        {/if}
+    {else}
+        {assign var='asterisk_logger_sql_mode' value=$config.asterisk_logger_sql_mode}
+        {if $config.asterisk_logger_sql_mode == '1' }
+            {assign var='isCheckedasterisk_logger_sql_mode' value='checked'}
+            {assign var="caseNumasterisk_logger_sql_mode" value="CASE2a: Config is set, value = 1"}
+        {else}
+            {assign var='isCheckedasterisk_logger_sql_mode' value=''}
+            {assign var="caseNumasterisk_logger_sql_mode" value="CASE2b: Config is set, value = 0"}
+        {/if}
+    {/if}
+    <input type='hidden' name='asterisk_logger_sql_mode' value='0'>
+    <input type='checkbox' name='asterisk_logger_sql_mode' size="45" value='1' {$isCheckedasterisk_logger_sql_mode} >
+    <!-- {$caseNumasterisk_logger_sql_mode} Config Val: '{$config.asterisk_logger_sql_mode}', default value: '{$asterisk_config.asterisk_logger_sql_mode}' -->
     </td>
 
 <TD>&nbsp;</TD><TD>&nbsp;</TD> </tr>

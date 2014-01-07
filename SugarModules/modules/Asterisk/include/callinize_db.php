@@ -525,8 +525,8 @@ function get_callerid($row) {
  * @return array Returns the call prefix
  */
 function get_call_prefix($row) {
-    $calloutPrefix = $GLOBALS['sugar_config']['asterisk_prefix'];
-    $callinPrefix = $GLOBALS['sugar_config']['asterisk_dialinPrefix'];
+    $calloutPrefix = isset($GLOBALS['sugar_config']['asterisk_prefix']) ? $GLOBALS['sugar_config']['asterisk_prefix'] : '';
+    $callinPrefix = isset($GLOBALS['sugar_config']['asterisk_dialinPrefix']) ? $GLOBALS['sugar_config']['asterisk_dialinPrefix'] : '';
 
     if ($row['direction'] == 'I') {
         $callPrefix = $callinPrefix;
@@ -772,14 +772,14 @@ function convert_bean_to_simple_array($moduleName, $innerResultSet, $current_use
         $parentId = '';
         $parentModule = '';
         if( !empty($beanRow['parent_name']) ) {
-            $parentName = $beanRow['parent_name'];
-            $parentId = $beanRow['parent_id'];
-            $parentModule = $beanRow['parent_module'];;
+            $parentName = getIfSet($beanRow, 'parent_name', "");
+            $parentId = getIfSet($beanRow, 'parent_id',"");
+            $parentModule = getIfSet($beanRow,'parent_module',"");
         }
 
-        $beanName = $beanRow['bean_last_name'];
+        $beanName = getIfSet($beanRow,'bean_last_name',"");
         if( !empty($beanRow['bean_first_name']) ) {
-            $beanName = $beanRow['bean_first_name'] . " " . $beanRow['bean_last_name'];
+            $beanName = $beanRow['bean_first_name'] . " " . getIfSet($beanRow,'bean_last_name',"");
         }
 
         $beanId = $beanRow['bean_id'];
@@ -788,7 +788,7 @@ function convert_bean_to_simple_array($moduleName, $innerResultSet, $current_use
             'bean_module' => $moduleName,
             'bean_id' => $beanId,
             'bean_name' => $beanName,
-            'bean_description' => $beanRow['bean_description'],
+            'bean_description' => getIfSet($beanRow, 'bean_description', ""),
             'bean_link' => build_link($moduleName,$beanId),
             'parent_name' => $parentName,
             'parent_module' => $parentModule,
@@ -800,6 +800,13 @@ function convert_bean_to_simple_array($moduleName, $innerResultSet, $current_use
     }
 
     return $beans;
+}
+
+function getIfSet($e, $key, $default='') {
+    if( isset($e[$key]) ) {
+        return $e[$key];
+    }
+    return $default;
 }
 
 /**
@@ -871,7 +878,7 @@ function find_beans_db_query($module, $moduleFields, $phoneToFind, $currentUser)
         // Assumption: all custom modules in the future will have first_name and last_name fields...
         $moduleDependentSelectFields = "c.first_name as bean_first_name, c.last_name as bean_last_name ";
         if( $module == "accounts" ) {
-            $moduleDependentSelectFields = "c.name as bean_last_name ";
+            $moduleDependentSelectFields = " c.name as bean_last_name ";
         }
         $selectPortion = "SELECT c.id as bean_id, $moduleDependentSelectFields, c.description as bean_description"
             . $accountSelectFields

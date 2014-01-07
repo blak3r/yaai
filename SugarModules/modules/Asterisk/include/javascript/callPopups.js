@@ -991,12 +991,17 @@ jQuery.cookie = function(name, value, options) {
 };
 
 $(document).ready(function(){
+
+    var histLoaded = true;
+    if( typeof(SUGAR.ajaxUI) !== "undefined") {
+        histLoaded = SUGAR.ajaxUI.hist_loaded;
+    }
     var isAjaxUiEnabled=/ajaxUI/gi.test(window.location.search.substring(1));
-    YAAI.log('ready() hist_loaded: ' + SUGAR.ajaxUI.hist_loaded + " ajaxUIEnabled = " + isAjaxUiEnabled);
+    //YAAI.log('ready() hist_loaded: ' + SUGAR.ajaxUI.hist_loaded + " ajaxUIEnabled = " + isAjaxUiEnabled);
 
     // if ajaxui in url... and SUGAR.ajaxUI.hist_loaded is true. -- include
     // or if ajax isn't in url --- include
-    if( !isAjaxUiEnabled || SUGAR.ajaxUI.hist_loaded ) {
+    if( !isAjaxUiEnabled || histLoaded ) {
         YAAI.log('loading yaai...');
         var loop = true;
         YAAI.checkForNewStates(loop);
