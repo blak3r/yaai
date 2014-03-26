@@ -10,14 +10,11 @@ If you have questions, please post them in the issues section.
 http://www.youtube.com/watch?v=UAdxUNlPDzQ
 
 ### Links to Documentation
-https://github.com/blak3r/yaai/wiki/User_Manual
+https://github.com/blak3r/yaai/wiki/User-Manual
 See also: https://github.com/blak3r/yaai/wiki/_pages
 
 ### Callinize Discussion Forum for asking questions, reporting bugs, feature requests, etc.
 https://github.com/blak3r/yaai/issues
-
-To vote on feature requests:
-http://callinize.uservoice.com
 
 For paid support or custom development requests, please contact us at hello@callinize.com.
 
