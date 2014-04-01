@@ -125,7 +125,7 @@ class AsteriskJS {
                         echo '<link rel="stylesheet" href="custom/modules/Asterisk/include/javascript/offlineMode/jquery-ui.css" />';
                     } else {
 
-                        echo '<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/redmond/jquery-ui.css" />';
+                        echo '<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/redmond/jquery-ui.css" />';
                     }
                 }
 
