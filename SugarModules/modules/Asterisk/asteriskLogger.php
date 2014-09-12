@@ -878,7 +878,7 @@ while (true) {
                                               asterisk_call_id_c='{$asteriskCallIDC}',
                                               asterisk_user_ext_c='{$dUserExtension}',
                                               asterisk_inbound_ext_c='{$dInboundExtension}',
-                                              date_start='{$dateStart}'
+                                              date_start='{$dateStart}',
                                               parent_type='{$parentType}',
                                               parent_id='{$parentID}',
                                               assigned_user_id='{$assignedUser}'
